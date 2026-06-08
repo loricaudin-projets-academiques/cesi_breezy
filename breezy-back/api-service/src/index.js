@@ -1,12 +1,11 @@
-
 const path = require("path");
 
 const envPath = path.resolve(__dirname, "../../.env");
-
 require("dotenv").config({ path: envPath });
 
+const connectPostgreSQL = require("./databases/postgresql/index");
+
 const express = require('express');
-const sequelize = require("./config/databases/postgresql");
 
 const app = express();
 app.use(express.json());
@@ -14,7 +13,7 @@ const port = 3000;
 
 const start = async () => {
   try {
-    await sequelize.authenticate();
+    await connectPostgreSQL();
     console.log("Connexion réussie à la base de données PostgreSQL");
   } catch (err) {
     console.error("Erreur de connexion à la base de données PostgreSQL : ", err);
