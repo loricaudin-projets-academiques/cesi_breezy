@@ -17,7 +17,7 @@ const start = async () => {
     await sequelize.authenticate();
     console.log("Connexion réussie à la base de données PostgreSQL");
   } catch (err) {
-    console.error("Erreur de connexion à la base de données PostgreSQL : ", null);
+    console.error("Erreur de connexion à la base de données PostgreSQL : ", err);
     return;
   }
 
@@ -26,7 +26,7 @@ const start = async () => {
   });
 
   app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
+    console.log(`Breezy Back listening on port ${port}`);
   });
 }
 
