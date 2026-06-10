@@ -54,6 +54,23 @@ services:
       postgres -c log_statement=none -c logging_collector=off
     networks:
       - backend
+  
+  db_sql_admin:
+    image: dpage/pgadmin4
+    container_name: db-sql-admin
+    depends_on:
+      - db_sql
+    ports:
+      - "8888:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@breezy.com
+      PGADMIN_DEFAULT_PASSWORD: root
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+      - ./pgadmin/servers.json:/pgadmin4/servers.json
+    networks:
+      - backend
 
   db_mongo:
     image: mongo:8
@@ -77,3 +94,4 @@ volumes:
   postgres_data:
   mongo_data:
   node_modules_api:
+  pgadmin-data:
