@@ -9,7 +9,6 @@ services:
     command: npm run dev
     volumes:
       - ./api-service:/api
-      - node_modules_api:/api/node_modules
     depends_on:
       - db_sql
       - db_mongo
@@ -93,5 +92,4 @@ networks:
 volumes:
   postgres_data:
   mongo_data:
-  node_modules_api:
   pgadmin-data:
