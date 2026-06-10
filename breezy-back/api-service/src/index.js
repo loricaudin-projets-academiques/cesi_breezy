@@ -18,7 +18,7 @@ const start = async () => {
     console.log("Connexion réussie à la base de données PostgreSQL");
   } catch (err) {
     console.error("Erreur de connexion à la base de données PostgreSQL : ", err);
-    return;
+    //return;
   }
 
   try {
@@ -26,12 +26,13 @@ const start = async () => {
     console.log("Connexion réussie à la base de données MongoDB");
   } catch (err) {
     console.error("Erreur de connexion à la base de données MongoDB : ", err);
-    return;
+    //return;
   }
 
   app.get('/', (req, res) => {
     res.send('Hello World!');
   });
+
   // permet de vérifier le statut de connexion des bdds
   app.get('/status', async (req, res) => {
     let postgresStatus = "Disconnected";
@@ -61,6 +62,8 @@ const start = async () => {
       mongodb: mongoStatus
     });
   });
+
+  app.use('/', require('./routes'));
 
   app.listen(port, () => {
     console.log(`Breezy Back listening on port ${port}`);
