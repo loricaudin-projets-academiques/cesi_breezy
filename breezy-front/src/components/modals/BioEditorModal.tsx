@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { playTick } from '../../audio';
+import { PROFILE_BIO_MAX_LENGTH } from '../../profileLimits';
 
 interface BioEditorModalProps {
   isOpen: boolean;
@@ -17,18 +18,19 @@ interface BioEditorModalProps {
 // Fenêtre pour modifier la biographie du profil
 export default function BioEditorModal({ isOpen, onClose, initialValue, onSave }: BioEditorModalProps) {
   const [inputValue, setInputValue] = useState(initialValue);
+  const remainingCharacters = PROFILE_BIO_MAX_LENGTH - inputValue.length;
 
   // Quand on rouvre la modal, on recharge la bio actuelle
   // (évite d'afficher une ancienne version non sauvegardée)
   useEffect(() => {
     if (isOpen) {
-      setInputValue(initialValue);
+      setInputValue(initialValue.slice(0, PROFILE_BIO_MAX_LENGTH));
     }
   }, [isOpen, initialValue]);
 
   // Sauvegarde et ferme la modal
   const handleSave = () => {
-    onSave(inputValue);
+    onSave(inputValue.slice(0, PROFILE_BIO_MAX_LENGTH));
   };
 
   return (
@@ -60,12 +62,13 @@ export default function BioEditorModal({ isOpen, onClose, initialValue, onSave }
             {/* Zone de texte limitée à 120 caractères */}
             <textarea
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              maxLength={120}
-              rows={3}
-              className="w-full text-xs p-2.5 bg-white/[0.04] rounded-xl text-breezy-icy border border-white/5 focus:outline-none focus:border-breezy-border-active resize-none"
+              onChange={(e) => setInputValue(e.target.value.slice(0, PROFILE_BIO_MAX_LENGTH))}
+              maxLength={PROFILE_BIO_MAX_LENGTH}
+              rows={4}
+              placeholder="Quelques mots sur toi..."
+              className="w-full resize-none rounded-xl border border-white/5 bg-white/[0.04] p-2.5 text-xs leading-relaxed text-breezy-icy outline-none transition focus:border-breezy-border-active whitespace-pre-wrap break-words [overflow-wrap:anywhere]"
             />
-            <p className="text-[8px] font-mono text-white/30 text-right mt-1">
+            <p className={`mt-1 text-right font-mono text-[8px] ${remainingCharacters <= 15 ? 'text-breezy-purple' : 'text-white/30'}`}>
               {inputValue.length}/120 caractères
             </p>
             

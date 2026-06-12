@@ -7,6 +7,9 @@ import { useState, useEffect } from 'react';
 import { ProfileStatType, UserProfile } from '../types';
 import { playChime, playTick } from '../audio';
 import { authService } from '../services/ServiceContainer';
+import { PROFILE_BIO_MAX_LENGTH, PROFILE_NOTE_MAX_LENGTH } from '../profileLimits';
+
+const limitProfileText = (value: string, maxLength: number) => value.trim().slice(0, maxLength);
 
 // Gère tout ce qui concerne le profil utilisateur : édition, musique, modals d'édition
 export function useProfile(triggerToast: (msg: string) => void) {
@@ -30,7 +33,8 @@ export function useProfile(triggerToast: (msg: string) => void) {
   // Enregistre la note d'humeur — si vide, on met un message par défaut
   const handleSaveNote = (newNote: string) => {
     playChime();
-    setUser((prev) => ({ ...prev, note: newNote.trim() || 'En mode Breezy...' }));
+    const nextNote = limitProfileText(newNote, PROFILE_NOTE_MAX_LENGTH);
+    setUser((prev) => ({ ...prev, note: nextNote || 'En mode Breezy...' }));
     setShowNoteEditor(false);
     triggerToast('Ta note a bien été mise à jour !');
   };
@@ -38,7 +42,8 @@ export function useProfile(triggerToast: (msg: string) => void) {
   // Enregistre la biographie
   const handleSaveBio = (newBio: string) => {
     playChime();
-    setUser((prev) => ({ ...prev, bio: newBio.trim() || 'Membre Breezy.' }));
+    const nextBio = limitProfileText(newBio, PROFILE_BIO_MAX_LENGTH);
+    setUser((prev) => ({ ...prev, bio: nextBio || 'Membre Breezy.' }));
     setShowBioEditor(false);
     triggerToast('Ta bio a été mise à jour !');
   };

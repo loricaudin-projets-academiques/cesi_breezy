@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { playTick } from '../../audio';
+import { PROFILE_NOTE_MAX_LENGTH } from '../../profileLimits';
 
 interface NoteEditorModalProps {
   isOpen: boolean;
@@ -21,13 +22,13 @@ export default function NoteEditorModal({ isOpen, onClose, initialValue, onSave 
   // On recharge la valeur actuelle chaque fois que la modal s'ouvre
   useEffect(() => {
     if (isOpen) {
-      setInputValue(initialValue);
+      setInputValue(initialValue.slice(0, PROFILE_NOTE_MAX_LENGTH));
     }
   }, [isOpen, initialValue]);
 
   // Enregistre et ferme
   const handleSave = () => {
-    onSave(inputValue);
+    onSave(inputValue.slice(0, PROFILE_NOTE_MAX_LENGTH));
   };
 
   return (
@@ -61,8 +62,8 @@ export default function NoteEditorModal({ isOpen, onClose, initialValue, onSave 
               type="text"
               placeholder="Ce que tu ressens là..."
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              maxLength={40}
+              onChange={(e) => setInputValue(e.target.value.slice(0, PROFILE_NOTE_MAX_LENGTH))}
+              maxLength={PROFILE_NOTE_MAX_LENGTH}
               className="w-full text-xs p-2.5 bg-white/[0.04] rounded-xl text-breezy-icy border border-white/5 focus:outline-none focus:border-breezy-border-active"
             />
             <p className="text-[8px] font-mono text-white/30 text-right mt-1">

@@ -84,7 +84,7 @@ export default function ProfileScreen({
       {/* SECTION PRINCIPALE DU PROFIL — mise en page 2 colonnes */}
       <div className="grid grid-cols-12 gap-3 pb-2 select-none">
         {/* COLONNE GAUCHE (7/12) : Nom, bio, statistiques */}
-        <div className="col-span-7 flex flex-col justify-between">
+        <div className="col-span-8 min-w-0 flex flex-col justify-between">
           <div>
             <div className="flex justify-between items-start gap-1">
               <div>
@@ -106,10 +106,12 @@ export default function ProfileScreen({
             {/* La bio — cliquable pour l'éditer directement */}
             <div
               onClick={onOpenBioEditor}
-              className="glass rounded-[24px] p-4 mt-3 border border-white/5 hover:border-purple-500/20 transition duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.3)] cursor-pointer text-[11px] text-white/80 leading-relaxed font-sans"
+              className="glass mt-3 w-full max-w-full min-h-[72px] rounded-[24px] border border-white/5 px-4 py-3 text-[11px] leading-relaxed text-white/80 shadow-[0_4px_12px_rgba(0,0,0,0.3)] transition duration-300 hover:border-purple-500/20 cursor-pointer font-sans"
               title="Cliquer pour modifier..."
             >
+              <p className="max-w-full whitespace-pre-wrap break-words [overflow-wrap:anywhere] [word-break:break-word]">
               {user.bio ? `"${user.bio}"` : <span className="text-white/45 italic">Clique pour écrire ta bio...</span>}
+              </p>
             </div>
           </div>
 
@@ -150,7 +152,7 @@ export default function ProfileScreen({
         </div>
 
         {/* COLONNE DROITE (5/12) : Photo de profil, note, liens sociaux */}
-        <div className="col-span-5 flex flex-col items-center gap-2.5">
+        <div className="col-span-4 min-w-0 flex flex-col items-center gap-2.5">
           {/* Avatar avec halo lumineux */}
           <div className="relative group text-center flex flex-col items-center">
             <div className="relative">
