@@ -1,0 +1,21 @@
+# Dépendances npm — trop volumineuses pour le dépôt, npm install les recrée
+node_modules/
+
+# Dossiers générés au moment du build, pas besoin de les versionner
+build/
+dist/
+.next/
+
+# Les rapports de tests, on les recrée à la demande
+coverage/
+
+# Fichier fantôme de macOS, inutile pour tout le monde sauf les Mac
+.DS_Store
+
+# Logs de toutes sortes — on ne veut pas ça dans l'historique git
+*.log
+
+# Tous les .env contenant de vraies clés secrètes — JAMAIS dans le dépôt
+# La seule exception : .env.example qui sert de modèle sans vraies clés
+.env*
+!.env.example
