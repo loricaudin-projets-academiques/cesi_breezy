@@ -26,7 +26,7 @@ const start = async () => {
     console.log("Connexion réussie à la base de données MongoDB");
   } catch (err) {
     console.error("Erreur de connexion à la base de données MongoDB : ", err);
-    //return;
+    return;
   }
 
   app.get('/', (req, res) => {
