@@ -1,7 +1,8 @@
 const express = require("express");
 
 const { requireAuth } = require("../../middlewares/auth.middleware");
-const { createId, normalizeUsername } = require("../../data/memory-store");
+const { createId } = require("../../utils/ids");
+const { normalizeUsername } = require("../utils/user");
 
 const router = express.Router();
 const conversationsByUser = new Map();

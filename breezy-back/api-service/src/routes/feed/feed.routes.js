@@ -5,9 +5,9 @@ const {
   posts,
   commentsByPost,
   likedPostsByUser,
-  starredPostsByUser,
-  createId,
+  starredPostsByUser
 } = require("../../data/memory-store");
+const { createId } = require("../../utils/ids");
 const { requireAuth } = require("../../middlewares/auth.middleware");
 
 const router = express.Router();
