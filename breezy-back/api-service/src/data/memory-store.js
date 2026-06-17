@@ -9,7 +9,5 @@ export default {
   posts,
   commentsByPost,
   likedPostsByUser,
-  starredPostsByUser,
-  hashPassword,
-  verifyPassword,
+  starredPostsByUser
 };
