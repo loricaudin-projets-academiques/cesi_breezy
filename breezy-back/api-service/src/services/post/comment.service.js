@@ -11,7 +11,7 @@ async function createComment({ postId, userId, content, parentCommentId = null }
 
     const post = await postService.getPostById(postId);
     if (!post && !parentCommentId) {
-        //throw new Error("Post introuvable");
+        throw new Error("Post introuvable");
     }
 
     if (parentCommentId) {
