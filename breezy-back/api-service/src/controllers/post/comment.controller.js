@@ -1,14 +1,25 @@
-import postService from '../../services/post/post.service';
-import CommentService from '../../services/post/post.service';
+import commentService from "../../services/post/comment.service.js";
 
 export async function createPostComment(req, res) {
-    const id = req.params['id'];
-    const post = await postService.getPostById(id);
-
     try {
-        res.status(200).json({ message: "Success" });
+        const postId = req.params.id;
+        const { content, parentCommentId } = req.body;
+
+        const userId = null;
+        //const userId = req.user.id;
+
+        const comment = await commentService.createComment({
+            postId,
+            userId: userId,
+            content,
+            parentCommentId
+        });
+
+        return res.status(201).json(comment);
+
     } catch (err) {
-        res.status(400).json({ message: `Error: ${err}` });
+        return res.status(400).json({
+            message: err.message
+        });
     }
-    
 }
