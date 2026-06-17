@@ -9,6 +9,7 @@ const CommentSchema = new mongoose.Schema({
     parent_comment_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'Comment' },
     author_id: { type: mongoose.Schema.Types.UUID },
     content: { type: String },
+    media: { type: [String], default: [] },
     mentions: { type: [String], default: [] },
     status: { type: String, enum: ['published', 'draft', 'deleted'], default: 'draft' },
     likes_count: { type: Number, default: 0 },
