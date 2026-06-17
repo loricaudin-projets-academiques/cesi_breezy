@@ -50,7 +50,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
   const selectedConv = conversations.find(c => c.id === activeConvId);
 
   // Crée une nouvelle conversation ou ouvre celle qui existe déjà
-  const handleCreateConvSubmit = (e: React.FormEvent) => {
+  const handleCreateConvSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!contactName.trim() || !contactUsername.trim()) return;
 
@@ -65,17 +65,29 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
       return;
     }
 
-    // C'est le service qui sait construire une conversation valide
-    const newConv = conversationService.createConversation(contactName, contactUsername, contactAvatar);
+    try {
+      const newConv = await conversationService.createRemoteConversation({
+        name: contactName,
+        username: contactUsername,
+        avatar: contactAvatar,
+      });
 
-    onUpdateConversations((prev) => [newConv, ...prev]);
-    setActiveConvId(newConv.id);
+      onUpdateConversations((prev) => [newConv, ...prev.filter((conv) => conv.id !== newConv.id)]);
+      setActiveConvId(newConv.id);
+      setContactName('');
+      setContactUsername('');
+      setContactAvatar('');
+      triggerToast(`Chat ouvert avec ${newConv.name}`);
+    } catch {
+      const newConv = conversationService.createConversation(contactName, contactUsername, contactAvatar);
 
-    // On remet les champs du formulaire à vide
-    setContactName('');
-    setContactUsername('');
-    setContactAvatar('');
-    triggerToast(`Chat ouvert avec ${newConv.name}`);
+      onUpdateConversations((prev) => [newConv, ...prev]);
+      setActiveConvId(newConv.id);
+      setContactName('');
+      setContactUsername('');
+      setContactAvatar('');
+      triggerToast(`Chat ouvert avec ${newConv.name}`);
+    }
   };
 
   // Scroll automatique vers le bas quand un nouveau message arrive

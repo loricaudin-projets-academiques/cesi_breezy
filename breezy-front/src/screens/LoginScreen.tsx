@@ -60,15 +60,25 @@ export default function LoginScreen({ onLogin, onRegister, triggerToast }: Login
 
       // Petit délai pour simuler une requête réseau
       setTimeout(async () => {
-        await onRegister(name.trim(), formattedUsername, password, DEFAULT_API_URL);
-        setIsConnecting(false);
+        try {
+          await onRegister(name.trim(), formattedUsername, password, DEFAULT_API_URL);
+        } catch {
+          // Le provider affiche deja le message d'erreur.
+        } finally {
+          setIsConnecting(false);
+        }
       }, 1200);
     } else {
       triggerToast("Vérification en cours...");
 
       setTimeout(async () => {
-        await onLogin(formattedUsername, password, DEFAULT_API_URL);
-        setIsConnecting(false);
+        try {
+          await onLogin(formattedUsername, password, DEFAULT_API_URL);
+        } catch {
+          // Le provider affiche deja le message d'erreur.
+        } finally {
+          setIsConnecting(false);
+        }
       }, 1200);
     }
   };
