@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence } from "motion/react";
 import { MessageSquareDiff } from "lucide-react";
@@ -69,7 +69,14 @@ export default function AppShell({ children }: { children: ReactNode }) {
     triggerToast,
   } = useBreezyApp();
 
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     if (!isLoggedIn && !isLoginRoute) {
       router.replace("/login");
     }
@@ -77,12 +84,29 @@ export default function AppShell({ children }: { children: ReactNode }) {
     if (isLoggedIn && isLoginRoute) {
       router.replace("/feed");
     }
-  }, [isLoggedIn, isLoginRoute, router]);
+  }, [isLoggedIn, isLoginRoute, router, mounted]);
 
   const handleTabChange = (tab: TabType) => {
     playTick();
     router.push(tabRoutes[tab]);
   };
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-[#050505] bg-gradient-custom text-icy flex flex-col justify-center items-center p-3 relative overflow-hidden font-sans">
+        <AmbientGlow enabled={ambientGlow} />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none z-0" />
+
+        <PhoneFrame>
+          <div className="flex-1 flex items-center justify-center">
+            <span className="text-xs text-white/30 font-mono tracking-widest uppercase animate-pulse">
+              Breezy...
+            </span>
+          </div>
+        </PhoneFrame>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#050505] bg-gradient-custom text-icy flex flex-col justify-center items-center p-3 relative overflow-hidden font-sans">
@@ -172,6 +196,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           isOpen={isPostModalOpen}
           onClose={() => setIsPostModalOpen(false)}
           onAddPost={feed.handleAddPost}
+          triggerToast={triggerToast}
         />
       </PhoneFrame>
     </div>

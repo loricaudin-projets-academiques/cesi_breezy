@@ -3,40 +3,60 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Globe } from 'lucide-react';
 import { PostCategory, POST_CATEGORIES } from '../types';
 import { playTick, playChime } from '../audio';
+import VideoUploadField from './VideoUploadField';
+import { mediaService } from '../services/ServiceContainer';
 
 interface PostCreationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddPost: (content: string, category: PostCategory, image?: string) => void;
+  onAddPost: (content: string, category: PostCategory, image?: string, video?: string) => void;
+  triggerToast: (msg: string) => void;
 }
 
-// Fenêtre de composition d'un nouveau post
 export default function PostCreationModal({
   isOpen,
   onClose,
-  onAddPost
+  onAddPost,
+  triggerToast,
 }: PostCreationModalProps) {
-  // Les champs du formulaire
   const [text, setText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<PostCategory>('for-you');
   const [imageUrl, setImageUrl] = useState('');
+  const [videoUrl, setVideoUrl] = useState<string | undefined>();
+  const [uploading, setUploading] = useState(false);
 
-  // Publication du post et fermeture de la modal
+  // filename brut conservé pour pouvoir supprimer l'orphelin si la modal est fermée sans publier.
+  const pendingVideoFilenameRef = useRef<string | undefined>(undefined);
+
+  // À la fermeture sans publication : supprimer la vidéo uploadée mais non publiée.
+  useEffect(() => {
+    if (!isOpen && pendingVideoFilenameRef.current) {
+      mediaService.deleteVideo(pendingVideoFilenameRef.current).catch(() => {});
+      pendingVideoFilenameRef.current = undefined;
+      setVideoUrl(undefined);
+    }
+  }, [isOpen]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!text.trim()) return;
 
-    onAddPost(text.trim(), selectedCategory, imageUrl.trim() || undefined);
+    // Effacer le ref AVANT d'appeler onAddPost pour éviter que le useEffect
+    // de fermeture ne supprime la vidéo qui vient d'être publiée.
+    const publishedVideo = videoUrl;
+    pendingVideoFilenameRef.current = undefined;
+
+    onAddPost(text.trim(), selectedCategory, imageUrl.trim() || undefined, publishedVideo);
     playChime();
-    
-    // On remet les champs à vide pour la prochaine fois
+
     setText('');
     setImageUrl('');
+    setVideoUrl(undefined);
     onClose();
   };
 
@@ -44,7 +64,6 @@ export default function PostCreationModal({
     <AnimatePresence>
       {isOpen && (
         <div className="absolute inset-0 z-50 flex items-center justify-center p-4">
-          {/* Fond sombre — cliquer dessus ferme la modal */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.6 }}
@@ -53,7 +72,6 @@ export default function PostCreationModal({
             className="absolute inset-0 bg-black/80 backdrop-blur-md cursor-pointer"
           />
 
-          {/* La modal elle-même */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0, y: 15 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -61,7 +79,6 @@ export default function PostCreationModal({
             transition={{ type: "spring", damping: 25, stiffness: 350 }}
             className="w-full max-w-sm glassmorphism-premium rounded-3xl p-5 border border-white/10 relative shadow-[0_20px_50px_rgba(0,0,0,0.85)] z-10 flex flex-col"
           >
-            {/* En-tête avec titre et bouton de fermeture */}
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-1.5">
                 <Globe className="w-3.5 h-3.5 text-breezy-neon" />
@@ -78,8 +95,7 @@ export default function PostCreationModal({
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
-              
-              {/* Choix de la catégorie de destination */}
+
               <div className="flex flex-col gap-1.5">
                 <span className="text-[9px] font-mono text-white/30 uppercase tracking-widest px-0.5">Catégorie</span>
                 <div className="grid grid-cols-4 gap-1.5 text-[10px]">
@@ -103,7 +119,6 @@ export default function PostCreationModal({
                 </div>
               </div>
 
-              {/* Zone de texte principale */}
               <div className="flex flex-col gap-1.5">
                 <span className="text-[9px] font-mono text-white/30 uppercase tracking-widest px-0.5">Ton message</span>
                 <textarea
@@ -119,7 +134,6 @@ export default function PostCreationModal({
                 </div>
               </div>
 
-              {/* Champ optionnel pour ajouter une image par URL */}
               <div className="flex flex-col gap-1.5 font-sans">
                 <span className="text-[9px] font-mono text-white/30 uppercase tracking-widest px-0.5">
                   URL d'image (optionnel)
@@ -133,11 +147,18 @@ export default function PostCreationModal({
                 />
               </div>
 
-              {/* Bouton de publication */}
+              <VideoUploadField
+                value={videoUrl}
+                onChange={setVideoUrl}
+                onFilenameChange={(name) => { pendingVideoFilenameRef.current = name; }}
+                onUploadingChange={setUploading}
+                triggerToast={triggerToast}
+              />
+
               <div className="flex items-center justify-end pt-2 border-t border-white/5 mt-1 font-sans">
                 <button
                   type="submit"
-                  disabled={!text.trim()}
+                  disabled={!text.trim() || uploading}
                   className="py-2.5 px-6 rounded-xl bg-breezy-icy text-slate-950 font-sans font-bold text-xs hover:bg-breezy-neon disabled:opacity-40 disabled:hover:bg-breezy-icy transition active:scale-95 shadow-md flex items-center gap-1.5 cursor-pointer"
                 >
                   Publier &rarr;

@@ -29,6 +29,7 @@ export interface Post {
   starredByUser: boolean;
   category: PostCategory;
   image?: string; // Photo optionnelle jointe au post
+  video?: string; // Vidéo optionnelle jointe au post (≤ 100 Mo)
 }
 
 // Un commentaire publié sous un post
@@ -37,6 +38,7 @@ export interface Comment {
   username: string;
   text: string;
   time: string;
+  video?: string; // Vidéo optionnelle jointe au commentaire
 }
 
 // Tous les commentaires de l'app, rangés par identifiant de post
@@ -48,6 +50,7 @@ export interface MessageItem {
   sender: 'me' | 'them'; // "me" = nous, "them" = notre interlocuteur
   text: string;
   time: string;
+  video?: string; // Vidéo optionnelle jointe au message
 }
 
 // Tout ce qui concerne une conversation (le contact, les messages, l'état non-lu...)

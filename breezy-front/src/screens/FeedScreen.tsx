@@ -14,18 +14,19 @@ interface FeedScreenProps extends PostInteractionHandlers, PostListState {
   filteredPosts: Post[];
 }
 
-// Fil d'actualité principal — affiche les posts selon l'onglet sélectionné
 export default function FeedScreen({
   homeCategory,
   onCategoryChange,
   filteredPosts,
   postComments,
   commentDrafts,
+  commentVideoDrafts,
   showCommentsForPost,
   onToggleStar,
   onToggleLike,
   onToggleComments,
   onCommentDraftChange,
+  onCommentVideoChange,
   onAddComment,
   triggerToast
 }: FeedScreenProps) {
@@ -37,7 +38,7 @@ export default function FeedScreen({
       exit={{ opacity: 0, y: -10 }}
       className="p-4 flex flex-col gap-4"
     >
-      {/* Onglets de catégorie : Pour toi, Abonnements, Amis, Favoris */}
+      {/* Onglets de catégorie */}
       <div className="glassmorphic rounded-2xl p-1 flex gap-1 border border-white/5 select-none shrink-0">
         {POST_CATEGORIES.map(({ key, label }) => {
           const isActive = homeCategory === key;
@@ -57,7 +58,6 @@ export default function FeedScreen({
         })}
       </div>
 
-      {/* Message d'état vide si aucun post dans cette catégorie */}
       {filteredPosts.length === 0 ? (
         <div className="py-24 text-center text-white/30 flex flex-col justify-center items-center gap-3 bg-[#0d0d12]/20 rounded-2xl border border-white/5">
           <Compass className="w-9 h-9 opacity-35" />
@@ -67,7 +67,6 @@ export default function FeedScreen({
           </div>
         </div>
       ) : (
-        // La liste des posts filtrés
         <div className="flex flex-col gap-3">
           {filteredPosts.map((post) => (
             <PostCard
@@ -75,11 +74,13 @@ export default function FeedScreen({
               post={post}
               comments={postComments[post.id]}
               commentDraft={commentDrafts[post.id]}
+              commentVideoDraft={commentVideoDrafts[post.id]}
               showComments={showCommentsForPost[post.id]}
               onToggleStar={onToggleStar}
               onToggleLike={onToggleLike}
               onToggleComments={onToggleComments}
               onCommentDraftChange={onCommentDraftChange}
+              onCommentVideoChange={onCommentVideoChange}
               onAddComment={onAddComment}
               triggerToast={triggerToast}
             />

@@ -8,16 +8,16 @@ import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, Send, ArrowLeft, MoreVertical, Sparkles, MessageSquarePlus, X } from 'lucide-react';
 import { Conversation, MessageItem } from '../types';
 import { playTick, playMessageSound, playChime } from '../audio';
-import { conversationService } from '../services/ServiceContainer';
+import { conversationService, mediaService } from '../services/ServiceContainer';
 import { normalizeUsername } from '../utils/username';
 import Avatar from './Avatar';
+import VideoPlayer from './VideoPlayer';
+import VideoUploadField from './VideoUploadField';
 
-// Heure courante au format HH:MM — affichée sous chaque bulle de message
 function currentTimeLabel(): string {
   return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-// Applique une transformation à une seule conversation de la liste
 function updateConversation(
   conversations: Conversation[],
   id: string,
@@ -32,32 +32,40 @@ interface MessagesTabProps {
   triggerToast: (msg: string) => void;
 }
 
-// Écran de messagerie : liste des conversations à gauche, chat à droite
 export default function MessagesTab({ conversations, onUpdateConversations, triggerToast }: MessagesTabProps) {
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [inputText, setInputText] = useState('');
+  const [messageVideo, setMessageVideo] = useState<string | undefined>();
+  const [msgUploading, setMsgUploading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [isSelectContactOpen, setIsSelectContactOpen] = useState(false);
-  
-  // Champs du formulaire de création de nouveau contact
+
   const [contactName, setContactName] = useState('');
   const [contactUsername, setContactUsername] = useState('');
   const [contactAvatar, setContactAvatar] = useState('');
-  
-  // Référence pour faire défiler jusqu'au dernier message automatiquement
+
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  // filename brut de la vidéo en attente dans la barre de message
+  const pendingMsgVideoFilenameRef = useRef<string | undefined>(undefined);
 
   const selectedConv = conversations.find(c => c.id === activeConvId);
 
-  // Crée une nouvelle conversation ou ouvre celle qui existe déjà
-  const handleCreateConvSubmit = (e: React.FormEvent) => {
+  // Supprime la vidéo pendante et réinitialise les états
+  const clearPendingVideo = (deleteFile = true) => {
+    if (deleteFile && pendingMsgVideoFilenameRef.current) {
+      mediaService.deleteVideo(pendingMsgVideoFilenameRef.current).catch(() => {});
+    }
+    pendingMsgVideoFilenameRef.current = undefined;
+    setMessageVideo(undefined);
+  };
+
+  const handleCreateConvSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!contactName.trim() || !contactUsername.trim()) return;
 
     playChime();
     setIsSelectContactOpen(false);
 
-    // Si ce contact existe déjà, on va directement dans le chat
     const cleanUsername = normalizeUsername(contactUsername);
     const existing = conversations.find(c => c.username === cleanUsername);
     if (existing) {
@@ -65,70 +73,94 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
       return;
     }
 
-    // C'est le service qui sait construire une conversation valide
-    const newConv = conversationService.createConversation(contactName, contactUsername, contactAvatar);
+    try {
+      const newConv = await conversationService.createRemoteConversation({
+        name: contactName,
+        username: contactUsername,
+        avatar: contactAvatar,
+      });
 
-    onUpdateConversations((prev) => [newConv, ...prev]);
-    setActiveConvId(newConv.id);
+      onUpdateConversations((prev) => [newConv, ...prev.filter((conv) => conv.id !== newConv.id)]);
+      setActiveConvId(newConv.id);
+      setContactName('');
+      setContactUsername('');
+      setContactAvatar('');
+      triggerToast(`Chat ouvert avec ${newConv.name}`);
+    } catch {
+      const newConv = conversationService.createConversation(contactName, contactUsername, contactAvatar);
 
-    // On remet les champs du formulaire à vide
-    setContactName('');
-    setContactUsername('');
-    setContactAvatar('');
-    triggerToast(`Chat ouvert avec ${newConv.name}`);
+      onUpdateConversations((prev) => [newConv, ...prev]);
+      setActiveConvId(newConv.id);
+      setContactName('');
+      setContactUsername('');
+      setContactAvatar('');
+      triggerToast(`Chat ouvert avec ${newConv.name}`);
+    }
   };
 
-  // Scroll automatique vers le bas quand un nouveau message arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [selectedConv?.messages, isTyping, activeConvId]);
 
-  // Ouvre une conversation et marque tous les messages comme lus
   const handleOpenConv = (id: string) => {
     playTick();
+    // Si on change de conversation avec une vidéo pendante, on la supprime
+    if (activeConvId !== id) {
+      clearPendingVideo(true);
+    }
     setActiveConvId(id);
-
     onUpdateConversations((prev) =>
       updateConversation(prev, id, (c) => ({ ...c, unreadCount: 0 }))
     );
   };
 
-  // Ajoute un message à la conversation active (le nôtre ou celui du contact)
+  const handleBack = () => {
+    // Supprimer la vidéo pendante avant de revenir à la liste
+    clearPendingVideo(true);
+    playTick();
+    setActiveConvId(null);
+  };
+
   const appendMessage = (convId: string, message: MessageItem) => {
     onUpdateConversations((prev) =>
       updateConversation(prev, convId, (c) => ({
         ...c,
         messages: [...c.messages, message],
-        lastMessage: message.text,
+        lastMessage: message.text || '📹 Vidéo',
         time: "À l'instant"
       }))
     );
   };
 
-  // Envoie notre message et attend la réponse (API ou bot local — c'est le service qui gère)
   const handleSendMessage = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!inputText.trim() || !activeConvId || !selectedConv) return;
+    const hasText = !!inputText.trim();
+    const hasVideo = !!messageVideo;
+    if ((!hasText && !hasVideo) || !activeConvId || !selectedConv) return;
 
     const userMessage = inputText.trim();
+    const videoToSend = messageVideo;
     const convId = activeConvId;
     const contact = { name: selectedConv.name, username: selectedConv.username };
+
+    // Effacer le ref AVANT d'append pour éviter clearPendingVideo accidentel
+    pendingMsgVideoFilenameRef.current = undefined;
 
     appendMessage(convId, {
       id: `me-${Date.now()}`,
       sender: 'me',
       text: userMessage,
+      video: videoToSend,
       time: currentTimeLabel()
     });
     setInputText('');
+    setMessageVideo(undefined);
     playMessageSound(true);
 
-    // On affiche les trois points "en train d'écrire..."
     setIsTyping(true);
 
-    // On attend 1.5 secondes pour simuler un délai de frappe humain
     setTimeout(async () => {
-      const replyText = await conversationService.fetchReply(userMessage, contact);
+      const replyText = await conversationService.fetchReply(userMessage || '📹 Vidéo', contact);
 
       appendMessage(convId, {
         id: `bot-${Date.now()}`,
@@ -147,7 +179,6 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
     <div className="flex-1 flex flex-col h-full relative overflow-hidden">
       <AnimatePresence mode="wait">
         {!activeConvId ? (
-          /* VUE 1 : Boîte de réception */
           <motion.div
             key="list"
             className="flex-1 overflow-y-auto no-scrollbar py-2 px-4 flex flex-col gap-3"
@@ -185,14 +216,12 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                     onClick={() => handleOpenConv(conv.id)}
                     className="w-full text-left glassmorphic rounded-2xl p-3.5 flex items-center gap-3.5 border border-white/5 hover:border-white/15 hover:bg-white/[0.02] active:scale-[0.99] transition-all duration-300 relative group"
                   >
-                    {/* Pastille verte sur les messages non lus */}
                     {conv.unreadCount > 0 && (
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-breezy-neon flex items-center justify-center glow-neon">
                         <span className="text-[9px] font-bold text-black">{conv.unreadCount}</span>
                       </div>
                     )}
 
-                    {/* Avatar avec indicateur de présence */}
                     <div className="relative shrink-0">
                       <Avatar name={conv.name} username={conv.username} url={conv.avatar} className="w-12 h-12" />
                       {conv.online && (
@@ -202,7 +231,6 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                       )}
                     </div>
 
-                    {/* Aperçu du dernier message */}
                     <div className="flex-1 min-w-0 pr-8">
                       <div className="flex justify-between items-baseline mb-0.5">
                         <h4 className="text-sm font-sans font-medium text-breezy-icy group-hover:text-breezy-neon transition-colors">
@@ -222,7 +250,6 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
             </div>
           </motion.div>
         ) : (
-          /* VUE 2 : La discussion en cours */
           <motion.div
             key="chat"
             className="flex-1 flex flex-col h-full bg-breezy-bg z-10"
@@ -231,16 +258,16 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
             exit={{ opacity: 0, x: 20 }}
             transition={{ type: "spring", damping: 28, stiffness: 350 }}
           >
-            {/* En-tête de la discussion */}
+            {/* En-tête */}
             <div className="shrink-0 p-4 border-b border-white/5 flex items-center justify-between glassmorphic">
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => { playTick(); setActiveConvId(null); }}
+                  onClick={handleBack}
                   className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/85 transition"
                 >
                   <ArrowLeft className="w-4 h-4" />
                 </button>
-                
+
                 <div className="flex items-center gap-2.5">
                   <Avatar name={selectedConv?.name || ''} username={selectedConv?.username} url={selectedConv?.avatar} className="w-9 h-9" />
                   <div>
@@ -272,7 +299,6 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
               {selectedConv?.messages.map((msg) => {
                 const isMe = msg.sender === 'me';
                 return (
-                  // Nos messages à droite, ceux du contact à gauche
                   <motion.div
                     key={msg.id}
                     initial={{ opacity: 0, y: 10, scale: 0.98 }}
@@ -286,7 +312,12 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                           : 'glassmorphic text-breezy-icy rounded-tl-xs border border-white/5 shadow-sm'
                       }`}
                     >
-                      {msg.text}
+                      {msg.text && <span>{msg.text}</span>}
+                      {msg.video && (
+                        <div className={`${msg.text ? 'mt-2' : ''}`}>
+                          <VideoPlayer src={msg.video} />
+                        </div>
+                      )}
                     </div>
                     <span className="text-[9px] font-mono text-white/40 mt-1 px-1">
                       {msg.time}
@@ -295,7 +326,6 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                 );
               })}
 
-              {/* Indicateur "en train d'écrire..." animé */}
               <AnimatePresence>
                 {isTyping && (
                   <motion.div
@@ -318,7 +348,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Barre de saisie du message */}
+            {/* Barre de saisie */}
             <form
               onSubmit={handleSendMessage}
               className="p-3 shrink-0 border-t border-white/5 glassmorphic flex items-center gap-2"
@@ -330,9 +360,17 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                 placeholder="Écrire un message..."
                 className="flex-1 text-xs rounded-xl glassmorphism-light py-3 px-4 text-breezy-icy placeholder-white/30 focus:outline-none focus:border-breezy-border-active transition"
               />
+              <VideoUploadField
+                compact
+                value={messageVideo}
+                onChange={setMessageVideo}
+                onFilenameChange={(name) => { pendingMsgVideoFilenameRef.current = name; }}
+                onUploadingChange={setMsgUploading}
+                triggerToast={triggerToast}
+              />
               <button
                 type="submit"
-                disabled={!inputText.trim()}
+                disabled={(!inputText.trim() && !messageVideo) || msgUploading}
                 className="w-10 h-10 rounded-xl bg-breezy-icy text-slate-950 hover:bg-breezy-neon disabled:opacity-40 disabled:hover:bg-breezy-icy flex items-center justify-center active:scale-95 transition shrink-0"
               >
                 <Send className="w-4 h-4" />
@@ -342,7 +380,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
         )}
       </AnimatePresence>
 
-      {/* VUE 3 : Formulaire pour démarrer une nouvelle conversation */}
+      {/* Formulaire nouvelle conversation */}
       <AnimatePresence>
         {isSelectContactOpen && (
           <div className="absolute inset-0 z-50 flex items-center justify-center p-6">
@@ -353,7 +391,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
               onClick={() => { playTick(); setIsSelectContactOpen(false); }}
               className="absolute inset-0 bg-black/80 backdrop-blur-md cursor-pointer"
             />
-            
+
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -364,7 +402,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                 <span className="text-xs font-mono text-breezy-neon uppercase tracking-wider font-bold">
                   Nouvelle conversation
                 </span>
-                <button 
+                <button
                   onClick={() => { playTick(); setIsSelectContactOpen(false); }}
                   className="text-white/40 hover:text-white"
                 >

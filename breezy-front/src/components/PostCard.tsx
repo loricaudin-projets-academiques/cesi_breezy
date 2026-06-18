@@ -8,22 +8,23 @@ import { Bookmark, Heart, MessageCircle, Share2, Send } from 'lucide-react';
 import { Comment, CommentsByPost, Post } from '../types';
 import { playTick, playChime } from '../audio';
 import Avatar from './Avatar';
+import VideoPlayer from './VideoPlayer';
+import VideoUploadField from './VideoUploadField';
 
-// Les actions possibles sur un post — définies une seule fois et réutilisées
-// par tous les écrans qui affichent des posts (feed, profil...)
 export interface PostInteractionHandlers {
   onToggleStar: (id: string) => void;
   onToggleLike: (id: string) => void;
   onToggleComments: (id: string) => void;
   onCommentDraftChange: (id: string, text: string) => void;
+  onCommentVideoChange: (id: string, url: string | undefined) => void;
   onAddComment: (id: string) => void;
   triggerToast: (msg: string) => void;
 }
 
-// L'état partagé des listes de posts (commentaires, brouillons, sections dépliées)
 export interface PostListState {
   postComments: CommentsByPost;
   commentDrafts: Record<string, string>;
+  commentVideoDrafts: Record<string, string | undefined>;
   showCommentsForPost: Record<string, boolean>;
 }
 
@@ -31,22 +32,26 @@ interface PostCardProps extends PostInteractionHandlers {
   post: Post;
   comments: Comment[];
   commentDraft: string;
+  commentVideoDraft: string | undefined;
   showComments: boolean;
 }
 
-// Carte qui représente un post dans le fil d'actualité
 export default function PostCard({
   post,
   comments = [],
   commentDraft = '',
+  commentVideoDraft,
   showComments = false,
   onToggleStar,
   onToggleLike,
   onToggleComments,
   onCommentDraftChange,
+  onCommentVideoChange,
   onAddComment,
   triggerToast
 }: PostCardProps) {
+  const canSendComment = !!(commentDraft.trim() || commentVideoDraft);
+
   return (
     <motion.div
       layout
@@ -61,10 +66,9 @@ export default function PostCard({
             <p className="text-[10px] font-mono text-white/45 mt-0.5">{post.authorUsername}</p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-1.5">
           <span className="text-[8.5px] font-mono text-white/30">{post.timestamp}</span>
-          {/* Marque-page pour sauvegarder le post */}
           <button
             onClick={() => onToggleStar(post.id)}
             className={`p-1.5 rounded-lg hover:bg-white/5 ${
@@ -82,7 +86,7 @@ export default function PostCard({
         {post.content}
       </p>
 
-      {/* Image optionnelle jointe au post */}
+      {/* Image optionnelle */}
       {post.image && (
         <div className="relative h-44 rounded-xl overflow-hidden border border-white/10 mt-1">
           <img src={post.image} className="w-full h-full object-cover" alt="Image du post" />
@@ -92,10 +96,12 @@ export default function PostCard({
         </div>
       )}
 
+      {/* Vidéo optionnelle */}
+      {post.video && <VideoPlayer src={post.video} />}
+
       {/* Actions : like, commentaires, partage */}
       <div className="flex items-center justify-between pt-2 border-t border-white/[0.04] mt-0.5 font-mono select-none">
-        
-        {/* Like */}
+
         <button
           onClick={() => onToggleLike(post.id)}
           className={`flex items-center gap-1.5 text-xs font-semibold focus:outline-none transition active:scale-90 ${
@@ -106,7 +112,6 @@ export default function PostCard({
           <span className="text-[10px]">{post.likes}</span>
         </button>
 
-        {/* Afficher / masquer les commentaires */}
         <button
           onClick={() => {
             playTick();
@@ -120,7 +125,6 @@ export default function PostCard({
           <span className="text-[10px]">{comments.length}</span>
         </button>
 
-        {/* Copie le lien du post dans le presse-papier */}
         <button
           onClick={() => {
             playChime();
@@ -137,16 +141,18 @@ export default function PostCard({
       {/* Section commentaires dépliable */}
       {showComments && (
         <div className="flex flex-col gap-2.5 pt-3.5 border-t border-white/5 mt-1.5">
-          {/* Commentaires déjà publiés */}
           {comments.map((cmt, idx) => (
             <div key={idx} className="bg-white/[0.02] border border-white/[0.03] p-2.5 rounded-xl text-[11px] leading-relaxed relative text-left">
               <span className="absolute right-2.5 top-2.5 text-[8.5px] font-mono text-white/30">{cmt.time}</span>
-              <p className="font-semibold text-breezy-icy">{cmt.author} <span className="text-[9px] font-mono text-white/40 ml-1">{cmt.username}</span></p>
-              <p className="text-white/80 mt-1">{cmt.text}</p>
+              <p className="font-semibold text-breezy-icy">
+                {cmt.author} <span className="text-[9px] font-mono text-white/40 ml-1">{cmt.username}</span>
+              </p>
+              {cmt.text && <p className="text-white/80 mt-1">{cmt.text}</p>}
+              {cmt.video && <VideoPlayer src={cmt.video} />}
             </div>
           ))}
 
-          {/* Champ pour écrire un nouveau commentaire */}
+          {/* Composeur de commentaire */}
           <div className="flex items-center gap-1.5">
             <input
               type="text"
@@ -155,9 +161,16 @@ export default function PostCard({
               onChange={(e) => onCommentDraftChange(post.id, e.target.value)}
               className="flex-1 bg-white/[0.03] text-xs p-2 rounded-xl text-breezy-icy placeholder-white/25 focus:outline-none border border-white/5 focus:border-breezy-border-active transition"
             />
+            <VideoUploadField
+              compact
+              value={commentVideoDraft}
+              onChange={(url) => onCommentVideoChange(post.id, url)}
+              triggerToast={triggerToast}
+            />
             <button
               onClick={() => onAddComment(post.id)}
-              className="w-8.5 h-8.5 rounded-xl bg-breezy-icy text-slate-950 flex items-center justify-center hover:bg-breezy-neon active:scale-95 transition shrink-0"
+              disabled={!canSendComment}
+              className="w-8 h-8 rounded-xl bg-breezy-icy text-slate-950 flex items-center justify-center hover:bg-breezy-neon active:scale-95 transition shrink-0 disabled:opacity-40"
             >
               <Send className="w-3.5 h-3.5" />
             </button>
