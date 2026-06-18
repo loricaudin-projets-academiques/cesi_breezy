@@ -81,7 +81,7 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
   // VUE 1 : Formulaire pour configurer la chanson
   if (showConfig) {
     return (
-      <div className="glassmorphic rounded-2xl p-4 border border-white/5 relative overflow-hidden font-sans">
+      <div className="glassmorphic rounded-2xl p-4 border border-breezy-border relative overflow-hidden font-sans">
         <div className="flex justify-between items-center mb-3">
           <span className="text-[10px] font-mono text-breezy-neon uppercase tracking-wider font-bold">
             Configurer la musique
@@ -89,7 +89,7 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
           <button
             type="button"
             onClick={() => { playTick(); setShowConfig(false); }}
-            className="w-6 h-6 rounded-md hover:bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition cursor-pointer"
+            className="w-6 h-6 rounded-md hover:bg-breezy-card flex items-center justify-center text-breezy-muted hover:text-breezy-icy transition cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -102,7 +102,7 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               placeholder="Titre de la chanson"
-              className="w-full text-xs rounded-xl bg-white/[0.03] p-2.5 px-3 text-breezy-icy placeholder-white/20 border border-white/5 focus:outline-none focus:border-breezy-border-active transition"
+              className="w-full text-xs rounded-xl bg-breezy-card p-2.5 px-3 text-breezy-icy placeholder-breezy-muted border border-breezy-border focus:outline-none focus:border-breezy-border-active transition"
             />
           </div>
           <div className="flex flex-col gap-0.5">
@@ -112,7 +112,7 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
               value={newArtist}
               onChange={(e) => setNewArtist(e.target.value)}
               placeholder="Nom de l'artiste"
-              className="w-full text-xs rounded-xl bg-white/[0.03] p-2.5 px-3 text-breezy-icy placeholder-white/20 border border-white/5 focus:outline-none focus:border-breezy-border-active transition"
+              className="w-full text-xs rounded-xl bg-breezy-card p-2.5 px-3 text-breezy-icy placeholder-breezy-muted border border-breezy-border focus:outline-none focus:border-breezy-border-active transition"
             />
           </div>
           <div className="flex flex-col gap-0.5">
@@ -121,7 +121,7 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
               value={newCover}
               onChange={(e) => setNewCover(e.target.value)}
               placeholder="URL de la pochette (optionnel)"
-              className="w-full text-xs rounded-xl bg-white/[0.03] p-2.5 px-3 text-breezy-icy placeholder-white/20 border border-white/5 focus:outline-none focus:border-breezy-border-active transition"
+              className="w-full text-xs rounded-xl bg-breezy-card p-2.5 px-3 text-breezy-icy placeholder-breezy-muted border border-breezy-border focus:outline-none focus:border-breezy-border-active transition"
             />
           </div>
           <button
@@ -138,21 +138,21 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
   // VUE 2 : Aucune musique configurée — invitation à en ajouter une
   if (!music.title) {
     return (
-      <div className="glassmorphic rounded-2xl p-4 border border-white/5 relative overflow-hidden group hover:border-breezy-border-active/20 transition-all duration-300 font-sans">
+      <div className="glassmorphic rounded-2xl p-4 border border-breezy-border relative overflow-hidden group hover:border-breezy-border-active/20 transition-all duration-300 font-sans">
         <div className="absolute -right-6 -bottom-6 w-16 h-16 rounded-full bg-breezy-purple/10 blur-xl pointer-events-none" />
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2.5">
-            <div className="w-11 h-11 shrink-0 rounded-full border border-white/10 flex items-center justify-center bg-black/40 text-white/30">
+            <div className="w-11 h-11 shrink-0 rounded-full border border-breezy-border flex items-center justify-center bg-breezy-card text-breezy-faint">
               <Music className="w-5 h-5 text-breezy-neon/60" />
             </div>
             <div className="text-left">
               <h4 className="text-[12px] font-sans font-semibold text-breezy-icy/70 tracking-tight">Aucune musique</h4>
-              <p className="text-[10px] font-sans text-white/30 -mt-0.5">Dis ce que tu écoutes !</p>
+              <p className="text-[10px] font-sans text-breezy-muted -mt-0.5">Dis ce que tu écoutes !</p>
             </div>
           </div>
           <button
             onClick={() => { playTick(); setShowConfig(true); }}
-            className="py-1.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-[9.5px] font-bold font-mono text-[#AEEBFF] hover:border-[#AEEBFF]/30 transition active:scale-95 cursor-pointer"
+            className="py-1.5 px-3 rounded-xl bg-breezy-card hover:bg-breezy-card-hover border border-breezy-border text-[9.5px] font-bold font-mono text-breezy-neon hover:border-breezy-border-active transition active:scale-95 cursor-pointer"
           >
             CONFIGURER
           </button>
@@ -163,12 +163,12 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
 
   // VUE 3 : Le lecteur complet avec la chanson en cours
   return (
-    <div className="glassmorphic rounded-2xl p-3 border border-white/5 relative overflow-hidden group hover:border-breezy-border-active/20 transition-all duration-300 font-sans">
+    <div className="glassmorphic rounded-2xl p-3 border border-breezy-border relative overflow-hidden group hover:border-breezy-border-active/20 transition-all duration-300 font-sans">
       <div className="absolute -right-6 -bottom-6 w-16 h-16 rounded-full bg-breezy-purple/10 blur-xl pointer-events-none group-hover:bg-breezy-purple/20 transition-all duration-500" />
       
       <div className="flex items-center gap-2.5">
         {/* Pochette de l'album — tourne quand la musique joue */}
-        <div className="relative w-11 h-11 shrink-0 rounded-full overflow-hidden border border-white/10 flex items-center justify-center bg-black/40">
+        <div className="relative w-11 h-11 shrink-0 rounded-full overflow-hidden border border-breezy-border flex items-center justify-center bg-breezy-overlay">
           {music.cover ? (
             <motion.img
               src={music.cover}
@@ -184,7 +184,7 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
           )}
           <div className="absolute inset-0 flex items-center justify-center">
             {/* Centre du vinyle */}
-            <div className="w-2.5 h-2.5 rounded-full bg-black border border-white/20 flex items-center justify-center">
+            <div className="w-2.5 h-2.5 rounded-full bg-breezy-overlay border border-breezy-border flex items-center justify-center">
               <div className="w-0.5 h-0.5 rounded-full bg-breezy-neon" />
             </div>
           </div>
@@ -194,17 +194,17 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
             <Music className="w-3 h-3 text-breezy-neon" />
-            <p className="text-[11px] font-mono tracking-wider text-white/40 uppercase">EN ÉCOUTE</p>
+            <p className="text-[11px] font-mono tracking-wider text-breezy-muted uppercase">EN ÉCOUTE</p>
           </div>
           <h4 className="text-[12px] font-sans font-semibold text-breezy-icy truncate tracking-tight">{music.title}</h4>
-          <p className="text-[10px] font-sans text-white/50 truncate -mt-0.5">{music.artist}</p>
+          <p className="text-[10px] font-sans text-breezy-muted truncate -mt-0.5">{music.artist}</p>
         </div>
 
         {/* Boutons play/pause et paramètres */}
         <div className="flex items-center gap-1.5 select-none">
           <button
             onClick={handlePlayToggle}
-            className="w-7 h-7 rounded-lg glassmorphism-light hover:bg-white/10 flex items-center justify-center text-white/90 hover:text-breezy-neon active:scale-95 transition cursor-pointer"
+            className="w-7 h-7 rounded-lg glassmorphism-light hover:bg-breezy-card flex items-center justify-center text-breezy-icy hover:text-breezy-neon active:scale-95 transition cursor-pointer"
             title={music.isPlaying ? "Pause" : "Lecture"}
           >
             {music.isPlaying ? (
@@ -216,7 +216,7 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
 
           <button
             onClick={() => { playTick(); setShowConfig(true); }}
-            className="w-7 h-7 rounded-lg glassmorphism-light hover:bg-white/10 flex items-center justify-center text-white/40 hover:text-white/80 active:scale-95 transition cursor-pointer"
+            className="w-7 h-7 rounded-lg glassmorphism-light hover:bg-breezy-card flex items-center justify-center text-breezy-muted hover:text-breezy-icy active:scale-95 transition cursor-pointer"
             title="Changer de musique"
           >
             <Settings className="w-3.5 h-3.5" />
@@ -226,14 +226,14 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
 
       {/* Barre de progression de la chanson */}
       <div className="mt-2.5">
-        <div className="w-full h-[3px] bg-white/5 rounded-full overflow-hidden relative">
+        <div className="w-full h-[3px] bg-breezy-card rounded-full overflow-hidden relative">
           <motion.div
             className="h-full bg-gradient-to-r from-breezy-neon to-breezy-purple rounded-full"
             style={{ width: `${localProgress}%` }}
             layoutId="trackProgress"
           />
         </div>
-        <div className="flex justify-between items-center text-[8px] font-mono text-white/30 mt-1 px-0.5">
+        <div className="flex justify-between items-center text-[8px] font-mono text-breezy-faint mt-1 px-0.5">
           <span>{`0:${Math.floor(localProgress * 0.03).toString().padStart(2, '0')}`}</span>
           {/* Indicateur de lecture animé (barres qui bougent) */}
           {music.isPlaying && (

@@ -60,15 +60,25 @@ export default function LoginScreen({ onLogin, onRegister, triggerToast }: Login
 
       // Petit délai pour simuler une requête réseau
       setTimeout(async () => {
-        await onRegister(name.trim(), formattedUsername, password, DEFAULT_API_URL);
-        setIsConnecting(false);
+        try {
+          await onRegister(name.trim(), formattedUsername, password, DEFAULT_API_URL);
+        } catch {
+          // Le provider affiche deja le message d'erreur.
+        } finally {
+          setIsConnecting(false);
+        }
       }, 1200);
     } else {
       triggerToast("Vérification en cours...");
 
       setTimeout(async () => {
-        await onLogin(formattedUsername, password, DEFAULT_API_URL);
-        setIsConnecting(false);
+        try {
+          await onLogin(formattedUsername, password, DEFAULT_API_URL);
+        } catch {
+          // Le provider affiche deja le message d'erreur.
+        } finally {
+          setIsConnecting(false);
+        }
       }, 1200);
     }
   };
@@ -94,7 +104,7 @@ export default function LoginScreen({ onLogin, onRegister, triggerToast }: Login
         <div className="relative mb-2">
           {/* Halo animé derrière l'icône */}
           <div className="absolute inset-0 bg-breezy-neon/25 blur-lg rounded-full animate-pulse" />
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-breezy-purple via-breezy-lavender to-breezy-neon flex items-center justify-center border border-white/10 z-10 relative">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-breezy-purple via-breezy-lavender to-breezy-neon flex items-center justify-center border border-breezy-border z-10 relative">
             {isSignUp ? (
               <UserPlus className="w-6 h-6 text-slate-950" />
             ) : (
@@ -105,13 +115,13 @@ export default function LoginScreen({ onLogin, onRegister, triggerToast }: Login
         <h1 className="text-xl font-display font-black tracking-wider text-breezy-icy uppercase">
           {isSignUp ? 'CRÉER UN COMPTE' : 'BREEZY'}
         </h1>
-        <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest mt-1">
+        <p className="text-[10px] font-mono text-breezy-muted uppercase tracking-widest mt-1">
           {isSignUp ? 'Rejoins le réseau' : 'Accès au réseau'}
         </p>
       </div>
 
       {/* Formulaire principal */}
-      <div className="glassmorphic rounded-2xl p-5 border border-white/5 shadow-2xl relative overflow-hidden">
+      <div className="glassmorphic rounded-2xl p-5 border border-breezy-border shadow-2xl relative overflow-hidden">
         <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-breezy-neon/5 blur-xl pointer-events-none" />
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -124,18 +134,18 @@ export default function LoginScreen({ onLogin, onRegister, triggerToast }: Login
                 exit={{ opacity: 0, y: -10 }}
                 className="flex flex-col gap-1.5 text-left"
               >
-                <label className="text-[9px] font-mono text-white/40 uppercase tracking-wider font-semibold ml-1">
+                <label className="text-[9px] font-mono text-breezy-muted uppercase tracking-wider font-semibold ml-1">
                   Nom complet
                 </label>
                 <div className="relative">
-                  <User className="w-4 h-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <User className="w-4 h-4 text-breezy-faint absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Jean Dupont"
-                    className="w-full text-xs font-sans rounded-xl bg-white/[0.03] p-3.5 pl-10 text-breezy-icy placeholder-white/20 border border-white/5 focus:outline-none focus:border-breezy-border-active focus:bg-white/[0.06] transition"
+                    className="w-full text-xs font-sans rounded-xl bg-breezy-card p-3.5 pl-10 text-breezy-icy placeholder-breezy-muted border border-breezy-border focus:outline-none focus:border-breezy-border-active focus:bg-breezy-card-hover transition"
                   />
                 </div>
               </motion.div>
@@ -144,12 +154,12 @@ export default function LoginScreen({ onLogin, onRegister, triggerToast }: Login
 
           {/* Champ Pseudo */}
           <div className="flex flex-col gap-1.5 text-left">
-            <label className="text-[9px] font-mono text-white/40 uppercase tracking-wider font-semibold ml-1">
+            <label className="text-[9px] font-mono text-breezy-muted uppercase tracking-wider font-semibold ml-1">
               Nom d'utilisateur
             </label>
             <div className="relative">
               {/* Préfixe @ affiché dans le champ */}
-              <span className="text-xs font-semibold text-white/30 absolute left-3.5 top-1/2 -translate-y-1/2">
+              <span className="text-xs font-semibold text-breezy-faint absolute left-3.5 top-1/2 -translate-y-1/2">
                 @
               </span>
               <input
@@ -158,25 +168,25 @@ export default function LoginScreen({ onLogin, onRegister, triggerToast }: Login
                 value={username.startsWith('@') ? username.slice(1) : username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="jeandupont"
-                className="w-full text-xs font-sans rounded-xl bg-white/[0.03] p-3.5 pl-10 text-breezy-icy placeholder-white/20 border border-white/5 focus:outline-none focus:border-breezy-border-active focus:bg-white/[0.06] transition"
+                className="w-full text-xs font-sans rounded-xl bg-breezy-card p-3.5 pl-10 text-breezy-icy placeholder-breezy-muted border border-breezy-border focus:outline-none focus:border-breezy-border-active focus:bg-breezy-card-hover transition"
               />
             </div>
           </div>
 
           {/* Champ Mot de passe */}
           <div className="flex flex-col gap-1.5 text-left">
-            <label className="text-[9px] font-mono text-white/40 uppercase tracking-wider font-semibold ml-1">
+            <label className="text-[9px] font-mono text-breezy-muted uppercase tracking-wider font-semibold ml-1">
               Mot de passe
             </label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Lock className="w-4 h-4 text-breezy-faint absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full text-xs font-sans rounded-xl bg-white/[0.03] p-3.5 pl-10 text-breezy-icy placeholder-white/20 border border-white/5 focus:outline-none focus:border-breezy-border-active focus:bg-white/[0.06] transition"
+                className="w-full text-xs font-sans rounded-xl bg-breezy-card p-3.5 pl-10 text-breezy-icy placeholder-breezy-muted border border-breezy-border focus:outline-none focus:border-breezy-border-active focus:bg-breezy-card-hover transition"
               />
             </div>
           </div>
@@ -190,18 +200,18 @@ export default function LoginScreen({ onLogin, onRegister, triggerToast }: Login
                 exit={{ opacity: 0, y: -10 }}
                 className="flex flex-col gap-1.5 text-left"
               >
-                <label className="text-[9px] font-mono text-white/40 uppercase tracking-wider font-semibold ml-1">
+                <label className="text-[9px] font-mono text-breezy-muted uppercase tracking-wider font-semibold ml-1">
                   Confirmer le mot de passe
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-4 h-4 text-breezy-faint absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="password"
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full text-xs font-sans rounded-xl bg-white/[0.03] p-3.5 pl-10 text-breezy-icy placeholder-white/20 border border-white/5 focus:outline-none focus:border-breezy-border-active focus:bg-white/[0.06] transition"
+                    className="w-full text-xs font-sans rounded-xl bg-breezy-card p-3.5 pl-10 text-breezy-icy placeholder-breezy-muted border border-breezy-border focus:outline-none focus:border-breezy-border-active focus:bg-breezy-card-hover transition"
                   />
                 </div>
               </motion.div>
@@ -242,9 +252,9 @@ export default function LoginScreen({ onLogin, onRegister, triggerToast }: Login
       </div>
 
       {/* Note de sécurité en bas de la page */}
-      <div className="mt-6 p-3 rounded-xl bg-white/[0.01] border border-white/[0.03] flex items-center gap-2.5 text-left select-none">
+      <div className="mt-6 p-3 rounded-xl bg-breezy-card border border-breezy-border flex items-center gap-2.5 text-left select-none">
         <Shield className="w-4 h-4 text-breezy-lavender shrink-0" />
-        <p className="text-[9px] text-white/30 leading-snug">
+        <p className="text-[9px] text-breezy-faint leading-snug">
           Tout est stocké localement dans ton navigateur. Aucune donnée n'est envoyée sans ton accord.
         </p>
       </div>

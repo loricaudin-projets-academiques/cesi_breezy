@@ -46,7 +46,7 @@ export default function BioEditorModal({ isOpen, onClose, initialValue, onSave }
               playTick();
               onClose();
             }}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-breezy-overlay backdrop-blur-sm"
           />
           
           {/* Contenu de la modal */}
@@ -54,7 +54,7 @@ export default function BioEditorModal({ isOpen, onClose, initialValue, onSave }
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
-            className="w-full max-w-xs glassmorphism-premium rounded-2xl p-4 border border-white/10 z-10"
+            className="w-full max-w-xs glassmorphism-premium rounded-2xl p-4 border border-breezy-border z-10"
           >
             <h4 className="text-xs font-mono text-breezy-purple uppercase tracking-wider mb-2.5 font-bold">
               Modifier ta bio
@@ -66,20 +66,20 @@ export default function BioEditorModal({ isOpen, onClose, initialValue, onSave }
               maxLength={PROFILE_BIO_MAX_LENGTH}
               rows={4}
               placeholder="Quelques mots sur toi..."
-              className="w-full resize-none rounded-xl border border-white/5 bg-white/[0.04] p-2.5 text-xs leading-relaxed text-breezy-icy outline-none transition focus:border-breezy-border-active whitespace-pre-wrap break-words [overflow-wrap:anywhere]"
+              className="w-full resize-none rounded-xl border border-breezy-border bg-breezy-card p-2.5 text-xs leading-relaxed text-breezy-icy outline-none transition focus:border-breezy-border-active whitespace-pre-wrap break-words [overflow-wrap:anywhere]"
             />
-            <p className={`mt-1 text-right font-mono text-[8px] ${remainingCharacters <= 15 ? 'text-breezy-purple' : 'text-white/30'}`}>
+            <p className={`mt-1 text-right font-mono text-[8px] ${remainingCharacters <= 15 ? 'text-breezy-purple' : 'text-breezy-faint'}`}>
               {inputValue.length}/120 caractères
             </p>
             
             {/* Boutons d'action */}
-            <div className="flex justify-end gap-2 mt-4 pt-2.5 border-t border-white/5">
+            <div className="flex justify-end gap-2 mt-4 pt-2.5 border-t border-breezy-border">
               <button
                 onClick={() => {
                   playTick();
                   onClose();
                 }}
-                className="text-[10px] text-white/40 hover:text-white/80 py-1.5 px-3"
+                className="text-[10px] text-breezy-muted hover:text-breezy-icy py-1.5 px-3"
               >
                 Annuler
               </button>

@@ -24,8 +24,8 @@ export function getAvatarUrl(url?: string, username?: string, name?: string): st
 // Avatar rond avec un léger contour — s'adapte à la taille passée en props
 export default function Avatar({ name, username, url, className = "w-9 h-9" }: AvatarProps) {
   return (
-    <div className={`${className} rounded-full overflow-hidden border border-white/10 p-0.5 shrink-0 bg-[#050505]`}>
-      <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-[#050505] relative">
+    <div className={`${className} rounded-full overflow-hidden border border-breezy-border p-0.5 shrink-0 bg-breezy-bg`}>
+      <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-breezy-bg relative">
         <img src={getAvatarUrl(url, username, name)} className="w-full h-full object-cover rounded-full" alt={name} />
       </div>
     </div>

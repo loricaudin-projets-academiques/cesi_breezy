@@ -32,7 +32,7 @@ export default function FollowersModal({ isOpen, onClose, type, triggerToast }: 
               playTick();
               onClose();
             }}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-breezy-overlay backdrop-blur-sm"
           />
           
           {/* Contenu de la modal */}
@@ -40,33 +40,33 @@ export default function FollowersModal({ isOpen, onClose, type, triggerToast }: 
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
-            className="w-full max-w-xs glassmorphism-premium rounded-2.5xl p-5 border border-white/10 z-10 flex flex-col max-h-[460px]"
+            className="w-full max-w-xs glassmorphism-premium rounded-2.5xl p-5 border border-breezy-border z-10 flex flex-col max-h-[460px]"
           >
             {/* Titre qui change selon l'onglet sélectionné */}
-            <div className="flex justify-between items-center mb-4 pb-2 border-b border-white/5">
+            <div className="flex justify-between items-center mb-4 pb-2 border-b border-breezy-border">
               <span className="text-xs font-mono text-breezy-neon uppercase tracking-wider font-bold">
                 {type === 'followers' && 'Abonnés'}
                 {type === 'following' && 'Abonnements'}
                 {type === 'friends' && 'Amis proches'}
               </span>
-              <span className="text-[10px] font-mono text-white/30">LOCAL</span>
+              <span className="text-[10px] font-mono text-breezy-faint">LOCAL</span>
             </div>
 
             {/* Liste des membres — scrollable si elle déborde */}
             <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col gap-2.5">
               {INITIAL_FOLLOWERS.length === 0 ? (
-                <div className="py-8 text-center text-white/30 text-[10.5px] font-sans">
+                <div className="py-8 text-center text-breezy-faint text-[10.5px] font-sans">
                   Personne dans cette liste pour l'instant.
                 </div>
               ) : (
                 INITIAL_FOLLOWERS.map((m, idx) => (
-                  <div key={idx} className="p-2 bg-white/[0.02] border border-white/5 rounded-xl flex items-center justify-between gap-2">
+                  <div key={idx} className="p-2 bg-breezy-card border border-breezy-border rounded-xl flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       {/* Avatar généré ou personnalisé */}
-                      <img src={getAvatarUrl(m.avatar, m.username, m.name)} className="w-7 h-7 rounded-full object-cover border border-white/10" alt="" />
+                      <img src={getAvatarUrl(m.avatar, m.username, m.name)} className="w-7 h-7 rounded-full object-cover border border-breezy-border" alt="" />
                       <div className="min-w-0">
                         <p className="text-[10px] font-sans font-medium text-breezy-icy truncate">{m.name}</p>
-                        <p className="text-[8.5px] font-mono text-white/40 truncate">{m.username}</p>
+                        <p className="text-[8.5px] font-mono text-breezy-muted truncate">{m.username}</p>
                       </div>
                     </div>
                     {/* Bouton d'action (follow / unfollow) */}
@@ -75,14 +75,14 @@ export default function FollowersModal({ isOpen, onClose, type, triggerToast }: 
                         playTick();
                         triggerToast(`Action effectuée pour ${m.name}`);
                       }}
-                      className="py-1 px-2 text-[8px] font-bold font-mono rounded bg-white/5 hover:bg-white/10 border border-white/5 transition shrink-0 active:scale-95"
+                      className="py-1 px-2 text-[8px] font-bold font-mono rounded bg-breezy-card hover:bg-breezy-card-hover border border-breezy-border transition shrink-0 active:scale-95"
                     >
                       {m.followedByMe ? (
-                        <span className="text-[#AEEBFF] flex items-center gap-0.5">
+                        <span className="text-breezy-neon flex items-center gap-0.5">
                           <UserCheck className="w-2.5 h-2.5" /> suivi
                         </span>
                       ) : (
-                        <span className="text-white/65 flex items-center gap-0.5">
+                        <span className="text-breezy-muted flex items-center gap-0.5">
                           <UserPlus className="w-2.5 h-2.5" /> suivre
                         </span>
                       )}
@@ -97,7 +97,7 @@ export default function FollowersModal({ isOpen, onClose, type, triggerToast }: 
                 playTick();
                 onClose();
               }}
-              className="w-full mt-4 text-center py-2 text-[10px] font-mono hover:text-breezy-purple text-white/30 border border-white/5 hover:border-white/15 rounded-xl block cursor-pointer transition"
+              className="w-full mt-4 text-center py-2 text-[10px] font-mono hover:text-breezy-purple text-breezy-faint border border-breezy-border hover:border-breezy-border-active rounded-xl block cursor-pointer transition"
             >
               Fermer
             </button>

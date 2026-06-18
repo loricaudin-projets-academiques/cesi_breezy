@@ -56,6 +56,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
     isLoggedIn,
     ambientGlow,
     setAmbientGlow,
+    theme,
+    setTheme,
     toasts,
     handleRemoveToast,
     conversations,
@@ -85,9 +87,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] bg-gradient-custom text-icy flex flex-col justify-center items-center p-3 relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-breezy-bg bg-gradient-custom text-icy flex flex-col justify-center items-center p-3 relative overflow-hidden font-sans">
       <AmbientGlow enabled={ambientGlow} />
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none z-0" />
+      <div className="absolute inset-0 bg-grid-custom pointer-events-none z-0" />
 
       <PhoneFrame>
         <NotificationToast toasts={toasts} onRemove={handleRemoveToast} />
@@ -96,7 +98,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           children
         ) : (
           <>
-            <div className="pt-8 px-4 pb-2.5 flex justify-between items-center bg-[#050508]/80 backdrop-blur-xl border-b border-white/[0.04] shrink-0 z-30">
+            <div className="pt-8 px-4 pb-2.5 flex justify-between items-center bg-breezy-bg/80 backdrop-blur-xl border-b border-breezy-border shrink-0 z-30">
               <div className="flex items-center gap-1.5 select-none">
                 <span className="text-sm font-display font-semibold text-breezy-icy uppercase tracking-wide">
                   {getTitle(activeTab)}
@@ -109,7 +111,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                     playTick();
                     setIsPostModalOpen(true);
                   }}
-                  className="p-1 px-2.5 rounded-lg border border-white/5 bg-white/[0.03] hover:border-breezy-border-active flex items-center gap-1.5 hover:text-breezy-neon transition duration-200"
+                  className="p-1 px-2.5 rounded-lg border border-breezy-border bg-breezy-card hover:border-breezy-border-active flex items-center gap-1.5 hover:text-breezy-neon transition duration-200"
                   title="Compose stream"
                 >
                   <MessageSquareDiff className="w-4 h-4" />
@@ -164,6 +166,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
           onToggleLike={feed.handleToggleLike}
           ambientGlow={ambientGlow}
           onToggleAmbientGlow={() => setAmbientGlow(!ambientGlow)}
+          theme={theme}
+          onThemeChange={setTheme}
           triggerToast={triggerToast}
           onLogout={handleLogout}
         />

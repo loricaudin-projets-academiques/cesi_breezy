@@ -5,64 +5,293 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-display: "Space Grotesk", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
-  
+
+  /* Structure */
+  --color-breezy-bg: #050508;
+  --color-breezy-card: rgba(13, 13, 18, 0.6);
+  --color-breezy-card-hover: rgba(22, 22, 33, 0.8);
+  --color-breezy-border: rgba(255, 255, 255, 0.08);
+  --color-breezy-border-active: rgba(174, 235, 255, 0.3);
+
+  /* Texte */
+  --color-breezy-icy: #F5FAFF;
+  --color-breezy-muted: rgba(245, 250, 255, 0.5);
+  --color-breezy-faint: rgba(245, 250, 255, 0.3);
+
+  /* Accents */
+  --color-breezy-neon: #AEEBFF;
+  --color-breezy-lavender: #C8B6FF;
+  --color-breezy-purple: #E4B5FF;
+
+  /* Overlay, glass, frame, halos, grille */
+  --color-breezy-overlay: rgba(0, 0, 0, 0.6);
+  --breezy-glass-bg: rgba(255, 255, 255, 0.03);
+  --breezy-glass-border: rgba(255, 255, 255, 0.08);
+  --breezy-glass-bright-bg: rgba(255, 255, 255, 0.08);
+  --breezy-glass-bright-border: rgba(255, 255, 255, 0.15);
+  --breezy-frame: #1a1a1a;
+  --breezy-glow-1: rgba(228, 181, 255, 0.08);
+  --breezy-glow-2: rgba(174, 235, 255, 0.07);
+  --breezy-grid: rgba(255, 255, 255, 0.012);
+}
+
+/* ─── Thème : base (valeurs par défaut déjà définies dans @theme) ─── */
+[data-theme="base"] {
   --color-breezy-bg: #050508;
   --color-breezy-card: rgba(13, 13, 18, 0.6);
   --color-breezy-card-hover: rgba(22, 22, 33, 0.8);
   --color-breezy-border: rgba(255, 255, 255, 0.08);
   --color-breezy-border-active: rgba(174, 235, 255, 0.3);
   --color-breezy-icy: #F5FAFF;
+  --color-breezy-muted: rgba(245, 250, 255, 0.5);
+  --color-breezy-faint: rgba(245, 250, 255, 0.3);
   --color-breezy-neon: #AEEBFF;
   --color-breezy-lavender: #C8B6FF;
   --color-breezy-purple: #E4B5FF;
+  --color-breezy-overlay: rgba(0, 0, 0, 0.6);
+  --breezy-glass-bg: rgba(255, 255, 255, 0.03);
+  --breezy-glass-border: rgba(255, 255, 255, 0.08);
+  --breezy-glass-bright-bg: rgba(255, 255, 255, 0.08);
+  --breezy-glass-bright-border: rgba(255, 255, 255, 0.15);
+  --breezy-frame: #1a1a1a;
+  --breezy-glow-1: rgba(228, 181, 255, 0.08);
+  --breezy-glow-2: rgba(174, 235, 255, 0.07);
+  --breezy-grid: rgba(255, 255, 255, 0.012);
 }
 
-/* Base custom resets & aesthetic overrides */
+/* ─── Thème : blanc / clair ─── */
+[data-theme="light"] {
+  --color-breezy-bg: #F6F7F9;
+  --color-breezy-card: rgba(255, 255, 255, 0.75);
+  --color-breezy-card-hover: rgba(255, 255, 255, 0.95);
+  --color-breezy-border: rgba(15, 18, 30, 0.10);
+  --color-breezy-border-active: rgba(79, 70, 229, 0.35);
+  --color-breezy-icy: #0B0B12;
+  --color-breezy-muted: rgba(11, 11, 18, 0.55);
+  --color-breezy-faint: rgba(11, 11, 18, 0.35);
+  --color-breezy-neon: #4F46E5;
+  --color-breezy-lavender: #7C3AED;
+  --color-breezy-purple: #9333EA;
+  --color-breezy-overlay: rgba(15, 18, 30, 0.35);
+  --breezy-glass-bg: rgba(255, 255, 255, 0.6);
+  --breezy-glass-border: rgba(15, 18, 30, 0.08);
+  --breezy-glass-bright-bg: rgba(255, 255, 255, 0.85);
+  --breezy-glass-bright-border: rgba(15, 18, 30, 0.12);
+  --breezy-frame: #D2D6DE;
+  --breezy-glow-1: rgba(124, 58, 237, 0.10);
+  --breezy-glow-2: rgba(79, 70, 229, 0.08);
+  --breezy-grid: rgba(15, 18, 30, 0.04);
+}
+
+/* ─── Thème : noir violet ─── */
+[data-theme="noir-violet"] {
+  --color-breezy-bg: #05010A;
+  --color-breezy-card: rgba(24, 10, 38, 0.6);
+  --color-breezy-card-hover: rgba(38, 18, 56, 0.8);
+  --color-breezy-border: rgba(192, 132, 252, 0.12);
+  --color-breezy-border-active: rgba(192, 132, 252, 0.4);
+  --color-breezy-icy: #F5EEFF;
+  --color-breezy-muted: rgba(245, 238, 255, 0.55);
+  --color-breezy-faint: rgba(245, 238, 255, 0.3);
+  --color-breezy-neon: #C084FC;
+  --color-breezy-lavender: #A855F7;
+  --color-breezy-purple: #E879F9;
+  --color-breezy-overlay: rgba(0, 0, 0, 0.7);
+  --breezy-glass-bg: rgba(168, 85, 247, 0.05);
+  --breezy-glass-border: rgba(192, 132, 252, 0.14);
+  --breezy-glass-bright-bg: rgba(168, 85, 247, 0.10);
+  --breezy-glass-bright-border: rgba(192, 132, 252, 0.22);
+  --breezy-frame: #160826;
+  --breezy-glow-1: rgba(168, 85, 247, 0.14);
+  --breezy-glow-2: rgba(232, 121, 249, 0.10);
+  --breezy-grid: rgba(192, 132, 252, 0.03);
+}
+
+/* ─── Thème : océan ─── */
+[data-theme="ocean"] {
+  --color-breezy-bg: #04121F;
+  --color-breezy-card: rgba(8, 30, 48, 0.6);
+  --color-breezy-card-hover: rgba(12, 44, 68, 0.8);
+  --color-breezy-border: rgba(56, 189, 248, 0.10);
+  --color-breezy-border-active: rgba(34, 211, 238, 0.35);
+  --color-breezy-icy: #ECFBFF;
+  --color-breezy-muted: rgba(236, 251, 255, 0.55);
+  --color-breezy-faint: rgba(236, 251, 255, 0.3);
+  --color-breezy-neon: #22D3EE;
+  --color-breezy-lavender: #38BDF8;
+  --color-breezy-purple: #818CF8;
+  --color-breezy-overlay: rgba(2, 8, 15, 0.65);
+  --breezy-glass-bg: rgba(56, 189, 248, 0.05);
+  --breezy-glass-border: rgba(56, 189, 248, 0.12);
+  --breezy-glass-bright-bg: rgba(56, 189, 248, 0.10);
+  --breezy-glass-bright-border: rgba(56, 189, 248, 0.20);
+  --breezy-frame: #0A1E30;
+  --breezy-glow-1: rgba(34, 211, 238, 0.12);
+  --breezy-glow-2: rgba(56, 189, 248, 0.10);
+  --breezy-grid: rgba(56, 189, 248, 0.03);
+}
+
+/* ─── Thème : forêt ─── */
+[data-theme="forest"] {
+  --color-breezy-bg: #04140E;
+  --color-breezy-card: rgba(8, 32, 22, 0.6);
+  --color-breezy-card-hover: rgba(12, 48, 32, 0.8);
+  --color-breezy-border: rgba(52, 211, 153, 0.10);
+  --color-breezy-border-active: rgba(52, 211, 153, 0.35);
+  --color-breezy-icy: #ECFFF6;
+  --color-breezy-muted: rgba(236, 255, 246, 0.55);
+  --color-breezy-faint: rgba(236, 255, 246, 0.3);
+  --color-breezy-neon: #34D399;
+  --color-breezy-lavender: #6EE7B7;
+  --color-breezy-purple: #A3E635;
+  --color-breezy-overlay: rgba(2, 12, 8, 0.65);
+  --breezy-glass-bg: rgba(52, 211, 153, 0.05);
+  --breezy-glass-border: rgba(52, 211, 153, 0.12);
+  --breezy-glass-bright-bg: rgba(52, 211, 153, 0.10);
+  --breezy-glass-bright-border: rgba(52, 211, 153, 0.20);
+  --breezy-frame: #0A2016;
+  --breezy-glow-1: rgba(52, 211, 153, 0.12);
+  --breezy-glow-2: rgba(163, 230, 53, 0.08);
+  --breezy-grid: rgba(52, 211, 153, 0.03);
+}
+
+/* ─── Thème : sunset ─── */
+[data-theme="sunset"] {
+  --color-breezy-bg: #1A0A12;
+  --color-breezy-card: rgba(42, 16, 28, 0.6);
+  --color-breezy-card-hover: rgba(60, 24, 40, 0.8);
+  --color-breezy-border: rgba(251, 113, 133, 0.12);
+  --color-breezy-border-active: rgba(251, 113, 133, 0.4);
+  --color-breezy-icy: #FFF1F4;
+  --color-breezy-muted: rgba(255, 241, 244, 0.55);
+  --color-breezy-faint: rgba(255, 241, 244, 0.3);
+  --color-breezy-neon: #FB7185;
+  --color-breezy-lavender: #FB923C;
+  --color-breezy-purple: #FBBF24;
+  --color-breezy-overlay: rgba(20, 4, 10, 0.65);
+  --breezy-glass-bg: rgba(251, 113, 133, 0.05);
+  --breezy-glass-border: rgba(251, 113, 133, 0.12);
+  --breezy-glass-bright-bg: rgba(251, 113, 133, 0.10);
+  --breezy-glass-bright-border: rgba(251, 113, 133, 0.20);
+  --breezy-frame: #2A1019;
+  --breezy-glow-1: rgba(251, 113, 133, 0.12);
+  --breezy-glow-2: rgba(251, 191, 36, 0.08);
+  --breezy-grid: rgba(251, 113, 133, 0.03);
+}
+
+/* ─── Resets & base ─── */
 body {
-  background-color: #050505;
-  color: #F5FAFF;
+  background-color: var(--color-breezy-bg);
+  color: var(--color-breezy-icy);
   font-family: var(--font-sans);
   overflow-x: hidden;
   margin: 0;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Elegant Dark Gradient & Glass Definitions */
+/* ─── Fond dégradé ambiant ─── */
 .bg-gradient-custom {
-  background: radial-gradient(circle at 10% 20%, rgba(46,26,46,0.4) 0%, transparent 50%),
-              radial-gradient(circle at 90% 80%, rgba(26,26,46,0.4) 0%, transparent 50%);
+  background: var(--color-breezy-bg);
+  transition: background-color 0.3s ease;
 }
 
+/* ─── Grille de fond ─── */
+.bg-grid-custom {
+  display: none;
+}
+
+/* ─── Glass ─── */
 .glass {
-  background: rgba(255,255,255,0.03);
+  background: var(--breezy-glass-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--breezy-glass-border);
 }
 
 .glass-bright {
-  background: rgba(255,255,255,0.08);
+  background: var(--breezy-glass-bright-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.15);
+  border: 1px solid var(--breezy-glass-bright-border);
 }
 
+.glassmorphic {
+  background: var(--breezy-glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--breezy-glass-border);
+}
+
+.glassmorphism {
+  background: var(--breezy-glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--breezy-glass-border);
+}
+
+.glassmorphism-light {
+  background: var(--breezy-glass-bright-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--breezy-glass-bright-border);
+}
+
+.glassmorphism-premium {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: var(--breezy-glass-bg);
+  border: 1px solid var(--breezy-glass-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 1px 1px var(--breezy-glass-bright-border);
+}
+
+/* ─── Halos ambiants ─── */
+.ambient-glow-violet {
+  background: radial-gradient(circle at 50% 50%, var(--breezy-glow-1) 0%, transparent 60%);
+  filter: blur(40px);
+}
+
+.ambient-glow-blue {
+  background: radial-gradient(circle at 50% 50%, var(--breezy-glow-2) 0%, transparent 60%);
+  filter: blur(40px);
+}
+
+/* ─── Glow / neon ─── */
 .neon-glow-blue {
-  box-shadow: 0 0 15px rgba(174,235,255,0.3);
+  box-shadow: 0 0 15px var(--breezy-glow-2);
 }
 
 .neon-glow-white {
-  box-shadow: 0 0 10px rgba(245,250,255,0.2);
+  box-shadow: 0 0 10px var(--breezy-glass-bright-bg);
 }
 
+.glow-white {
+  box-shadow: 0 0 12px var(--breezy-glass-bright-bg);
+}
+
+.glow-neon {
+  box-shadow: 0 0 16px color-mix(in srgb, var(--color-breezy-neon) 40%, transparent);
+}
+
+.glow-lavender {
+  box-shadow: 0 0 16px color-mix(in srgb, var(--color-breezy-lavender) 40%, transparent);
+}
+
+.active-nav-glow {
+  filter:
+    drop-shadow(0 0 6px var(--color-breezy-neon))
+    drop-shadow(0 0 12px color-mix(in srgb, var(--color-breezy-neon) 50%, transparent));
+}
+
+/* ─── Texte sémantique ─── */
 .text-icy {
-  color: #F5FAFF;
+  color: var(--color-breezy-icy);
 }
 
 .text-muted {
-  color: rgba(245,250,255,0.5);
+  color: var(--color-breezy-muted);
 }
 
-/* Custom scrollbar hiding */
+/* ─── Scrollbar masquée ─── */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -70,56 +299,3 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
-/* Premium glassmorphic background reflection effects */
-.ambient-glow-violet {
-  background: radial-gradient(circle at 50% 50%, rgba(228, 181, 255, 0.08) 0%, transparent 60%);
-  filter: blur(40px);
-}
-
-.ambient-glow-blue {
-  background: radial-gradient(circle at 50% 50%, rgba(174, 235, 255, 0.07) 0%, transparent 60%);
-  filter: blur(40px);
-}
-
-/* Glassmorphism utility */
-.glassmorphism {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.glassmorphism-light {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-.glassmorphism-premium {
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.05);
-}
-
-/* Micro glow classes */
-.glow-white {
-  box-shadow: 0 0 12px rgba(245, 250, 255, 0.2);
-}
-
-.glow-neon {
-  box-shadow: 0 0 16px rgba(174, 235, 255, 0.25);
-}
-
-.glow-lavender {
-  box-shadow: 0 0 16px rgba(200, 182, 255, 0.25);
-}
-
-/* Active bottom navigation glow styling */
-.active-nav-glow {
-  filter: drop-shadow(0 0 6px rgb(174, 235, 255)) drop-shadow(0 0 12px rgba(174, 235, 255, 0.5));
-}
-

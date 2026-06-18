@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useState, useEffect } from "react";
 
 import { UserProfile, ProfileSubTab } from "../types";
 import { getErrorMessage } from "../utils/errors";
@@ -8,7 +8,8 @@ import { useToast } from "../hooks/useToast";
 import { useProfile } from "../hooks/useProfile";
 import { useFeed } from "../hooks/useFeed";
 import { useConversations } from "../hooks/useConversations";
-import { authService } from "../services/ServiceContainer";
+import { authService, storageProvider } from "../services/ServiceContainer";
+import { ThemeId, DEFAULT_THEME, THEME_STORAGE_KEY, isThemeId } from "../theme/themes";
 
 type BreezyAppContextValue = ReturnType<typeof useBreezyAppState>;
 
@@ -21,6 +22,21 @@ function useBreezyAppState() {
   const [ambientGlow, setAmbientGlow] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeProfileSubTab, setActiveProfileSubTab] = useState<ProfileSubTab>("posts");
+
+  const [theme, setThemeState] = useState<ThemeId>(() => {
+    const saved = storageProvider.get<ThemeId>(THEME_STORAGE_KEY);
+    return isThemeId(saved) ? saved : DEFAULT_THEME;
+  });
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
+
+  const setTheme = (id: ThemeId) => {
+    setThemeState(id);
+    document.documentElement.dataset.theme = id;
+    storageProvider.set(THEME_STORAGE_KEY, id);
+  };
 
   const { toasts, triggerToast, handleRemoveToast } = useToast();
   const profile = useProfile(triggerToast);
@@ -78,6 +94,8 @@ function useBreezyAppState() {
     setIsPostModalOpen,
     ambientGlow,
     setAmbientGlow,
+    theme,
+    setTheme,
     searchQuery,
     setSearchQuery,
     activeProfileSubTab,

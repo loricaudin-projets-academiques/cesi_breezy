@@ -40,7 +40,7 @@ export default function AvatarSelectorModal({ isOpen, onClose, onSelect }: Avata
               playTick();
               onClose();
             }}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-breezy-overlay backdrop-blur-sm"
           />
           
           {/* Contenu de la modal */}
@@ -48,9 +48,9 @@ export default function AvatarSelectorModal({ isOpen, onClose, onSelect }: Avata
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
-            className="w-full max-w-xs glassmorphism-premium rounded-2.5xl p-5 border border-white/10 z-10"
+            className="w-full max-w-xs glassmorphism-premium rounded-2.5xl p-5 border border-breezy-border z-10"
           >
-            <h4 className="text-xs font-mono text-[#F5FAFF]/40 tracking-widest uppercase mb-3 text-center">
+            <h4 className="text-xs font-mono text-breezy-muted tracking-widest uppercase mb-3 text-center">
               Changer d'avatar
             </h4>
             
@@ -61,7 +61,7 @@ export default function AvatarSelectorModal({ isOpen, onClose, onSelect }: Avata
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://images.unsplash.com/..."
-                className="w-full text-xs font-sans rounded-xl bg-white/[0.04] p-3 text-breezy-icy placeholder-white/20 border border-white/5 focus:outline-none focus:border-breezy-border-active transition"
+                className="w-full text-xs font-sans rounded-xl bg-breezy-card p-3 text-breezy-icy placeholder-breezy-muted border border-breezy-border focus:outline-none focus:border-breezy-border-active transition"
               />
               
               {/* Valider avec une URL personnalisée */}
@@ -81,7 +81,7 @@ export default function AvatarSelectorModal({ isOpen, onClose, onSelect }: Avata
                   onSelect('');
                   onClose();
                 }}
-                className="w-full py-2 rounded-xl border border-white/5 hover:border-white/10 hover:bg-white/[0.02] text-white/60 hover:text-white font-sans text-xs uppercase tracking-wider transition"
+                className="w-full py-2 rounded-xl border border-breezy-border hover:border-breezy-border-active hover:bg-breezy-card text-breezy-muted hover:text-breezy-icy font-sans text-xs uppercase tracking-wider transition"
               >
                 Utiliser l'avatar par défaut
               </button>
@@ -93,7 +93,7 @@ export default function AvatarSelectorModal({ isOpen, onClose, onSelect }: Avata
                 playTick();
                 onClose();
               }}
-              className="w-full mt-3 text-center py-2 text-[10px] font-mono hover:text-breezy-neon text-white/30 border border-white/5 hover:border-white/15 rounded-xl block cursor-pointer transition"
+              className="w-full mt-3 text-center py-2 text-[10px] font-mono hover:text-breezy-neon text-breezy-faint border border-breezy-border hover:border-breezy-border-active rounded-xl block cursor-pointer transition"
             >
               Annuler
             </button>

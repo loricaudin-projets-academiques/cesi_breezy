@@ -38,7 +38,7 @@ export default function FeedScreen({
       className="p-4 flex flex-col gap-4"
     >
       {/* Onglets de catégorie : Pour toi, Abonnements, Amis, Favoris */}
-      <div className="glassmorphic rounded-2xl p-1 flex gap-1 border border-white/5 select-none shrink-0">
+      <div className="glassmorphic rounded-2xl p-1 flex gap-1 border border-breezy-border select-none shrink-0">
         {POST_CATEGORIES.map(({ key, label }) => {
           const isActive = homeCategory === key;
           return (
@@ -47,8 +47,8 @@ export default function FeedScreen({
               onClick={() => onCategoryChange(key)}
               className={`flex-1 py-1.5 text-[10.5px] font-medium font-sans rounded-xl transition-all duration-300 relative ${
                 isActive
-                  ? 'text-[#050505] font-semibold bg-white scale-[1.01] shadow-md'
-                  : 'text-white/45 hover:text-white/80'
+                  ? 'text-breezy-bg font-semibold bg-breezy-icy scale-[1.01] shadow-md'
+                  : 'text-breezy-muted hover:text-breezy-icy'
               }`}
             >
               {label}
@@ -59,11 +59,11 @@ export default function FeedScreen({
 
       {/* Message d'état vide si aucun post dans cette catégorie */}
       {filteredPosts.length === 0 ? (
-        <div className="py-24 text-center text-white/30 flex flex-col justify-center items-center gap-3 bg-[#0d0d12]/20 rounded-2xl border border-white/5">
+        <div className="py-24 text-center text-breezy-faint flex flex-col justify-center items-center gap-3 bg-breezy-card rounded-2xl border border-breezy-border">
           <Compass className="w-9 h-9 opacity-35" />
           <div>
             <p className="text-xs font-semibold text-breezy-icy">Rien dans "{homeCategory}" pour l'instant</p>
-            <p className="text-[10px] text-white/40 mt-0.5">Publie quelque chose pour commencer !</p>
+            <p className="text-[10px] text-breezy-muted mt-0.5">Publie quelque chose pour commencer !</p>
           </div>
         </div>
       ) : (

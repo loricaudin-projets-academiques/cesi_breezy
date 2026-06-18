@@ -44,7 +44,7 @@ export default function NoteEditorModal({ isOpen, onClose, initialValue, onSave 
               playTick();
               onClose();
             }}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-breezy-overlay backdrop-blur-sm"
           />
           
           {/* Contenu de la modal */}
@@ -52,7 +52,7 @@ export default function NoteEditorModal({ isOpen, onClose, initialValue, onSave 
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
-            className="w-full max-w-xs glassmorphism-premium rounded-2xl p-4 border border-white/10 z-10"
+            className="w-full max-w-xs glassmorphism-premium rounded-2xl p-4 border border-breezy-border z-10"
           >
             <h4 className="text-xs font-mono text-breezy-neon uppercase tracking-wider mb-2.5 font-bold">
               Ta note du moment
@@ -64,20 +64,20 @@ export default function NoteEditorModal({ isOpen, onClose, initialValue, onSave 
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value.slice(0, PROFILE_NOTE_MAX_LENGTH))}
               maxLength={PROFILE_NOTE_MAX_LENGTH}
-              className="w-full text-xs p-2.5 bg-white/[0.04] rounded-xl text-breezy-icy border border-white/5 focus:outline-none focus:border-breezy-border-active"
+              className="w-full text-xs p-2.5 bg-breezy-card rounded-xl text-breezy-icy border border-breezy-border focus:outline-none focus:border-breezy-border-active"
             />
-            <p className="text-[8px] font-mono text-white/30 text-right mt-1">
+            <p className="text-[8px] font-mono text-breezy-faint text-right mt-1">
               {inputValue.length}/40 caractères
             </p>
             
             {/* Boutons de validation ou d'annulation */}
-            <div className="flex justify-end gap-2 mt-4 pt-2.5 border-t border-white/5">
+            <div className="flex justify-end gap-2 mt-4 pt-2.5 border-t border-breezy-border">
               <button
                 onClick={() => {
                   playTick();
                   onClose();
                 }}
-                className="text-[10px] text-white/40 hover:text-white/80 py-1.5 px-3"
+                className="text-[10px] text-breezy-muted hover:text-breezy-icy py-1.5 px-3"
               >
                 Annuler
               </button>

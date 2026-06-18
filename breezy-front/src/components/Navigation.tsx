@@ -25,7 +25,7 @@ export default function Navigation({ activeTab, onTabChange, hasUnreadMessages }
           id="nav-home"
           onClick={() => onTabChange('home')}
           className={`flex flex-col items-center justify-center p-2.5 rounded-2xl relative transition focus:outline-none ${
-            activeTab === 'home' ? 'text-white' : 'text-white/45 hover:text-white/70'
+            activeTab === 'home' ? 'text-breezy-icy' : 'text-breezy-muted hover:text-breezy-icy'
           }`}
         >
           <Home className={`w-5 h-5 ${activeTab === 'home' ? 'active-nav-glow' : ''}`} />
@@ -45,7 +45,7 @@ export default function Navigation({ activeTab, onTabChange, hasUnreadMessages }
           id="nav-search"
           onClick={() => onTabChange('search')}
           className={`flex flex-col items-center justify-center p-2.5 rounded-2xl relative transition focus:outline-none ${
-            activeTab === 'search' ? 'text-white' : 'text-white/45 hover:text-white/70'
+            activeTab === 'search' ? 'text-breezy-icy' : 'text-breezy-muted hover:text-breezy-icy'
           }`}
         >
           <Search className={`w-5 h-5 ${activeTab === 'search' ? 'active-nav-glow' : ''}`} />
@@ -53,7 +53,7 @@ export default function Navigation({ activeTab, onTabChange, hasUnreadMessages }
             {activeTab === 'search' && (
               <motion.div
                 layoutId="activeNavTabGlowDot"
-                className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-[#AEEBFF] glow-neon"
+                className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-breezy-neon glow-neon"
               />
             )}
           </AnimatePresence>
@@ -64,21 +64,21 @@ export default function Navigation({ activeTab, onTabChange, hasUnreadMessages }
           id="nav-messages"
           onClick={() => onTabChange('messages')}
           className={`flex flex-col items-center justify-center p-2.5 rounded-2xl relative transition focus:outline-none ${
-            activeTab === 'messages' ? 'text-white' : 'text-white/45 hover:text-white/70'
+            activeTab === 'messages' ? 'text-breezy-icy' : 'text-breezy-muted hover:text-breezy-icy'
           }`}
         >
           <div className="relative">
             <MessageSquare className={`w-5 h-5 ${activeTab === 'messages' ? 'active-nav-glow' : ''}`} />
             {/* Pastille violette quand on a des messages non lus */}
             {hasUnreadMessages && (
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-breezy-lavender border border-slate-950 block glow-lavender" />
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-breezy-lavender border border-breezy-bg block glow-lavender" />
             )}
           </div>
           <AnimatePresence>
             {activeTab === 'messages' && (
               <motion.div
                 layoutId="activeNavTabGlowDot"
-                className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-[#C8B6FF] glow-neon"
+                className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-breezy-lavender glow-neon"
               />
             )}
           </AnimatePresence>
@@ -89,7 +89,7 @@ export default function Navigation({ activeTab, onTabChange, hasUnreadMessages }
           id="nav-profile"
           onClick={() => onTabChange('profile')}
           className={`flex flex-col items-center justify-center p-2.5 rounded-2xl relative transition focus:outline-none ${
-            activeTab === 'profile' ? 'text-white' : 'text-white/45 hover:text-white/70'
+            activeTab === 'profile' ? 'text-breezy-icy' : 'text-breezy-muted hover:text-breezy-icy'
           }`}
         >
           <User className={`w-5 h-5 ${activeTab === 'profile' ? 'active-nav-glow' : ''}`} />
@@ -97,7 +97,7 @@ export default function Navigation({ activeTab, onTabChange, hasUnreadMessages }
             {activeTab === 'profile' && (
               <motion.div
                 layoutId="activeNavTabGlowDot"
-                className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-[#E4B5FF] glow-neon"
+                className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-breezy-purple glow-neon"
               />
             )}
           </AnimatePresence>

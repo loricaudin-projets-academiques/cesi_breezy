@@ -30,7 +30,7 @@ export default function NotificationToast({ toasts, onRemove }: NotificationToas
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-            className="pointer-events-auto w-full glassmorphic rounded-xl p-3 flex items-center justify-between shadow-[0_4px_20px_rgba(0,0,0,0.6)] border border-breezy-border-active/30"
+            className="pointer-events-auto w-full glassmorphic rounded-xl p-3 flex items-center justify-between shadow-[0_4px_20px_rgba(0,0,0,0.6)] border border-breezy-border-active"
           >
             <div className="flex items-center gap-2.5">
               <div className="p-1 rounded-lg bg-breezy-neon/10 text-breezy-neon">
@@ -43,7 +43,7 @@ export default function NotificationToast({ toasts, onRemove }: NotificationToas
             {/* Bouton pour fermer manuellement la notification */}
             <button
               onClick={() => onRemove(toast.id)}
-              className="text-[10px] text-white/40 hover:text-white/80 px-1.5 py-0.5 rounded hover:bg-white/5 transition"
+              className="text-[10px] text-breezy-muted hover:text-breezy-icy px-1.5 py-0.5 rounded hover:bg-breezy-card transition"
             >
               Fermer
             </button>

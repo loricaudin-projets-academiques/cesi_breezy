@@ -50,7 +50,7 @@ export default function PostCard({
   return (
     <motion.div
       layout
-      className="glassmorphic rounded-2xl p-4 border border-white/5 flex flex-col gap-3 hover:border-white/10 transition-all duration-300 relative group"
+      className="glassmorphic rounded-2xl p-4 border border-breezy-border flex flex-col gap-3 hover:border-breezy-border-active transition-all duration-300 relative group"
     >
       {/* Qui a publié ce post et quand */}
       <div className="flex items-center justify-between">
@@ -58,17 +58,17 @@ export default function PostCard({
           <Avatar name={post.authorName} username={post.authorUsername} url={post.avatar} className="w-9 h-9" />
           <div>
             <h4 className="text-xs font-semibold text-breezy-icy leading-none">{post.authorName}</h4>
-            <p className="text-[10px] font-mono text-white/45 mt-0.5">{post.authorUsername}</p>
+            <p className="text-[10px] font-mono text-breezy-muted mt-0.5">{post.authorUsername}</p>
           </div>
         </div>
         
         <div className="flex items-center gap-1.5">
-          <span className="text-[8.5px] font-mono text-white/30">{post.timestamp}</span>
+          <span className="text-[8.5px] font-mono text-breezy-faint">{post.timestamp}</span>
           {/* Marque-page pour sauvegarder le post */}
           <button
             onClick={() => onToggleStar(post.id)}
-            className={`p-1.5 rounded-lg hover:bg-white/5 ${
-              post.starredByUser ? 'text-breezy-lavender' : 'text-white/30'
+            className={`p-1.5 rounded-lg hover:bg-breezy-card ${
+              post.starredByUser ? 'text-breezy-lavender' : 'text-breezy-faint'
             }`}
             title="Sauvegarder"
           >
@@ -78,28 +78,28 @@ export default function PostCard({
       </div>
 
       {/* Le texte du post */}
-      <p className="text-xs text-white/85 leading-relaxed tracking-tight break-words pl-0.5 font-sans">
+      <p className="text-xs text-breezy-icy leading-relaxed tracking-tight break-words pl-0.5 font-sans">
         {post.content}
       </p>
 
       {/* Image optionnelle jointe au post */}
       {post.image && (
-        <div className="relative h-44 rounded-xl overflow-hidden border border-white/10 mt-1">
+        <div className="relative h-44 rounded-xl overflow-hidden border border-breezy-border mt-1">
           <img src={post.image} className="w-full h-full object-cover" alt="Image du post" />
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-            <span className="text-[8.5px] font-mono text-white/60 bg-black/40 px-1.5 py-0.5 rounded border border-white/10">IMAGE</span>
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-breezy-overlay to-transparent p-2">
+            <span className="text-[8.5px] font-mono text-breezy-muted bg-breezy-overlay px-1.5 py-0.5 rounded border border-breezy-border">IMAGE</span>
           </div>
         </div>
       )}
 
       {/* Actions : like, commentaires, partage */}
-      <div className="flex items-center justify-between pt-2 border-t border-white/[0.04] mt-0.5 font-mono select-none">
+      <div className="flex items-center justify-between pt-2 border-t border-breezy-border mt-0.5 font-mono select-none">
         
         {/* Like */}
         <button
           onClick={() => onToggleLike(post.id)}
           className={`flex items-center gap-1.5 text-xs font-semibold focus:outline-none transition active:scale-90 ${
-            post.likedByUser ? 'text-rose-400' : 'text-white/45 hover:text-white/70'
+            post.likedByUser ? 'text-rose-400' : 'text-breezy-muted hover:text-breezy-icy'
           }`}
         >
           <Heart className={`w-3.5 h-3.5 ${post.likedByUser ? 'fill-current' : ''}`} />
@@ -113,7 +113,7 @@ export default function PostCard({
             onToggleComments(post.id);
           }}
           className={`flex items-center gap-1.5 text-xs focus:outline-none transition ${
-            showComments ? 'text-breezy-neon font-semibold' : 'text-white/45 hover:text-white/70'
+            showComments ? 'text-breezy-neon font-semibold' : 'text-breezy-muted hover:text-breezy-icy'
           }`}
         >
           <MessageCircle className="w-3.5 h-3.5" />
@@ -127,7 +127,7 @@ export default function PostCard({
             navigator.clipboard.writeText(`breezy.social/stream/${post.id}`);
             triggerToast(`Lien copié !`);
           }}
-          className="flex items-center gap-1.5 text-xs text-white/45 hover:text-white/70 focus:outline-none"
+          className="flex items-center gap-1.5 text-xs text-breezy-muted hover:text-breezy-icy focus:outline-none"
           title="Copier le lien"
         >
           <Share2 className="w-3.5 h-3.5" />
@@ -136,13 +136,13 @@ export default function PostCard({
 
       {/* Section commentaires dépliable */}
       {showComments && (
-        <div className="flex flex-col gap-2.5 pt-3.5 border-t border-white/5 mt-1.5">
+        <div className="flex flex-col gap-2.5 pt-3.5 border-t border-breezy-border mt-1.5">
           {/* Commentaires déjà publiés */}
           {comments.map((cmt, idx) => (
-            <div key={idx} className="bg-white/[0.02] border border-white/[0.03] p-2.5 rounded-xl text-[11px] leading-relaxed relative text-left">
-              <span className="absolute right-2.5 top-2.5 text-[8.5px] font-mono text-white/30">{cmt.time}</span>
-              <p className="font-semibold text-breezy-icy">{cmt.author} <span className="text-[9px] font-mono text-white/40 ml-1">{cmt.username}</span></p>
-              <p className="text-white/80 mt-1">{cmt.text}</p>
+            <div key={idx} className="bg-breezy-card border border-breezy-border p-2.5 rounded-xl text-[11px] leading-relaxed relative text-left">
+              <span className="absolute right-2.5 top-2.5 text-[8.5px] font-mono text-breezy-faint">{cmt.time}</span>
+              <p className="font-semibold text-breezy-icy">{cmt.author} <span className="text-[9px] font-mono text-breezy-muted ml-1">{cmt.username}</span></p>
+              <p className="text-breezy-icy mt-1">{cmt.text}</p>
             </div>
           ))}
 
@@ -153,7 +153,7 @@ export default function PostCard({
               placeholder="Écrire un commentaire..."
               value={commentDraft}
               onChange={(e) => onCommentDraftChange(post.id, e.target.value)}
-              className="flex-1 bg-white/[0.03] text-xs p-2 rounded-xl text-breezy-icy placeholder-white/25 focus:outline-none border border-white/5 focus:border-breezy-border-active transition"
+              className="flex-1 bg-breezy-card text-xs p-2 rounded-xl text-breezy-icy placeholder-breezy-muted focus:outline-none border border-breezy-border focus:border-breezy-border-active transition"
             />
             <button
               onClick={() => onAddComment(post.id)}
