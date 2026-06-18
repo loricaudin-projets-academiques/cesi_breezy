@@ -37,6 +37,7 @@ export interface Comment {
   username: string;
   text: string;
   time: string;
+  image?: string;
 }
 
 // Tous les commentaires de l'app, rangés par identifiant de post
@@ -48,6 +49,7 @@ export interface MessageItem {
   sender: 'me' | 'them'; // "me" = nous, "them" = notre interlocuteur
   text: string;
   time: string;
+  image?: string;
 }
 
 // Tout ce qui concerne une conversation (le contact, les messages, l'état non-lu...)

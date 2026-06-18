@@ -30,11 +30,13 @@ function useBreezyAppState() {
   const postInteractions = {
     postComments: feed.postComments,
     commentDrafts: feed.commentDrafts,
+    commentImageDrafts: feed.commentImageDrafts,
     showCommentsForPost: feed.showCommentsForPost,
     onToggleStar: feed.handleToggleStar,
     onToggleLike: feed.handleToggleLike,
     onToggleComments: feed.handleToggleComments,
     onCommentDraftChange: feed.handleCommentDraftChange,
+    onCommentImageChange: feed.handleCommentImageChange,
     onAddComment: feed.handleAddComment,
     triggerToast,
   };

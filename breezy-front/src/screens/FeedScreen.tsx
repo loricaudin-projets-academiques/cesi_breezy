@@ -21,11 +21,13 @@ export default function FeedScreen({
   filteredPosts,
   postComments,
   commentDrafts,
+  commentImageDrafts,
   showCommentsForPost,
   onToggleStar,
   onToggleLike,
   onToggleComments,
   onCommentDraftChange,
+  onCommentImageChange,
   onAddComment,
   triggerToast
 }: FeedScreenProps) {
@@ -75,11 +77,13 @@ export default function FeedScreen({
               post={post}
               comments={postComments[post.id]}
               commentDraft={commentDrafts[post.id]}
+              commentImageDraft={commentImageDrafts[post.id]}
               showComments={showCommentsForPost[post.id]}
               onToggleStar={onToggleStar}
               onToggleLike={onToggleLike}
               onToggleComments={onToggleComments}
               onCommentDraftChange={onCommentDraftChange}
+              onCommentImageChange={onCommentImageChange}
               onAddComment={onAddComment}
               triggerToast={triggerToast}
             />

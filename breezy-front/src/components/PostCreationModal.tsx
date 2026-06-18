@@ -8,18 +8,21 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Globe } from 'lucide-react';
 import { PostCategory, POST_CATEGORIES } from '../types';
 import { playTick, playChime } from '../audio';
+import ImagePicker from './ImagePicker';
 
 interface PostCreationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddPost: (content: string, category: PostCategory, image?: string) => void;
+  triggerToast: (msg: string) => void;
 }
 
 // Fenêtre de composition d'un nouveau post
 export default function PostCreationModal({
   isOpen,
   onClose,
-  onAddPost
+  onAddPost,
+  triggerToast,
 }: PostCreationModalProps) {
   // Les champs du formulaire
   const [text, setText] = useState('');
@@ -119,17 +122,15 @@ export default function PostCreationModal({
                 </div>
               </div>
 
-              {/* Champ optionnel pour ajouter une image par URL */}
-              <div className="flex flex-col gap-1.5 font-sans">
+              {/* Sélecteur de photo */}
+              <div className="flex flex-col gap-1.5">
                 <span className="text-[9px] font-mono text-white/30 uppercase tracking-widest px-0.5">
-                  URL d'image (optionnel)
+                  Photo (optionnel)
                 </span>
-                <input
-                  type="text"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="https://images.unsplash.com/photo-..."
-                  className="w-full text-xs p-3 rounded-2xl glassmorphism-light text-breezy-icy placeholder-white/35 border border-white/5 focus:outline-none focus:border-breezy-border-active transition"
+                <ImagePicker
+                  value={imageUrl || undefined}
+                  onChange={(u) => setImageUrl(u ?? '')}
+                  triggerToast={triggerToast}
                 />
               </div>
 

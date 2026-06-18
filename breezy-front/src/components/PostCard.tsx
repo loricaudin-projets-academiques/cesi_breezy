@@ -8,6 +8,7 @@ import { Bookmark, Heart, MessageCircle, Share2, Send } from 'lucide-react';
 import { Comment, CommentsByPost, Post } from '../types';
 import { playTick, playChime } from '../audio';
 import Avatar from './Avatar';
+import ImagePicker from './ImagePicker';
 
 // Les actions possibles sur un post — définies une seule fois et réutilisées
 // par tous les écrans qui affichent des posts (feed, profil...)
@@ -16,6 +17,7 @@ export interface PostInteractionHandlers {
   onToggleLike: (id: string) => void;
   onToggleComments: (id: string) => void;
   onCommentDraftChange: (id: string, text: string) => void;
+  onCommentImageChange: (id: string, url?: string) => void;
   onAddComment: (id: string) => void;
   triggerToast: (msg: string) => void;
 }
@@ -24,6 +26,7 @@ export interface PostInteractionHandlers {
 export interface PostListState {
   postComments: CommentsByPost;
   commentDrafts: Record<string, string>;
+  commentImageDrafts: Record<string, string>;
   showCommentsForPost: Record<string, boolean>;
 }
 
@@ -31,6 +34,7 @@ interface PostCardProps extends PostInteractionHandlers {
   post: Post;
   comments: Comment[];
   commentDraft: string;
+  commentImageDraft?: string;
   showComments: boolean;
 }
 
@@ -39,11 +43,13 @@ export default function PostCard({
   post,
   comments = [],
   commentDraft = '',
+  commentImageDraft,
   showComments = false,
   onToggleStar,
   onToggleLike,
   onToggleComments,
   onCommentDraftChange,
+  onCommentImageChange,
   onAddComment,
   triggerToast
 }: PostCardProps) {
@@ -84,9 +90,9 @@ export default function PostCard({
 
       {/* Image optionnelle jointe au post */}
       {post.image && (
-        <div className="relative h-44 rounded-xl overflow-hidden border border-white/10 mt-1">
-          <img src={post.image} className="w-full h-full object-cover" alt="Image du post" />
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+        <div className="relative rounded-xl overflow-hidden border border-white/10 mt-1 max-h-64 flex justify-center bg-black/20">
+          <img src={post.image} className="max-w-full max-h-64 object-contain" alt="Image du post" />
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2 pointer-events-none">
             <span className="text-[8.5px] font-mono text-white/60 bg-black/40 px-1.5 py-0.5 rounded border border-white/10">IMAGE</span>
           </div>
         </div>
@@ -142,25 +148,38 @@ export default function PostCard({
             <div key={idx} className="bg-white/[0.02] border border-white/[0.03] p-2.5 rounded-xl text-[11px] leading-relaxed relative text-left">
               <span className="absolute right-2.5 top-2.5 text-[8.5px] font-mono text-white/30">{cmt.time}</span>
               <p className="font-semibold text-breezy-icy">{cmt.author} <span className="text-[9px] font-mono text-white/40 ml-1">{cmt.username}</span></p>
-              <p className="text-white/80 mt-1">{cmt.text}</p>
+              {cmt.text && <p className="text-white/80 mt-1">{cmt.text}</p>}
+              {cmt.image && (
+                <div className="mt-2 rounded-xl overflow-hidden border border-white/10 max-h-48 flex justify-center bg-black/20">
+                  <img src={cmt.image} className="max-w-full max-h-48 object-contain" alt="Image du commentaire" />
+                </div>
+              )}
             </div>
           ))}
 
           {/* Champ pour écrire un nouveau commentaire */}
-          <div className="flex items-center gap-1.5">
-            <input
-              type="text"
-              placeholder="Écrire un commentaire..."
-              value={commentDraft}
-              onChange={(e) => onCommentDraftChange(post.id, e.target.value)}
-              className="flex-1 bg-white/[0.03] text-xs p-2 rounded-xl text-breezy-icy placeholder-white/25 focus:outline-none border border-white/5 focus:border-breezy-border-active transition"
+          <div className="flex flex-col gap-1.5">
+            <ImagePicker
+              value={commentImageDraft || undefined}
+              onChange={(u) => onCommentImageChange(post.id, u)}
+              triggerToast={triggerToast}
             />
-            <button
-              onClick={() => onAddComment(post.id)}
-              className="w-8.5 h-8.5 rounded-xl bg-breezy-icy text-slate-950 flex items-center justify-center hover:bg-breezy-neon active:scale-95 transition shrink-0"
-            >
-              <Send className="w-3.5 h-3.5" />
-            </button>
+            <div className="flex items-center gap-1.5">
+              <input
+                type="text"
+                placeholder="Écrire un commentaire..."
+                value={commentDraft}
+                onChange={(e) => onCommentDraftChange(post.id, e.target.value)}
+                className="flex-1 bg-white/[0.03] text-xs p-2 rounded-xl text-breezy-icy placeholder-white/25 focus:outline-none border border-white/5 focus:border-breezy-border-active transition"
+              />
+              <button
+                onClick={() => onAddComment(post.id)}
+                disabled={!commentDraft.trim() && !commentImageDraft}
+                className="w-8.5 h-8.5 rounded-xl bg-breezy-icy text-slate-950 flex items-center justify-center hover:bg-breezy-neon active:scale-95 transition shrink-0 disabled:opacity-40 disabled:hover:bg-breezy-icy"
+              >
+                <Send className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
       )}

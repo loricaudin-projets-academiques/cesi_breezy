@@ -7,19 +7,33 @@ import { useState, useEffect } from 'react';
 import { Conversation } from '../types';
 import { conversationService } from '../services/ServiceContainer';
 
-// Gère la liste des conversations et la synchronise automatiquement avec le stockage
 export function useConversations() {
   const [conversations, setConversations] = useState<Conversation[]>(() => {
-    // On charge ce qui était déjà sauvegardé dès l'initialisation
     return conversationService.getConversations();
   });
 
-  // Dès que conversations change, on sauvegarde — pas besoin de penser à le faire manuellement
+  useEffect(() => {
+    let cancelled = false;
+
+    conversationService.fetchConversations()
+      .then((nextConversations) => {
+        if (!cancelled) {
+          setConversations(nextConversations);
+        }
+      })
+      .catch(() => {
+        // Keep the local cache usable if the API is unavailable.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   useEffect(() => {
     conversationService.saveConversations(conversations);
   }, [conversations]);
 
-  // Vide la messagerie et efface ses données persistées — utilisé à la déconnexion
   const resetConversations = () => {
     conversationService.clearData();
     setConversations([]);

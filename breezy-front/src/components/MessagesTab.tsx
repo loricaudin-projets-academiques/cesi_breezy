@@ -11,6 +11,7 @@ import { playTick, playMessageSound, playChime } from '../audio';
 import { conversationService } from '../services/ServiceContainer';
 import { normalizeUsername } from '../utils/username';
 import Avatar from './Avatar';
+import ImagePicker from './ImagePicker';
 
 // Heure courante au format HH:MM — affichée sous chaque bulle de message
 function currentTimeLabel(): string {
@@ -36,6 +37,7 @@ interface MessagesTabProps {
 export default function MessagesTab({ conversations, onUpdateConversations, triggerToast }: MessagesTabProps) {
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [inputText, setInputText] = useState('');
+  const [pendingImage, setPendingImage] = useState<string | undefined>(undefined);
   const [isTyping, setIsTyping] = useState(false);
   const [isSelectContactOpen, setIsSelectContactOpen] = useState(false);
   
@@ -50,7 +52,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
   const selectedConv = conversations.find(c => c.id === activeConvId);
 
   // Crée une nouvelle conversation ou ouvre celle qui existe déjà
-  const handleCreateConvSubmit = (e: React.FormEvent) => {
+  const handleCreateConvSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!contactName.trim() || !contactUsername.trim()) return;
 
@@ -65,23 +67,35 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
       return;
     }
 
-    // C'est le service qui sait construire une conversation valide
-    const newConv = conversationService.createConversation(contactName, contactUsername, contactAvatar);
+    try {
+      const newConv = await conversationService.createRemoteConversation({
+        name: contactName,
+        username: contactUsername,
+        avatar: contactAvatar,
+      });
 
-    onUpdateConversations((prev) => [newConv, ...prev]);
-    setActiveConvId(newConv.id);
+      onUpdateConversations((prev) => [newConv, ...prev.filter((conv) => conv.id !== newConv.id)]);
+      setActiveConvId(newConv.id);
+      setContactName('');
+      setContactUsername('');
+      setContactAvatar('');
+      triggerToast(`Chat ouvert avec ${newConv.name}`);
+    } catch {
+      const newConv = conversationService.createConversation(contactName, contactUsername, contactAvatar);
 
-    // On remet les champs du formulaire à vide
-    setContactName('');
-    setContactUsername('');
-    setContactAvatar('');
-    triggerToast(`Chat ouvert avec ${newConv.name}`);
+      onUpdateConversations((prev) => [newConv, ...prev]);
+      setActiveConvId(newConv.id);
+      setContactName('');
+      setContactUsername('');
+      setContactAvatar('');
+      triggerToast(`Chat ouvert avec ${newConv.name}`);
+    }
   };
 
-  // Scroll automatique vers le bas quand un nouveau message arrive
+  // Scroll automatique vers le bas quand un nouveau message arrive ou qu'une image est en attente
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [selectedConv?.messages, isTyping, activeConvId]);
+  }, [selectedConv?.messages, isTyping, activeConvId, pendingImage]);
 
   // Ouvre une conversation et marque tous les messages comme lus
   const handleOpenConv = (id: string) => {
@@ -99,7 +113,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
       updateConversation(prev, convId, (c) => ({
         ...c,
         messages: [...c.messages, message],
-        lastMessage: message.text,
+        lastMessage: message.image && !message.text ? "📷 Photo" : message.text,
         time: "À l'instant"
       }))
     );
@@ -108,9 +122,11 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
   // Envoie notre message et attend la réponse (API ou bot local — c'est le service qui gère)
   const handleSendMessage = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!inputText.trim() || !activeConvId || !selectedConv) return;
+    if (!inputText.trim() && !pendingImage) return;
+    if (!activeConvId || !selectedConv) return;
 
     const userMessage = inputText.trim();
+    const imageToSend = pendingImage;
     const convId = activeConvId;
     const contact = { name: selectedConv.name, username: selectedConv.username };
 
@@ -118,9 +134,11 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
       id: `me-${Date.now()}`,
       sender: 'me',
       text: userMessage,
+      image: imageToSend,
       time: currentTimeLabel()
     });
     setInputText('');
+    setPendingImage(undefined);
     playMessageSound(true);
 
     // On affiche les trois points "en train d'écrire..."
@@ -286,7 +304,12 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                           : 'glassmorphic text-breezy-icy rounded-tl-xs border border-white/5 shadow-sm'
                       }`}
                     >
-                      {msg.text}
+                      {msg.text && <p>{msg.text}</p>}
+                      {msg.image && (
+                        <div className={`${msg.text ? 'mt-2' : ''} rounded-xl overflow-hidden max-h-48 flex justify-center bg-black/20`}>
+                          <img src={msg.image} className="max-w-full max-h-48 object-contain rounded-xl" alt="Image" />
+                        </div>
+                      )}
                     </div>
                     <span className="text-[9px] font-mono text-white/40 mt-1 px-1">
                       {msg.time}
@@ -321,22 +344,41 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
             {/* Barre de saisie du message */}
             <form
               onSubmit={handleSendMessage}
-              className="p-3 shrink-0 border-t border-white/5 glassmorphic flex items-center gap-2"
+              className="p-3 shrink-0 border-t border-white/5 glassmorphic flex flex-col gap-2"
             >
-              <input
-                type="text"
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                placeholder="Écrire un message..."
-                className="flex-1 text-xs rounded-xl glassmorphism-light py-3 px-4 text-breezy-icy placeholder-white/30 focus:outline-none focus:border-breezy-border-active transition"
-              />
-              <button
-                type="submit"
-                disabled={!inputText.trim()}
-                className="w-10 h-10 rounded-xl bg-breezy-icy text-slate-950 hover:bg-breezy-neon disabled:opacity-40 disabled:hover:bg-breezy-icy flex items-center justify-center active:scale-95 transition shrink-0"
-              >
-                <Send className="w-4 h-4" />
-              </button>
+              {pendingImage && (
+                <div className="px-1">
+                  <ImagePicker
+                    value={pendingImage}
+                    onChange={setPendingImage}
+                    triggerToast={triggerToast}
+                  />
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                {!pendingImage && (
+                  <ImagePicker
+                    value={undefined}
+                    onChange={setPendingImage}
+                    triggerToast={triggerToast}
+                    compact
+                  />
+                )}
+                <input
+                  type="text"
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  placeholder="Écrire un message..."
+                  className="flex-1 text-xs rounded-xl glassmorphism-light py-3 px-4 text-breezy-icy placeholder-white/30 focus:outline-none focus:border-breezy-border-active transition"
+                />
+                <button
+                  type="submit"
+                  disabled={!inputText.trim() && !pendingImage}
+                  className="w-10 h-10 rounded-xl bg-breezy-icy text-slate-950 hover:bg-breezy-neon disabled:opacity-40 disabled:hover:bg-breezy-icy flex items-center justify-center active:scale-95 transition shrink-0"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </div>
             </form>
           </motion.div>
         )}
