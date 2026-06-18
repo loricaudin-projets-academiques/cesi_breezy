@@ -3,6 +3,7 @@ import "./globals.css";
 
 import AppShell from "./AppShell";
 import { BreezyAppProvider } from "./BreezyAppProvider";
+import { LanguageProvider } from "../translations/LanguageProvider";
 
 export const metadata: Metadata = {
   title: "Breezy",
@@ -17,9 +18,11 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body>
-        <BreezyAppProvider>
-          <AppShell>{children}</AppShell>
-        </BreezyAppProvider>
+        <LanguageProvider>
+          <BreezyAppProvider>
+            <AppShell>{children}</AppShell>
+          </BreezyAppProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

@@ -11,13 +11,12 @@ import { playTick, playMessageSound, playChime } from '../audio';
 import { conversationService } from '../services/ServiceContainer';
 import { normalizeUsername } from '../utils/username';
 import Avatar from './Avatar';
+import { useLang } from '../translations/LanguageProvider';
 
-// Heure courante au format HH:MM — affichée sous chaque bulle de message
 function currentTimeLabel(): string {
   return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-// Applique une transformation à une seule conversation de la liste
 function updateConversation(
   conversations: Conversation[],
   id: string,
@@ -32,32 +31,28 @@ interface MessagesTabProps {
   triggerToast: (msg: string) => void;
 }
 
-// Écran de messagerie : liste des conversations à gauche, chat à droite
 export default function MessagesTab({ conversations, onUpdateConversations, triggerToast }: MessagesTabProps) {
+  const { t } = useLang();
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isSelectContactOpen, setIsSelectContactOpen] = useState(false);
-  
-  // Champs du formulaire de création de nouveau contact
+
   const [contactName, setContactName] = useState('');
   const [contactUsername, setContactUsername] = useState('');
   const [contactAvatar, setContactAvatar] = useState('');
-  
-  // Référence pour faire défiler jusqu'au dernier message automatiquement
+
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const selectedConv = conversations.find(c => c.id === activeConvId);
 
-  // Crée une nouvelle conversation ou ouvre celle qui existe déjà
-  const handleCreateConvSubmit = (e: React.FormEvent) => {
+  const handleCreateConvSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!contactName.trim() || !contactUsername.trim()) return;
 
     playChime();
     setIsSelectContactOpen(false);
 
-    // Si ce contact existe déjà, on va directement dans le chat
     const cleanUsername = normalizeUsername(contactUsername);
     const existing = conversations.find(c => c.username === cleanUsername);
     if (existing) {
@@ -65,25 +60,35 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
       return;
     }
 
-    // C'est le service qui sait construire une conversation valide
-    const newConv = conversationService.createConversation(contactName, contactUsername, contactAvatar);
+    try {
+      const newConv = await conversationService.createRemoteConversation({
+        name: contactName,
+        username: contactUsername,
+        avatar: contactAvatar,
+      });
 
-    onUpdateConversations((prev) => [newConv, ...prev]);
-    setActiveConvId(newConv.id);
+      onUpdateConversations((prev) => [newConv, ...prev.filter((conv) => conv.id !== newConv.id)]);
+      setActiveConvId(newConv.id);
+      setContactName('');
+      setContactUsername('');
+      setContactAvatar('');
+      triggerToast(t('toasts.chatOpened', { name: newConv.name }));
+    } catch {
+      const newConv = conversationService.createConversation(contactName, contactUsername, contactAvatar);
 
-    // On remet les champs du formulaire à vide
-    setContactName('');
-    setContactUsername('');
-    setContactAvatar('');
-    triggerToast(`Chat ouvert avec ${newConv.name}`);
+      onUpdateConversations((prev) => [newConv, ...prev]);
+      setActiveConvId(newConv.id);
+      setContactName('');
+      setContactUsername('');
+      setContactAvatar('');
+      triggerToast(t('toasts.chatOpened', { name: newConv.name }));
+    }
   };
 
-  // Scroll automatique vers le bas quand un nouveau message arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [selectedConv?.messages, isTyping, activeConvId]);
 
-  // Ouvre une conversation et marque tous les messages comme lus
   const handleOpenConv = (id: string) => {
     playTick();
     setActiveConvId(id);
@@ -93,19 +98,17 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
     );
   };
 
-  // Ajoute un message à la conversation active (le nôtre ou celui du contact)
   const appendMessage = (convId: string, message: MessageItem) => {
     onUpdateConversations((prev) =>
       updateConversation(prev, convId, (c) => ({
         ...c,
         messages: [...c.messages, message],
         lastMessage: message.text,
-        time: "À l'instant"
+        time: t('messages.now'),
       }))
     );
   };
 
-  // Envoie notre message et attend la réponse (API ou bot local — c'est le service qui gère)
   const handleSendMessage = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!inputText.trim() || !activeConvId || !selectedConv) return;
@@ -123,10 +126,8 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
     setInputText('');
     playMessageSound(true);
 
-    // On affiche les trois points "en train d'écrire..."
     setIsTyping(true);
 
-    // On attend 1.5 secondes pour simuler un délai de frappe humain
     setTimeout(async () => {
       const replyText = await conversationService.fetchReply(userMessage, contact);
 
@@ -139,7 +140,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
 
       setIsTyping(false);
       playMessageSound(false);
-      triggerToast(`Nouveau message de ${contact.name}`);
+      triggerToast(t('toasts.newMessage', { name: contact.name }));
     }, 1500);
   };
 
@@ -147,7 +148,6 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
     <div className="flex-1 flex flex-col h-full relative overflow-hidden">
       <AnimatePresence mode="wait">
         {!activeConvId ? (
-          /* VUE 1 : Boîte de réception */
           <motion.div
             key="list"
             className="flex-1 overflow-y-auto no-scrollbar py-2 px-4 flex flex-col gap-3"
@@ -160,23 +160,23 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
               <div className="flex items-center gap-3">
                 <h2 className="text-xl font-display font-medium text-breezy-icy flex items-center gap-2">
                   <MessageSquare className="w-5 h-5 text-breezy-lavender active-nav-glow" />
-                  Messages
+                  {t('messages.title')}
                 </h2>
                 <button
                   onClick={() => setIsSelectContactOpen(true)}
                   className="p-1 rounded-md bg-white/5 hover:bg-white/10 hover:text-breezy-neon text-white/50 transition cursor-pointer"
-                  title="Nouveau chat"
+                  title={t('messages.newChat')}
                 >
                   <MessageSquarePlus className="w-4 h-4" />
                 </button>
               </div>
-              <span className="text-[10px] font-mono text-white/40 tracking-wider">MESSAGERIE</span>
+              <span className="text-[10px] font-mono text-white/40 tracking-wider">{t('messages.header')}</span>
             </div>
 
             <div className="flex flex-col gap-2.5 mt-1">
               {conversations.length === 0 ? (
                 <div className="py-20 text-center text-white/30 text-xs bg-[#0d0d12]/20 rounded-2xl border border-white/5">
-                  Aucune conversation ouverte.
+                  {t('messages.empty')}
                 </div>
               ) : (
                 conversations.map((conv) => (
@@ -185,14 +185,12 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                     onClick={() => handleOpenConv(conv.id)}
                     className="w-full text-left glassmorphic rounded-2xl p-3.5 flex items-center gap-3.5 border border-white/5 hover:border-white/15 hover:bg-white/[0.02] active:scale-[0.99] transition-all duration-300 relative group"
                   >
-                    {/* Pastille verte sur les messages non lus */}
                     {conv.unreadCount > 0 && (
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-breezy-neon flex items-center justify-center glow-neon">
                         <span className="text-[9px] font-bold text-black">{conv.unreadCount}</span>
                       </div>
                     )}
 
-                    {/* Avatar avec indicateur de présence */}
                     <div className="relative shrink-0">
                       <Avatar name={conv.name} username={conv.username} url={conv.avatar} className="w-12 h-12" />
                       {conv.online && (
@@ -202,7 +200,6 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                       )}
                     </div>
 
-                    {/* Aperçu du dernier message */}
                     <div className="flex-1 min-w-0 pr-8">
                       <div className="flex justify-between items-baseline mb-0.5">
                         <h4 className="text-sm font-sans font-medium text-breezy-icy group-hover:text-breezy-neon transition-colors">
@@ -222,7 +219,6 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
             </div>
           </motion.div>
         ) : (
-          /* VUE 2 : La discussion en cours */
           <motion.div
             key="chat"
             className="flex-1 flex flex-col h-full bg-breezy-bg z-10"
@@ -231,7 +227,6 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
             exit={{ opacity: 0, x: 20 }}
             transition={{ type: "spring", damping: 28, stiffness: 350 }}
           >
-            {/* En-tête de la discussion */}
             <div className="shrink-0 p-4 border-b border-white/5 flex items-center justify-between glassmorphic">
               <div className="flex items-center gap-3">
                 <button
@@ -240,14 +235,14 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                 >
                   <ArrowLeft className="w-4 h-4" />
                 </button>
-                
+
                 <div className="flex items-center gap-2.5">
                   <Avatar name={selectedConv?.name || ''} username={selectedConv?.username} url={selectedConv?.avatar} className="w-9 h-9" />
                   <div>
                     <h3 className="text-xs font-sans font-semibold text-breezy-icy">{selectedConv?.name}</h3>
                     <p className="text-[10px] font-mono text-breezy-neon flex items-center gap-1">
                       <span className={`w-1.5 h-1.5 rounded-full ${selectedConv?.online ? 'bg-emerald-500' : 'bg-white/30'}`} />
-                      {selectedConv?.online ? 'En ligne' : 'Hors ligne'}
+                      {selectedConv?.online ? t('messages.online') : t('messages.offline')}
                     </p>
                   </div>
                 </div>
@@ -263,16 +258,14 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
               </div>
             </div>
 
-            {/* Bulles de messages */}
             <div className="flex-1 overflow-y-auto no-scrollbar p-4 flex flex-col gap-3">
               <div className="mx-auto my-3 text-[10px] font-mono text-white/30 tracking-wider text-center select-none uppercase">
-                Conversation chiffrée
+                {t('messages.encrypted')}
               </div>
 
               {selectedConv?.messages.map((msg) => {
                 const isMe = msg.sender === 'me';
                 return (
-                  // Nos messages à droite, ceux du contact à gauche
                   <motion.div
                     key={msg.id}
                     initial={{ opacity: 0, y: 10, scale: 0.98 }}
@@ -295,7 +288,6 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                 );
               })}
 
-              {/* Indicateur "en train d'écrire..." animé */}
               <AnimatePresence>
                 {isTyping && (
                   <motion.div
@@ -305,7 +297,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                     className="self-start flex flex-col items-start max-w-[70%]"
                   >
                     <div className="glassmorphic p-3 rounded-2xl rounded-tl-xs border border-white/5 flex items-center gap-1.5">
-                      <span className="text-[10px] font-mono text-breezy-neon mr-1">En train d'écrire</span>
+                      <span className="text-[10px] font-mono text-breezy-neon mr-1">{t('messages.typing')}</span>
                       <div className="flex gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-breezy-neon/80 animate-bounce" style={{ animationDelay: '0ms' }} />
                         <span className="w-1.5 h-1.5 rounded-full bg-breezy-lavender/80 animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -318,7 +310,6 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Barre de saisie du message */}
             <form
               onSubmit={handleSendMessage}
               className="p-3 shrink-0 border-t border-white/5 glassmorphic flex items-center gap-2"
@@ -327,7 +318,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                 type="text"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder="Écrire un message..."
+                placeholder={t('messages.inputPlaceholder')}
                 className="flex-1 text-xs rounded-xl glassmorphism-light py-3 px-4 text-breezy-icy placeholder-white/30 focus:outline-none focus:border-breezy-border-active transition"
               />
               <button
@@ -342,7 +333,6 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
         )}
       </AnimatePresence>
 
-      {/* VUE 3 : Formulaire pour démarrer une nouvelle conversation */}
       <AnimatePresence>
         {isSelectContactOpen && (
           <div className="absolute inset-0 z-50 flex items-center justify-center p-6">
@@ -353,7 +343,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
               onClick={() => { playTick(); setIsSelectContactOpen(false); }}
               className="absolute inset-0 bg-black/80 backdrop-blur-md cursor-pointer"
             />
-            
+
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -362,9 +352,9 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
             >
               <div className="flex justify-between items-center mb-4 pb-2 border-b border-white/5">
                 <span className="text-xs font-mono text-breezy-neon uppercase tracking-wider font-bold">
-                  Nouvelle conversation
+                  {t('messages.newConv')}
                 </span>
-                <button 
+                <button
                   onClick={() => { playTick(); setIsSelectContactOpen(false); }}
                   className="text-white/40 hover:text-white"
                 >
@@ -374,7 +364,9 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
 
               <form onSubmit={handleCreateConvSubmit} className="flex flex-col gap-3.5 text-left font-sans">
                 <div className="flex flex-col gap-1">
-                  <label className="text-[8.5px] font-mono text-white/40 uppercase tracking-wider">Nom du contact</label>
+                  <label className="text-[8.5px] font-mono text-white/40 uppercase tracking-wider">
+                    {t('messages.contactName')}
+                  </label>
                   <input
                     type="text"
                     required
@@ -386,7 +378,9 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-[8.5px] font-mono text-white/40 uppercase tracking-wider">Nom d'utilisateur</label>
+                  <label className="text-[8.5px] font-mono text-white/40 uppercase tracking-wider">
+                    {t('messages.contactUsername')}
+                  </label>
                   <input
                     type="text"
                     required
@@ -402,7 +396,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                   disabled={!contactName.trim() || !contactUsername.trim()}
                   className="w-full mt-1 py-2.5 rounded-xl bg-breezy-icy hover:bg-breezy-neon text-slate-950 font-sans font-bold text-xs uppercase tracking-wider transition disabled:opacity-50 cursor-pointer"
                 >
-                  Démarrer le chat
+                  {t('messages.startChat')}
                 </button>
               </form>
             </motion.div>

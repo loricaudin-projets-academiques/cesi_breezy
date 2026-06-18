@@ -9,6 +9,7 @@ import { useProfile } from "../hooks/useProfile";
 import { useFeed } from "../hooks/useFeed";
 import { useConversations } from "../hooks/useConversations";
 import { authService } from "../services/ServiceContainer";
+import { useLang } from "../translations/LanguageProvider";
 
 type BreezyAppContextValue = ReturnType<typeof useBreezyAppState>;
 
@@ -22,6 +23,7 @@ function useBreezyAppState() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeProfileSubTab, setActiveProfileSubTab] = useState<ProfileSubTab>("posts");
 
+  const { t } = useLang();
   const { toasts, triggerToast, handleRemoveToast } = useToast();
   const profile = useProfile(triggerToast);
   const feed = useFeed(profile.user, triggerToast);
@@ -48,7 +50,7 @@ function useBreezyAppState() {
     try {
       openSession(await authService.login(username, passkey, apiUrl));
     } catch (error) {
-      triggerToast(getErrorMessage(error, "Erreur de connexion."));
+      triggerToast(getErrorMessage(error, t("toasts.loginError")));
       throw error;
     }
   };
@@ -57,7 +59,7 @@ function useBreezyAppState() {
     try {
       openSession(await authService.register(name, username, passkey, apiUrl));
     } catch (error) {
-      triggerToast(getErrorMessage(error, "Erreur lors de l'inscription."));
+      triggerToast(getErrorMessage(error, t("toasts.registerError")));
       throw error;
     }
   };

@@ -17,6 +17,7 @@ import BioEditorModal from "../components/modals/BioEditorModal";
 import AvatarSelectorModal from "../components/modals/AvatarSelectorModal";
 import FollowersModal from "../components/modals/FollowersModal";
 import { useBreezyApp } from "./BreezyAppProvider";
+import { useLang } from "../translations/LanguageProvider";
 
 const tabRoutes: Record<TabType, string> = {
   home: "/feed",
@@ -32,25 +33,12 @@ function getActiveTab(pathname: string): TabType {
   return "home";
 }
 
-function getTitle(activeTab: TabType) {
-  if (activeTab === "home") {
-    return (
-      <span className="flex items-center gap-1">
-        Breezy <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-breezy-neon/10 text-breezy-neon border border-breezy-neon/20 uppercase tracking-widest leading-none glow-neon">Feed</span>
-      </span>
-    );
-  }
-
-  if (activeTab === "search") return "Search Grid";
-  if (activeTab === "messages") return "Secure Direct";
-  return "Identity Core";
-}
-
 export default function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const activeTab = getActiveTab(pathname);
   const isLoginRoute = pathname.startsWith("/login");
+  const { t } = useLang();
 
   const {
     isLoggedIn,
@@ -84,6 +72,19 @@ export default function AppShell({ children }: { children: ReactNode }) {
     router.push(tabRoutes[tab]);
   };
 
+  const getTitle = () => {
+    if (activeTab === "home") {
+      return (
+        <span className="flex items-center gap-1">
+          Breezy <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-breezy-neon/10 text-breezy-neon border border-breezy-neon/20 uppercase tracking-widest leading-none glow-neon">{t('app.feedBadge')}</span>
+        </span>
+      );
+    }
+    if (activeTab === "search") return t('app.titleSearch');
+    if (activeTab === "messages") return t('app.titleMessages');
+    return t('app.titleProfile');
+  };
+
   return (
     <div className="min-h-screen bg-[#050505] bg-gradient-custom text-icy flex flex-col justify-center items-center p-3 relative overflow-hidden font-sans">
       <AmbientGlow enabled={ambientGlow} />
@@ -99,7 +100,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
             <div className="pt-8 px-4 pb-2.5 flex justify-between items-center bg-[#050508]/80 backdrop-blur-xl border-b border-white/[0.04] shrink-0 z-30">
               <div className="flex items-center gap-1.5 select-none">
                 <span className="text-sm font-display font-semibold text-breezy-icy uppercase tracking-wide">
-                  {getTitle(activeTab)}
+                  {getTitle()}
                 </span>
               </div>
 
@@ -110,10 +111,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
                     setIsPostModalOpen(true);
                   }}
                   className="p-1 px-2.5 rounded-lg border border-white/5 bg-white/[0.03] hover:border-breezy-border-active flex items-center gap-1.5 hover:text-breezy-neon transition duration-200"
-                  title="Compose stream"
+                  title={t('app.stream')}
                 >
                   <MessageSquareDiff className="w-4 h-4" />
-                  <span className="text-[9.5px] font-sans font-bold uppercase tracking-wider">Stream</span>
+                  <span className="text-[9.5px] font-sans font-bold uppercase tracking-wider">{t('app.stream')}</span>
                 </button>
               </div>
             </div>
