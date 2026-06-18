@@ -7,8 +7,13 @@ const connectPostgreSQL = require("./databases/postgresql/index");
 const connectMongoDB = require("./databases/mongodb/index");
 
 const express = require('express');
+const cors = require('cors');
 
 const app = express();
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+  credentials: true,
+}));
 app.use(express.json());
 const port = 3000;
 
@@ -26,7 +31,7 @@ const start = async () => {
     console.log("Connexion réussie à la base de données MongoDB");
   } catch (err) {
     console.error("Erreur de connexion à la base de données MongoDB : ", err);
-    //return;
+    return;
   }
 
   app.get('/', (req, res) => {
@@ -63,7 +68,18 @@ const start = async () => {
     });
   });
 
-  app.use('/', require('./routes'));
+  const routes = require('./routes');
+  app.use('/', routes);
+  app.use('/api', routes);
+
+  app.use((req, res) => {
+    res.status(404).json({ message: "Route API introuvable." });
+  });
+
+  app.use((err, req, res, next) => {
+    console.error("Erreur API :", err);
+    res.status(500).json({ message: "Erreur serveur." });
+  });
 
   app.listen(port, () => {
     console.log(`Breezy Back listening on port ${port}`);
