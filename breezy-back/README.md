@@ -36,46 +36,25 @@ db_password: postgres
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Starts the Next.js development server |
-| `npm run build` | Builds the Next.js app for production |
-| `npm run start` | Starts the production server |
-| `npm run lint` | Runs Next.js linting |
+| `docker compose up` | Starts all backend services |
+| `docker compose up -d` | Starts all backend services in detached |
+| `docker compose down` | Stop all backend services in detached |
+| `docker compose exec api npm run seed` | Runs seed for databases (only api_service seeds) |
+| `docker compose exec api npm run lint` | Runs lint for api_service only |
+| `docker compose exec api npm run lint:fix` | Runs lint for api_service only and try to autofix |
 
-## Environment
+##  Structure Interne de l'API (`api-service`)
 
-| Variable | Description |
-|---|---|
-| `NEXT_PUBLIC_API_URL` | Backend API base URL, for example `http://localhost:80/api` |
-
-## Architecture
+L'API principale (`api-service`) suit une architecture en couches propre et modulaire sous le dossier `src/` :
 
 ```text
-src/
-  app/              Next.js App Router routes and global layout
-  components/       Reusable UI components
-  hooks/            Client-side domain hooks
-  screens/          UI screens rendered by app routes
-  services/         Mock and HTTP data services
-    auth/
-    feed/
-    conversation/
-    storage/
-  utils/            Shared utility functions
-  types.ts          Shared domain types
-  config.ts         Runtime config defaults
-  mockData.ts       Initial local mock data
-  audio.ts          Web Audio helpers
+api-service/src/
+├── config/             # Configuration globale (ex: base de données)
+│   └── database.js     # Connexion à la base de données (À compléter)
+├── controllers/        # Contrôleurs gérant les requêtes/réponses HTTP
+├── models/             # Modèles de données (représentation BDD)
+├── routes/             # Déclaration et routage des points d'accès API
+├── services/           # Logique métier et règles de gestion
+├── tests/              # Tests unitaires et d'intégration
+└── index.js            # Point d'entrée principal de l'application
 ```
-
-Main route mapping:
-
-| Route | UI screen |
-|---|---|
-| `/` | Redirects to `/feed` |
-| `/login` | `src/screens/LoginScreen.tsx` |
-| `/feed` | `src/screens/FeedScreen.tsx` |
-| `/search` | `src/screens/SearchScreen.tsx` |
-| `/messages` | `src/components/MessagesTab.tsx` |
-| `/profile` | `src/screens/ProfileScreen.tsx` |
-
-The backend switch point remains `src/services/ServiceContainer.ts`. Mock services are active by default; HTTP service implementations live next to them for backend integration.
