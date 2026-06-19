@@ -1,8 +1,5 @@
 import mongoose from "mongoose";
 
-
-
-
 const CommentSchema = new mongoose.Schema({
 
     post_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
@@ -19,10 +16,6 @@ const CommentSchema = new mongoose.Schema({
     deleted_at: { type: Date, default: null },
 });
 
-
-
 const Comment = mongoose.model('Comment', CommentSchema);
-
-
 
 export default Comment;

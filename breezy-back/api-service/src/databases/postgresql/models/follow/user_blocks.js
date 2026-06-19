@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require("../../../../config/databases/postgresql");
+import { DataTypes } from 'sequelize';
+import { sequelize } from "../../../../config/databases/postgresql.js";
 
 const User_Block = sequelize.define(
     'User_Block',
@@ -23,4 +23,4 @@ const User_Block = sequelize.define(
     }
 );
 
-module.exports = User_Block;
+export default User_Block;

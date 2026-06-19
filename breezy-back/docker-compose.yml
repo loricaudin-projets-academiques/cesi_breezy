@@ -9,6 +9,7 @@ services:
     command: npm run dev
     volumes:
       - ./api-service:/api
+      - api_node_modules:/api/node_modules
     depends_on:
       - db_sql
       - db_mongo
@@ -60,7 +61,7 @@ services:
     depends_on:
       - db_sql
     ports:
-      - "8888:80"
+      - "8082:80"
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@breezy.com
       PGADMIN_DEFAULT_PASSWORD: root
@@ -87,6 +88,8 @@ services:
   db_mongo_admin:
     image: mongo-express:latest
     container_name: mongo-express
+    depends_on:
+      - db_mongo
     ports:
       - "8081:8081"
     environment:
@@ -99,10 +102,11 @@ services:
     networks:
       - backend
 
-networks:
-  backend:
-
 volumes:
+  api_node_modules:
   postgres_data:
   mongo_data:
   pgadmin-data:
+
+networks:
+  backend:

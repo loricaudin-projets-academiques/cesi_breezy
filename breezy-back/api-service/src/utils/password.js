@@ -1,19 +1,19 @@
-const crypto = require("crypto");
+import { randomBytes, scryptSync, timingSafeEqual } from "crypto";
 
-function hashPassword(password, salt = crypto.randomBytes(16).toString("hex")) {
-  const hash = crypto.scryptSync(String(password), salt, 64).toString("hex");
+function hashPassword(password, salt = randomBytes(16).toString("hex")) {
+  const hash = scryptSync(String(password), salt, 64).toString("hex");
   return `${salt}:${hash}`;
 }
 
 function verifyPassword(password, storedHash) {
   const [salt, originalHash] = String(storedHash || "").split(":");
-  if (!salt || !originalHash) return false;
+  if (!salt || !originalHash) {return false;}
 
   const candidate = hashPassword(password, salt).split(":")[1];
-  return crypto.timingSafeEqual(Buffer.from(candidate, "hex"), Buffer.from(originalHash, "hex"));
+  return timingSafeEqual(Buffer.from(candidate, "hex"), Buffer.from(originalHash, "hex"));
 }
 
-module.exports = {
+export {
   hashPassword,
   verifyPassword,
 };

@@ -18,7 +18,7 @@ function toPublicUser(user) {
   };
 }
 
-module.exports = {
+export {
   normalizeUsername,
   toPublicUser
 };

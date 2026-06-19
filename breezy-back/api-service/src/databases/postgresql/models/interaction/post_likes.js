@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require("../../../../config/databases/postgresql");
+import { DataTypes } from 'sequelize';
+import { sequelize } from "../../../../config/databases/postgresql.js";
 
 const Post_Like = sequelize.define(
     'Post_Like',
@@ -24,4 +24,4 @@ const Post_Like = sequelize.define(
     }
 );
 
-module.exports = Post_Like;
+export default Post_Like;

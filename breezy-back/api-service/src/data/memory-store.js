@@ -4,7 +4,7 @@ const commentsByPost = new Map();
 const likedPostsByUser = new Map();
 const starredPostsByUser = new Map();
 
-export default {
+export {
   users,
   posts,
   commentsByPost,
