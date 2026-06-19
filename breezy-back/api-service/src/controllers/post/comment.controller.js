@@ -9,7 +9,7 @@ export async function createPostComment(req, res) {
 
         const comment = await commentService.createComment({
             postId,
-            userId: userId,
+            userId,
             content,
             parentCommentId
         });

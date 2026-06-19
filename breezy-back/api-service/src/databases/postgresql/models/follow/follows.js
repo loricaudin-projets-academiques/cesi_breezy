@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require("../../../../config/databases/postgresql");
+import { DataTypes } from 'sequelize';
+import { sequelize } from "../../../../config/databases/postgresql.js";
 
 const Follow = sequelize.define(
     'Follow',
@@ -20,4 +20,4 @@ const Follow = sequelize.define(
     }
 );
 
-module.exports = Follow;
+export default Follow;

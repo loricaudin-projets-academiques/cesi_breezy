@@ -1,13 +1,13 @@
-const sequelize = require("../../config/databases/postgresql");
+import { sequelize } from "../../config/databases/postgresql.js";
 
-require("./models/follow/follows");
-require("./models/follow/user_blocks");
-require("./models/interaction/comment_likes");
-require("./models/interaction/post_likes");
+import "./models/follow/follows.js";
+import "./models/follow/user_blocks.js";
+import "./models/interaction/comment_likes.js";
+import "./models/interaction/post_likes.js";
 
 async function connectPostgreSQL() {
     await sequelize.authenticate();
     await sequelize.sync();
 }
 
-module.exports = connectPostgreSQL;
+export default connectPostgreSQL;

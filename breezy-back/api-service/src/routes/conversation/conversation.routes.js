@@ -1,10 +1,10 @@
-const express = require("express");
+import { Router } from "express";
 
-const { requireAuth } = require("../../middlewares/auth.middleware");
-const { createId } = require("../../utils/ids");
-const { normalizeUsername } = require("../../utils/user");
+import { requireAuth } from "../../middlewares/auth.middleware.js";
+import { createId } from "../../utils/ids.js";
+import { normalizeUsername } from "../../utils/user.js";
 
-const router = express.Router();
+const router = Router();
 const conversationsByUser = new Map();
 
 function getConversations(username) {
@@ -93,4 +93,4 @@ router.post("/reply", requireAuth, (req, res) => {
   return res.json({ reply: `Message recu par ${contactName} : "${message}"` });
 });
 
-module.exports = router;
+export default router;

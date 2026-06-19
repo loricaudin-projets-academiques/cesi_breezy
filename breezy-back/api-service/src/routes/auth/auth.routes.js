@@ -1,16 +1,14 @@
-const express = require("express");
-const jwt = require("jsonwebtoken");
+import { Router } from "express";
+import jwt from "jsonwebtoken";
 
-const {
-  users,
-} = require("../../data/memory-store").default;
-const { toPublicUser } = require("../../utils/user");
-const { normalizeUsername } = require("../../utils/user");
-const { JWT_SECRET } = require("../../middlewares/auth.middleware");
+import { users } from "../../data/memory-store.js";
+import { toPublicUser } from "../../utils/user.js";
+import { normalizeUsername } from "../../utils/user.js";
+import { JWT_SECRET } from "../../middlewares/auth.middleware.js";
 
-const { hashPassword, verifyPassword } = require("../../utils/password");
+import { hashPassword, verifyPassword } from "../../utils/password.js";
 
-const router = express.Router();
+const router = Router();
 
 function createDefaultProfile({ name, username }) {
   return {
@@ -80,4 +78,4 @@ router.post("/login", (req, res) => {
   return res.json(createSession(user));
 });
 
-module.exports = router;
+export default router;

@@ -1,16 +1,10 @@
-const express = require("express");
+import { Router } from "express";
 
-const {
-  users,
-  posts,
-  commentsByPost,
-  likedPostsByUser,
-  starredPostsByUser
-} = require("../../data/memory-store");
-const { createId } = require("../../utils/ids");
-const { requireAuth } = require("../../middlewares/auth.middleware");
+import { users, posts, commentsByPost, likedPostsByUser, starredPostsByUser } from "../../data/memory-store.js";
+import { createId } from "../../utils/ids.js";
+import { requireAuth } from "../../middlewares/auth.middleware.js";
 
-const router = express.Router();
+const router = Router();
 
 function nowLabel() {
   return "A l'instant";
@@ -148,4 +142,4 @@ router.post("/posts/:postId/star", requireAuth, (req, res) => {
   return res.json(getPostForUser(post, req.user.username));
 });
 
-module.exports = router;
+export default router;
