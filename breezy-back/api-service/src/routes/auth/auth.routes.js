@@ -3,12 +3,12 @@ const jwt = require("jsonwebtoken");
 
 const {
   users,
-  hashPassword,
-  verifyPassword,
 } = require("../../data/memory-store").default;
 const { toPublicUser } = require("../../utils/user");
 const { normalizeUsername } = require("../../utils/user");
 const { JWT_SECRET } = require("../../middlewares/auth.middleware");
+
+const { hashPassword, verifyPassword } = require("../../utils/password");
 
 const router = express.Router();
 
