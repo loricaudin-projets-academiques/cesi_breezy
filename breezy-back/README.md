@@ -1,20 +1,36 @@
-# Breezy - Front-end
+# Breezy - Back-end
 
-Breezy is a mobile-first social UI built with **React + Next.js + TypeScript + Tailwind CSS + Axios**.
-
-The current app keeps mock services for local development and also includes HTTP service classes for a backend or microservices setup.
+Breezy back-end is the logic project of Breezy with **ExpressJS + MongoDB (with Mongoose) + PostgreSQL (with Sequelize) + JWT**.
 
 ## Run Locally
 
-**Prerequisite:** Node.js 18.18+ for Next.js 15.
+**Prerequisite:**
+*   [Docker](https://www.docker.com/) + Docker Compose
+*   [Node.js](https://nodejs.org/) (Version 23+) (local only).
 
 ```bash
-npm install
-cp .env.example .env.local
-npm run dev
+docker compose up
 ```
 
-The app runs at **http://localhost:3000**.
+The api runs at **http://localhost:80/**.
+
+## DB Admin
+
+### Mongo Express
+Mongo Express is used to view the MongoDB database.
+Mongo Express run at **http://localhost:8081/**
+username: admin@breezy.com
+password: root
+
+### pgAdmin
+pgAdmin is used to view the MongoDB database.
+pgAdmin run at **http://localhost:8082/**
+username: admin@breezy.com
+password: root
+
+if demanded:
+db_username: postgres
+db_password: postgres
 
 ## Scripts
 
