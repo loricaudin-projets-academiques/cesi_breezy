@@ -1,5 +1,8 @@
 import connectMongoDB from "../databases/mongodb/index.js";
 import connectPostgreSQL from "../databases/postgresql/index.js";
+import runCommentSeed from "./comment/comment.seed.js";
+import runConversationSeed from "./message/conversation.seed.js";
+import runPrivateMessageSeed from "./message/private_message.js";
 import runPostSeed from "./post/post.seed.js";
 
 async function runSeed() {
@@ -22,6 +25,9 @@ async function runSeed() {
 
 
         await runPostSeed();
+        await runCommentSeed();
+        await runConversationSeed();
+        await runPrivateMessageSeed();
 
 
         console.log("Seed completed");

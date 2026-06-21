@@ -1,0 +1,18 @@
+[
+    {
+        "_id": "6a360d5405423cddc7d2871f",
+        "conversation_id": "6a360d5402772cddc7d2871f",
+        "sender_id": null,
+        "content": "Bonjour, avez-vous passé un bon week-end ?",
+        "created_at": "2025-12-12T12:12:12.653Z",
+        "updated_at": "2025-12-12T12:12:12.653Z"
+    },
+    {
+        "_id": "6a360d540542322dc7d2871f",
+        "conversation_id": "6a360d5402772cddc7d2871f",
+        "sender_id": null,
+        "content": "Salut, oui et toi ?",
+        "created_at": "2025-12-12T13:13:13.653Z",
+        "updated_at": "2025-12-12T13:13:13.653Z"
+    }
+]

@@ -1,5 +1,26 @@
 [
     {
-        "post_id": 
+        "_id": "6a358d5402772cddc7d2871f",
+        "post_id": "6a358d5402772ccec7d2871f",
+        "parent_comment_id": null,
+        "content": "Merci, à toi aussi",
+        "media": [],
+        "mentions": [],
+        "status": "published",
+        "created_at": "2026-06-19T19:43:31.653Z",
+        "updated_at": "2026-06-19T19:43:31.653Z",
+        "deleted_at": null
+    },
+    {
+        "_id": "6a358d5402772cdec7d2871f",
+        "post_id": "6a358d5402772ccec7d2871f",
+        "parent_comment_id": "6a358d5402772cddc7d2871f",
+        "content": "Merci 😊",
+        "media": [],
+        "mentions": [],
+        "status": "published",
+        "created_at": "2026-06-19T20:43:31.653Z",
+        "updated_at": "2026-06-19T20:43:31.653Z",
+        "deleted_at": null
     }
 ]
