@@ -6,8 +6,10 @@ import Post from "../../databases/mongodb/models/post/post.js";
 import Comment from "../../databases/mongodb/models/comment/comment.js";
 import Post_Like from "../../databases/postgresql/models/interaction/post_likes.js";
 import Post_Star from "../../databases/postgresql/models/interaction/post_stars.js";
+import Follow from "../../databases/postgresql/models/follow/follows.js";
 import { requireAuth } from "../../middlewares/auth.middleware.js";
 import { normalizeUsername } from "../../utils/user.js";
+import { deleteLocalUploads, storeGalleryImages } from "../../utils/media.js";
 
 const router = Router();
 
@@ -63,7 +65,7 @@ async function interactionSets(userId, posts) {
   };
 }
 
-function postToDto(post, author, interactions) {
+function postToDto(post, author, interactions, currentUser) {
   const postId = String(post._id);
 
   return {
@@ -71,8 +73,10 @@ function postToDto(post, author, interactions) {
     authorName: author?.name || "Utilisateur inconnu",
     authorUsername: author?.username || "",
     avatar: author?.avatar || "",
+    title: post.title || "",
     content: post.content,
     timestamp: timeLabel(post.created_at),
+    createdAt: post.created_at?.toISOString?.() || new Date(post.created_at).toISOString(),
     likes: post.likes_count || 0,
     comments: post.comments_count || 0,
     shares: post.reposts_count || 0,
@@ -80,6 +84,11 @@ function postToDto(post, author, interactions) {
     starredByUser: interactions.starred.has(postId),
     category: post.category || "for-you",
     image: post.media?.[0] || undefined,
+    images: post.media || [],
+    archived: post.status === "archived",
+    pinned: Boolean(post.pinned),
+    canArchive: currentUser.id === post.author_id,
+    canManage: currentUser.id === post.author_id,
   };
 }
 
@@ -87,14 +96,37 @@ async function postsToDtos(posts, currentUser) {
   const authors = await authorsById(posts);
   const interactions = await interactionSets(currentUser.id, posts);
 
-  return posts.map((post) => postToDto(post, authors.get(post.author_id), interactions));
+  return posts.map((post) => postToDto(post, authors.get(post.author_id), interactions, currentUser));
+}
+
+async function friendIdsFor(userId) {
+  const [outgoing, incoming] = await Promise.all([
+    Follow.findAll({ where: { follower_id: userId } }),
+    Follow.findAll({ where: { followed_id: userId } }),
+  ]);
+  const outgoingIds = new Set(outgoing.map((follow) => follow.followed_id));
+  const incomingIds = new Set(incoming.map((follow) => follow.follower_id));
+  return new Set([...outgoingIds].filter((id) => incomingIds.has(id)));
+}
+
+async function filterPrivatePosts(posts, currentUser) {
+  const authors = await authorsById(posts);
+  const currentFriendIds = await friendIdsFor(currentUser.id);
+
+  return posts.filter((post) => {
+    const author = authors.get(post.author_id);
+    if (!author) return false;
+    if (author.id === currentUser.id) return true;
+    if (!author.isPrivate) return true;
+    return currentFriendIds.has(author.id);
+  });
 }
 
 async function getVisiblePosts(query = {}) {
   return Post.find({
     status: "published",
     ...query,
-  }).sort({ created_at: -1 });
+  }).sort({ pinned: -1, created_at: -1 });
 }
 
 router.get("/posts", requireAuth, async (req, res) => {
@@ -102,8 +134,29 @@ router.get("/posts", requireAuth, async (req, res) => {
   if (!currentUser) return;
 
   const category = String(req.query.category || "").trim();
-  const query = category ? { category } : {};
-  const posts = await getVisiblePosts(query);
+  let query = {};
+
+  if (category === "following" || category === "friends") {
+    const [outgoing, incoming] = await Promise.all([
+      Follow.findAll({ where: { follower_id: currentUser.id } }),
+      category === "friends" ? Follow.findAll({ where: { followed_id: currentUser.id } }) : [],
+    ]);
+    const outgoingIds = new Set(outgoing.map((follow) => follow.followed_id));
+    const incomingIds = new Set(incoming.map((follow) => follow.follower_id));
+    const visibleAuthorIds = category === "friends"
+      ? [...outgoingIds].filter((id) => incomingIds.has(id))
+      : [...outgoingIds];
+
+    if (visibleAuthorIds.length === 0) {
+      return res.json([]);
+    }
+
+    query = { author_id: { $in: visibleAuthorIds } };
+  } else {
+    query = { author_id: { $ne: currentUser.id } };
+  }
+
+  const posts = await filterPrivatePosts(await getVisiblePosts(query), currentUser);
 
   return res.json(await postsToDtos(posts, currentUser));
 });
@@ -119,7 +172,29 @@ router.get("/users/:username/posts", requireAuth, async (req, res) => {
     return res.status(404).json({ message: "Utilisateur introuvable." });
   }
 
+  if (targetUser.isPrivate && targetUser.id !== currentUser.id) {
+    const flags = await Promise.all([
+      Follow.findOne({ where: { follower_id: currentUser.id, followed_id: targetUser.id } }),
+      Follow.findOne({ where: { follower_id: targetUser.id, followed_id: currentUser.id } }),
+    ]);
+    if (!flags[0] || !flags[1]) {
+      return res.json([]);
+    }
+  }
+
   const posts = await getVisiblePosts({ author_id: targetUser.id });
+  return res.json(await postsToDtos(posts, currentUser));
+});
+
+router.get("/archive/posts", requireAuth, async (req, res) => {
+  const currentUser = await getCurrentUser(req, res);
+  if (!currentUser) return;
+
+  const posts = await Post.find({
+    status: "archived",
+    author_id: currentUser.id,
+  }).sort({ pinned: -1, created_at: -1 });
+
   return res.json(await postsToDtos(posts, currentUser));
 });
 
@@ -128,8 +203,13 @@ router.post("/posts", requireAuth, async (req, res) => {
   if (!currentUser) return;
 
   const content = String(req.body.content || "").trim();
+  const title = String(req.body.title || "").trim().slice(0, 120);
   const category = req.body.category || "for-you";
   const image = String(req.body.image || "").trim();
+  const images = Array.isArray(req.body.images)
+    ? req.body.images.map((item) => String(item || "").trim()).filter(Boolean).slice(0, 5)
+    : [];
+  const media = await storeGalleryImages(currentUser.id, [...images, ...(image ? [image] : [])].slice(0, 5));
 
   if (!content) {
     return res.status(400).json({ message: "Le contenu du post est obligatoire." });
@@ -137,15 +217,86 @@ router.post("/posts", requireAuth, async (req, res) => {
 
   const post = await Post.create({
     author_id: currentUser.id,
+    title,
     content,
     category,
-    media: image ? [image] : [],
+    media,
     status: "published",
     created_at: new Date(),
     updated_at: new Date(),
   });
 
   return res.status(201).json((await postsToDtos([post], currentUser))[0]);
+});
+
+router.post("/posts/:postId/archive", requireAuth, async (req, res) => {
+  const currentUser = await getCurrentUser(req, res);
+  if (!currentUser) return;
+
+  if (!isValidPostId(req.params.postId)) {
+    return res.status(400).json({ message: "Identifiant de post invalide." });
+  }
+
+  const post = await Post.findById(req.params.postId);
+  if (!post || post.author_id !== currentUser.id || post.status === "deleted") {
+    return res.status(404).json({ message: "Post introuvable." });
+  }
+
+  post.status = post.status === "archived" ? "published" : "archived";
+  post.updated_at = new Date();
+  await post.save();
+
+  return res.json((await postsToDtos([post], currentUser))[0]);
+});
+
+router.post("/posts/:postId/pin", requireAuth, async (req, res) => {
+  const currentUser = await getCurrentUser(req, res);
+  if (!currentUser) return;
+
+  if (!isValidPostId(req.params.postId)) {
+    return res.status(400).json({ message: "Identifiant de post invalide." });
+  }
+
+  const post = await Post.findById(req.params.postId);
+  if (!post || post.author_id !== currentUser.id || post.status === "deleted") {
+    return res.status(404).json({ message: "Post introuvable." });
+  }
+
+  post.pinned = !post.pinned;
+  post.updated_at = new Date();
+  await post.save();
+
+  return res.json((await postsToDtos([post], currentUser))[0]);
+});
+
+router.delete("/posts/:postId", requireAuth, async (req, res) => {
+  const currentUser = await getCurrentUser(req, res);
+  if (!currentUser) return;
+
+  if (!isValidPostId(req.params.postId)) {
+    return res.status(400).json({ message: "Identifiant de post invalide." });
+  }
+
+  const post = await Post.findById(req.params.postId);
+  if (!post || post.author_id !== currentUser.id || post.status === "deleted") {
+    return res.status(404).json({ message: "Post introuvable." });
+  }
+
+  await deleteLocalUploads(post.media || []);
+  post.status = "deleted";
+  post.deleted_at = new Date();
+  post.updated_at = new Date();
+  post.media = [];
+  post.pinned = false;
+  await post.save();
+
+  await Comment.updateMany({ post_id: post._id }, { status: "deleted", deleted_at: new Date(), updated_at: new Date() });
+  await Promise.all([
+    Post_Like.destroy({ where: { post_id: String(post._id) } }),
+    Post_Star.destroy({ where: { post_id: String(post._id) } }),
+  ]);
+
+  return res.json({ id: String(post._id), deleted: true });
 });
 
 router.get("/comments", requireAuth, async (req, res) => {

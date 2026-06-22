@@ -1,8 +1,8 @@
 "use client";
 
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useCallback, useContext, useState } from "react";
 
-import { UserProfile, ProfileSubTab } from "../types";
+import { UserProfile } from "../types";
 import { getErrorMessage } from "../utils/errors";
 import { useToast } from "../hooks/useToast";
 import { useProfile } from "../hooks/useProfile";
@@ -19,11 +19,16 @@ function useBreezyAppState() {
   const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [ambientGlow, setAmbientGlow] = useState(true);
+  const [isLightTheme, setIsLightTheme] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeProfileSubTab, setActiveProfileSubTab] = useState<ProfileSubTab>("posts");
 
-  const { toasts, triggerToast, handleRemoveToast } = useToast();
-  const profile = useProfile(triggerToast);
+  const { toasts, triggerToast: rawTriggerToast, handleRemoveToast } = useToast();
+  const profile = useProfile(rawTriggerToast);
+  const triggerToast = useCallback((message: string) => {
+    if (profile.user.notificationsEnabled !== false) {
+      rawTriggerToast(message);
+    }
+  }, [profile.user.notificationsEnabled, rawTriggerToast]);
   const feed = useFeed(profile.user, triggerToast);
   const conversations = useConversations();
 
@@ -36,6 +41,9 @@ function useBreezyAppState() {
     onToggleComments: feed.handleToggleComments,
     onCommentDraftChange: feed.handleCommentDraftChange,
     onAddComment: feed.handleAddComment,
+    onToggleArchive: feed.handleToggleArchive,
+    onTogglePin: feed.handleTogglePin,
+    onDeletePost: feed.handleDeletePost,
     triggerToast,
   };
 
@@ -78,10 +86,10 @@ function useBreezyAppState() {
     setIsPostModalOpen,
     ambientGlow,
     setAmbientGlow,
+    isLightTheme,
+    setIsLightTheme,
     searchQuery,
     setSearchQuery,
-    activeProfileSubTab,
-    setActiveProfileSubTab,
     toasts,
     triggerToast,
     handleRemoveToast,

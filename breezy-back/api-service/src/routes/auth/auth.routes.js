@@ -20,6 +20,9 @@ function createDefaultProfile({ name, username }) {
     friends: 0,
     avatar: "",
     note: "En mode Breezy...",
+    isPrivate: false,
+    language: "fr",
+    notificationsEnabled: true,
     role: "user",
     music: {
       title: "",

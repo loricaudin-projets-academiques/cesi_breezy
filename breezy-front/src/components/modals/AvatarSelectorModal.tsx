@@ -18,6 +18,18 @@ interface AvatarSelectorModalProps {
 export default function AvatarSelectorModal({ isOpen, onClose, onSelect }: AvatarSelectorModalProps) {
   const [url, setUrl] = useState('');
 
+  const handleFile = (file: File | undefined) => {
+    if (!file || !file.type.startsWith('image/')) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      playChime();
+      onSelect(String(reader.result));
+      onClose();
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Valide le formulaire et applique le nouvel avatar
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +42,7 @@ export default function AvatarSelectorModal({ isOpen, onClose, onSelect }: Avata
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
           {/* Fond sombre cliquable pour fermer sans changer d'avatar */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -55,6 +67,19 @@ export default function AvatarSelectorModal({ isOpen, onClose, onSelect }: Avata
             </h4>
             
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+              <label className="w-full py-3 rounded-xl border border-white/10 hover:border-breezy-border-active bg-white/[0.03] text-breezy-icy text-center text-xs font-bold cursor-pointer transition">
+                Choisir depuis l'appareil
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(event) => {
+                    handleFile(event.target.files?.[0]);
+                    event.currentTarget.value = '';
+                  }}
+                />
+              </label>
+
               {/* Champ pour l'URL de la nouvelle photo */}
               <input
                 type="text"

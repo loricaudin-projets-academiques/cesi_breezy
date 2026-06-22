@@ -53,6 +53,23 @@ const User = sequelize.define(
       allowNull: false,
       defaultValue: "En mode Breezy...",
     },
+    isPrivate: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: "is_private",
+    },
+    language: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "fr",
+    },
+    notificationsEnabled: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+      field: "notifications_enabled",
+    },
     role: {
       type: DataTypes.STRING,
       allowNull: false,

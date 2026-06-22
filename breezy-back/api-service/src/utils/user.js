@@ -16,6 +16,9 @@ function toPublicUser(user) {
     friends: plainUser.friends,
     avatar: plainUser.avatar,
     note: plainUser.note,
+    isPrivate: plainUser.isPrivate,
+    language: plainUser.language,
+    notificationsEnabled: plainUser.notificationsEnabled,
     music: plainUser.music,
     role: plainUser.role,
   };

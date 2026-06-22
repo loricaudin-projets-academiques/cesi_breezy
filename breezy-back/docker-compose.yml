@@ -9,6 +9,7 @@ services:
     command: npm run dev
     volumes:
       - ./api-service:/api
+      - ./uploads:/api/uploads
       - api_node_modules:/api/node_modules
     depends_on:
       - db_sql

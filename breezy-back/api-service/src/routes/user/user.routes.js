@@ -5,6 +5,7 @@ import User from "../../databases/postgresql/models/user/user.js";
 import Follow from "../../databases/postgresql/models/follow/follows.js";
 import { requireAuth } from "../../middlewares/auth.middleware.js";
 import { normalizeUsername, toPublicUser } from "../../utils/user.js";
+import { storeProfilePhoto } from "../../utils/media.js";
 
 const router = Router();
 
@@ -39,9 +40,11 @@ async function refreshUsers(...users) {
 }
 
 async function userWithRelation(currentUserId, user) {
+  const flags = await relationFlags(currentUserId, user.id);
   return {
     ...toPublicUser(user),
-    ...(await relationFlags(currentUserId, user.id)),
+    ...flags,
+    canViewPrivate: currentUserId === user.id || !user.isPrivate || flags.isFriend,
   };
 }
 
@@ -51,6 +54,42 @@ router.get("/me", requireAuth, async (req, res) => {
     return;
   }
 
+  return res.json(toPublicUser(currentUser));
+});
+
+router.patch("/me", requireAuth, async (req, res) => {
+  const currentUser = await getCurrentUser(req, res);
+  if (!currentUser) {
+    return;
+  }
+
+  const updates = {};
+  for (const field of ["bio", "note", "language"]) {
+    if (typeof req.body[field] === "string") {
+      updates[field] = req.body[field].trim();
+    }
+  }
+
+  if (typeof req.body.isPrivate === "boolean") {
+    updates.isPrivate = req.body.isPrivate;
+  }
+
+  if (typeof req.body.notificationsEnabled === "boolean") {
+    updates.notificationsEnabled = req.body.notificationsEnabled;
+  }
+
+  if (req.body.music && typeof req.body.music === "object") {
+    updates.music = {
+      ...currentUser.music,
+      ...req.body.music,
+    };
+  }
+
+  if (typeof req.body.avatar === "string") {
+    updates.avatar = await storeProfilePhoto(currentUser.id, req.body.avatar.trim());
+  }
+
+  await currentUser.update(updates);
   return res.json(toPublicUser(currentUser));
 });
 

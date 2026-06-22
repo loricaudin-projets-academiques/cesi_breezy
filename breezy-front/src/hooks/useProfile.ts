@@ -10,6 +10,7 @@ import { authService } from '../services/ServiceContainer';
 import { api } from '../services/api';
 import { getErrorMessage } from '../utils/errors';
 import { PROFILE_BIO_MAX_LENGTH, PROFILE_NOTE_MAX_LENGTH } from '../profileLimits';
+import { INITIAL_USER } from '../mockData';
 
 const limitProfileText = (value: string, maxLength: number) => value.trim().slice(0, maxLength);
 const emptySocialLists: Record<ProfileStatType, Follower[]> = {
@@ -21,9 +22,7 @@ const emptySocialLists: Record<ProfileStatType, Follower[]> = {
 // Gère tout ce qui concerne le profil utilisateur : édition, musique, modals d'édition
 export function useProfile(triggerToast: (msg: string) => void) {
   // Les données du profil, rechargées depuis le stockage au démarrage
-  const [user, setUser] = useState<UserProfile>(() => {
-    return authService.getCurrentUser();
-  });
+  const [user, setUser] = useState<UserProfile>(INITIAL_USER);
 
   // Contrôle l'ouverture et la fermeture de chaque modal d'édition
   const [showNoteEditor, setShowNoteEditor] = useState(false);
@@ -36,7 +35,9 @@ export function useProfile(triggerToast: (msg: string) => void) {
 
   // À chaque modification du profil, on sauvegarde discrètement en arrière-plan
   useEffect(() => {
-    authService.saveCurrentUser(user);
+    if (user.username) {
+      authService.saveCurrentUser(user);
+    }
   }, [user]);
 
   const refreshCurrentUser = useCallback(async () => {
@@ -46,9 +47,15 @@ export function useProfile(triggerToast: (msg: string) => void) {
       return localUser;
     }
 
-    const freshUser = await authService.fetchCurrentUser();
-    setUser(freshUser);
-    return freshUser;
+    try {
+      const freshUser = await authService.fetchCurrentUser();
+      setUser(freshUser);
+      return freshUser;
+    } catch {
+      const localUser = authService.getCurrentUser();
+      setUser(localUser);
+      return localUser;
+    }
   }, []);
 
   useEffect(() => {
@@ -78,11 +85,24 @@ export function useProfile(triggerToast: (msg: string) => void) {
     }
   }, [triggerToast]);
 
+  const updateCurrentUser = useCallback(async (updates: Partial<UserProfile>) => {
+    setUser((prev) => ({ ...prev, ...updates }));
+
+    try {
+      const { data } = await api.patch<UserProfile>('/users/me', updates);
+      setUser(data);
+      return data;
+    } catch (error) {
+      triggerToast(getErrorMessage(error, 'Impossible de sauvegarder le profil.'));
+      throw error;
+    }
+  }, [triggerToast]);
+
   // Enregistre la note d'humeur — si vide, on met un message par défaut
   const handleSaveNote = (newNote: string) => {
     playChime();
     const nextNote = limitProfileText(newNote, PROFILE_NOTE_MAX_LENGTH);
-    setUser((prev) => ({ ...prev, note: nextNote || 'En mode Breezy...' }));
+    void updateCurrentUser({ note: nextNote || 'En mode Breezy...' });
     setShowNoteEditor(false);
     triggerToast('Ta note a bien été mise à jour !');
   };
@@ -91,7 +111,7 @@ export function useProfile(triggerToast: (msg: string) => void) {
   const handleSaveBio = (newBio: string) => {
     playChime();
     const nextBio = limitProfileText(newBio, PROFILE_BIO_MAX_LENGTH);
-    setUser((prev) => ({ ...prev, bio: nextBio || 'Membre Breezy.' }));
+    void updateCurrentUser({ bio: nextBio || 'Membre Breezy.' });
     setShowBioEditor(false);
     triggerToast('Ta bio a été mise à jour !');
   };
@@ -99,10 +119,9 @@ export function useProfile(triggerToast: (msg: string) => void) {
   // Change l'avatar et répercute la modification sur les posts existants si besoin
   const handleSelectAvatar = (url: string, onAvatarChangeCallback?: (url: string) => void) => {
     playChime();
-    setUser((prev) => ({ ...prev, avatar: url }));
-    if (onAvatarChangeCallback) {
-      onAvatarChangeCallback(url);
-    }
+    void updateCurrentUser({ avatar: url }).then((savedUser) => {
+      onAvatarChangeCallback?.(savedUser.avatar);
+    });
     setShowAvatarSelector(false);
     triggerToast('Nouvel avatar enregistré !');
   };
@@ -120,6 +139,7 @@ export function useProfile(triggerToast: (msg: string) => void) {
     playTick();
     setUser((prev) => {
       const nextPlaying = !prev.music.isPlaying;
+      void updateCurrentUser({ music: { ...prev.music, isPlaying: nextPlaying } });
       triggerToast(nextPlaying ? 'Lecture en cours 🎵' : 'Musique en pause');
       return {
         ...prev,
@@ -130,10 +150,8 @@ export function useProfile(triggerToast: (msg: string) => void) {
 
   // Met à jour les infos de la chanson en cours (titre, artiste, pochette...)
   const handleMusicChange = (updates: Partial<typeof user.music>) => {
-    setUser((prev) => ({
-      ...prev,
-      music: { ...prev.music, ...updates }
-    }));
+    const nextMusic = { ...user.music, ...updates };
+    void updateCurrentUser({ music: nextMusic });
   };
 
   return {
@@ -149,6 +167,7 @@ export function useProfile(triggerToast: (msg: string) => void) {
     setShowFollowersModal,
     followersModalType,
     refreshCurrentUser,
+    updateCurrentUser,
     socialLists,
     isSocialListLoading,
     loadSocialList,

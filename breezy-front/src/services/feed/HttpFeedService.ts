@@ -27,12 +27,13 @@ export class HttpFeedService implements IFeedService {
     this.storage.set<CommentsByPost>(KEYS.comments, comments);
   }
 
-  createPost(author: UserProfile, content: string, category: PostCategory, image?: string): Post {
+  createPost(author: UserProfile, content: string, category: PostCategory, image?: string, images: string[] = [], title = ""): Post {
     return {
       id: `post-${Date.now()}`,
       authorName: author.name,
       authorUsername: author.username,
       avatar: author.avatar,
+      title,
       content,
       timestamp: "A l'instant",
       likes: 0,
@@ -42,17 +43,25 @@ export class HttpFeedService implements IFeedService {
       starredByUser: false,
       category,
       image,
+      images: images.length ? images : image ? [image] : [],
     };
   }
 
-  async fetchPosts(): Promise<Post[]> {
-    const { data } = await api.get<Post[]>("/feed/posts");
+  async fetchPosts(category?: PostCategory): Promise<Post[]> {
+    const { data } = await api.get<Post[]>("/feed/posts", {
+      params: category && category !== "for-you" ? { category } : undefined,
+    });
     this.savePosts(data);
     return data;
   }
 
   async fetchUserPosts(username: string): Promise<Post[]> {
     const { data } = await api.get<Post[]>(`/feed/users/${encodeURIComponent(username)}/posts`);
+    return data;
+  }
+
+  async fetchArchivedPosts(): Promise<Post[]> {
+    const { data } = await api.get<Post[]>("/feed/archive/posts");
     return data;
   }
 
@@ -67,9 +76,11 @@ export class HttpFeedService implements IFeedService {
   }
 
   async createRemotePost(payload: {
+    title?: string;
     content: string;
     category: PostCategory;
     image?: string;
+    images?: string[];
   }): Promise<Post> {
     const { data } = await api.post<Post>("/feed/posts", payload);
     this.savePosts([data, ...this.getPosts().filter((post) => post.id !== data.id)]);
@@ -96,6 +107,26 @@ export class HttpFeedService implements IFeedService {
     const { data } = await api.post<Post>(`/feed/posts/${postId}/star`);
     this.savePosts(this.getPosts().map((post) => (post.id === data.id ? data : post)));
     return data;
+  }
+
+  async toggleArchive(postId: string): Promise<Post> {
+    const { data } = await api.post<Post>(`/feed/posts/${postId}/archive`);
+    this.savePosts(data.archived
+      ? this.getPosts().filter((post) => post.id !== data.id)
+      : [data, ...this.getPosts().filter((post) => post.id !== data.id)]
+    );
+    return data;
+  }
+
+  async togglePin(postId: string): Promise<Post> {
+    const { data } = await api.post<Post>(`/feed/posts/${postId}/pin`);
+    this.savePosts(this.getPosts().map((post) => (post.id === data.id ? data : post)));
+    return data;
+  }
+
+  async deletePost(postId: string): Promise<void> {
+    await api.delete(`/feed/posts/${postId}`);
+    this.savePosts(this.getPosts().filter((post) => post.id !== postId));
   }
 
   clearData(): void {

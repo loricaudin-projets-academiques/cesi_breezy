@@ -4,10 +4,13 @@
  */
 
 import { motion } from 'motion/react';
-import { Bookmark, Heart, MessageCircle, Share2, Send } from 'lucide-react';
+import { useState } from 'react';
+import { Archive, Bookmark, Heart, MessageCircle, MoreHorizontal, Pin, Send, Share2, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Comment, CommentsByPost, Post } from '../types';
 import { playTick, playChime } from '../audio';
 import Avatar from './Avatar';
+import { getMediaUrl } from '../utils/mediaUrl';
 
 // Les actions possibles sur un post — définies une seule fois et réutilisées
 // par tous les écrans qui affichent des posts (feed, profil...)
@@ -17,6 +20,9 @@ export interface PostInteractionHandlers {
   onToggleComments: (id: string) => void;
   onCommentDraftChange: (id: string, text: string) => void;
   onAddComment: (id: string) => void;
+  onToggleArchive: (id: string) => void;
+  onTogglePin: (id: string) => void;
+  onDeletePost: (id: string, title?: string) => boolean | Promise<boolean>;
   triggerToast: (msg: string) => void;
 }
 
@@ -32,6 +38,7 @@ interface PostCardProps extends PostInteractionHandlers {
   comments: Comment[];
   commentDraft: string;
   showComments: boolean;
+  canArchive?: boolean;
 }
 
 // Carte qui représente un post dans le fil d'actualité
@@ -40,30 +47,102 @@ export default function PostCard({
   comments = [],
   commentDraft = '',
   showComments = false,
+  canArchive = false,
   onToggleStar,
   onToggleLike,
   onToggleComments,
   onCommentDraftChange,
   onAddComment,
+  onToggleArchive,
+  onTogglePin,
+  onDeletePost,
   triggerToast
 }: PostCardProps) {
+  const router = useRouter();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const images = post.images?.length ? post.images : post.image ? [post.image] : [];
+  const canManage = canArchive || post.canManage;
+  const mediaImages = images.slice(0, 5);
+
+  const getImageTileClass = (count: number, index: number) => {
+    if (count === 1) return 'col-span-6 row-span-6';
+    if (count === 2) return 'col-span-3 row-span-6';
+    if (count === 3) return index === 0 ? 'col-span-6 row-span-3' : 'col-span-3 row-span-3';
+    if (count === 4) return 'col-span-3 row-span-3';
+    return index < 2 ? 'col-span-3 row-span-3' : 'col-span-2 row-span-3';
+  };
+
   return (
     <motion.div
       layout
       className="glassmorphic rounded-2xl p-4 border border-white/5 flex flex-col gap-3 hover:border-white/10 transition-all duration-300 relative group"
     >
+      {post.pinned && (
+        <div className="absolute right-4 top-4 text-breezy-lavender" title="Publication epinglee">
+          <Pin className="w-4 h-4 fill-current" />
+        </div>
+      )}
       {/* Qui a publié ce post et quand */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
+        <button
+          onClick={() => router.push(`/profile/${encodeURIComponent(post.authorUsername)}`)}
+          className="flex items-center gap-2.5 min-w-0 text-left hover:opacity-80 transition"
+        >
           <Avatar name={post.authorName} username={post.authorUsername} url={post.avatar} className="w-9 h-9" />
           <div>
             <h4 className="text-xs font-semibold text-breezy-icy leading-none">{post.authorName}</h4>
             <p className="text-[10px] font-mono text-white/45 mt-0.5">{post.authorUsername}</p>
           </div>
-        </div>
+        </button>
         
-        <div className="flex items-center gap-1.5">
+        <div className={`flex items-center gap-1.5 ${post.pinned ? 'pr-6' : ''}`}>
           <span className="text-[8.5px] font-mono text-white/30">{post.timestamp}</span>
+          {canManage && (
+            <div className="relative">
+              <button
+                onClick={() => setIsMenuOpen((prev) => !prev)}
+                className="p-1.5 rounded-lg hover:bg-white/5 text-white/45 hover:text-breezy-neon"
+                title="Options"
+              >
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+
+              {isMenuOpen && (
+                <div className="absolute right-0 top-8 z-30 w-40 rounded-xl border border-white/10 bg-[#09090d] shadow-2xl p-1.5 flex flex-col gap-1">
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      onToggleArchive(post.id);
+                    }}
+                    className="w-full px-3 py-2 rounded-lg hover:bg-white/[0.07] text-left text-[13px] leading-4 text-breezy-icy flex items-center gap-2"
+                  >
+                    <Archive className="w-3.5 h-3.5" />
+                    {post.archived ? 'Restaurer' : 'Archiver'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      onTogglePin(post.id);
+                    }}
+                    className="w-full px-3 py-2 rounded-lg hover:bg-white/[0.07] text-left text-[13px] leading-4 text-breezy-icy flex items-center gap-2"
+                  >
+                    <Pin className="w-3.5 h-3.5" />
+                    {post.pinned ? 'Retirer pin' : 'Epingler'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      onDeletePost(post.id, post.title || post.content);
+                    }}
+                    className="w-full px-3 py-2 rounded-lg hover:bg-rose-500/10 text-left text-[13px] leading-4 text-rose-300 flex items-center gap-2"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Supprimer
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
           {/* Marque-page pour sauvegarder le post */}
           <button
             onClick={() => onToggleStar(post.id)}
@@ -77,18 +156,28 @@ export default function PostCard({
         </div>
       </div>
 
+      {post.title && (
+        <h3 className="text-[18px] md:text-[22px] leading-6 md:leading-7 font-bold text-breezy-icy break-words pl-0.5">
+          {post.title}
+        </h3>
+      )}
+
       {/* Le texte du post */}
       <p className="text-xs text-white/85 leading-relaxed tracking-tight break-words pl-0.5 font-sans">
         {post.content}
       </p>
 
       {/* Image optionnelle jointe au post */}
-      {post.image && (
-        <div className="relative h-44 rounded-xl overflow-hidden border border-white/10 mt-1">
-          <img src={post.image} className="w-full h-full object-cover" alt="Image du post" />
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-            <span className="text-[8.5px] font-mono text-white/60 bg-black/40 px-1.5 py-0.5 rounded border border-white/10">IMAGE</span>
-          </div>
+      {mediaImages.length > 0 && (
+        <div className="grid grid-cols-6 grid-rows-6 gap-1.5 aspect-square max-h-[560px] rounded-xl overflow-hidden border border-white/10 mt-1 bg-black/20">
+          {mediaImages.map((image, index) => (
+            <div
+              key={`${image.slice(0, 24)}-${index}`}
+              className={`relative overflow-hidden bg-white/5 ${getImageTileClass(mediaImages.length, index)}`}
+            >
+              <img src={getMediaUrl(image)} className="w-full h-full object-cover" alt="Image du post" />
+            </div>
+          ))}
         </div>
       )}
 

@@ -49,7 +49,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
   // Crée une nouvelle conversation ou ouvre celle qui existe déjà
   const handleCreateConvSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!contactName.trim() || !contactUsername.trim()) return;
+    if (!contactUsername.trim()) return;
 
     playChime();
     setIsSelectContactOpen(false);
@@ -64,7 +64,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
 
     try {
       const newConv = await conversationService.createRemoteConversation({
-        name: contactName,
+        name: contactName.trim() || normalizeUsername(contactUsername),
         username: contactUsername,
         avatar: contactAvatar,
       });
@@ -160,6 +160,45 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
               </div>
               <span className="text-[10px] font-mono text-white/40 tracking-wider">MESSAGERIE</span>
             </div>
+
+            <AnimatePresence>
+              {isSelectContactOpen && (
+                <motion.form
+                  key="contact-search"
+                  onSubmit={handleCreateConvSubmit}
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  className="glassmorphic rounded-2xl border border-white/10 p-3 flex flex-col md:flex-row gap-2"
+                >
+                  <input
+                    type="text"
+                    value={contactUsername}
+                    onChange={(e) => {
+                      setContactUsername(e.target.value);
+                      setContactName(e.target.value.replace(/^@/, ''));
+                    }}
+                    placeholder="Rechercher un utilisateur @username"
+                    className="flex-1 text-xs font-sans rounded-xl bg-white/[0.04] p-3 text-breezy-icy placeholder-white/35 border border-white/5 focus:outline-none focus:border-breezy-border-active transition"
+                    autoFocus
+                  />
+                  <button
+                    type="submit"
+                    disabled={!contactUsername.trim()}
+                    className="px-4 py-2.5 rounded-xl bg-breezy-icy hover:bg-breezy-neon text-slate-950 font-sans font-bold text-xs transition disabled:opacity-50"
+                  >
+                    Ouvrir
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsSelectContactOpen(false)}
+                    className="px-3 py-2.5 rounded-xl border border-white/10 text-white/70 hover:text-white"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </motion.form>
+              )}
+            </AnimatePresence>
 
             <div className="flex flex-col gap-2.5 mt-1">
               {conversations.length === 0 ? (
@@ -332,7 +371,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
 
       {/* VUE 3 : Formulaire pour démarrer une nouvelle conversation */}
       <AnimatePresence>
-        {isSelectContactOpen && (
+        {false && isSelectContactOpen && (
           <div className="absolute inset-0 z-50 flex items-center justify-center p-6">
             <motion.div
               initial={{ opacity: 0 }}
