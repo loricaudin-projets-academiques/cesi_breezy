@@ -55,6 +55,10 @@ export class MockAuthService implements IAuthService {
     return user || INITIAL_USER;
   }
 
+  async fetchCurrentUser(): Promise<UserProfile> {
+    return this.getCurrentUser();
+  }
+
   // Met à jour les infos du profil dans le stockage local
   saveCurrentUser(user: UserProfile): void {
     this.storage.set<UserProfile>(KEYS.currentUser, user);

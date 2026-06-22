@@ -4,17 +4,20 @@ function normalizeUsername(username) {
 }
 
 function toPublicUser(user) {
+  const plainUser = typeof user.get === "function" ? user.get({ plain: true }) : user;
+
   return {
-    name: user.name,
-    username: user.username,
-    bio: user.bio,
-    followers: user.followers,
-    following: user.following,
-    friends: user.friends,
-    avatar: user.avatar,
-    note: user.note,
-    music: user.music,
-    role: user.role,
+    id: plainUser.id,
+    name: plainUser.name,
+    username: plainUser.username,
+    bio: plainUser.bio,
+    followers: plainUser.followers,
+    following: plainUser.following,
+    friends: plainUser.friends,
+    avatar: plainUser.avatar,
+    note: plainUser.note,
+    music: plainUser.music,
+    role: plainUser.role,
   };
 }
 

@@ -12,6 +12,7 @@ export interface IFeedService {
   saveComments(comments: CommentsByPost): void;
   createPost(author: UserProfile, content: string, category: PostCategory, image?: string): Post;
   fetchPosts(): Promise<Post[]>;
+  fetchUserPosts(username: string): Promise<Post[]>;
   fetchComments(postId?: string): Promise<CommentsByPost>;
   createRemotePost(payload: { content: string; category: PostCategory; image?: string }): Promise<Post>;
   addComment(postId: string, text: string): Promise<Comment>;

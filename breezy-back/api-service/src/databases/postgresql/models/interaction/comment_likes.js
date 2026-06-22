@@ -6,7 +6,7 @@ const Comment_Like = sequelize.define(
     {
         id: {
             type: DataTypes.UUID,
-            allowNull: false,
+            defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
         },
         user_id: {
@@ -20,7 +20,17 @@ const Comment_Like = sequelize.define(
         },
         created_at: {
             type: DataTypes.DATE,
+            defaultValue: DataTypes.NOW,
         }
+    },
+    {
+        indexes: [
+            {
+                unique: true,
+                fields: ["user_id", "comment_id"],
+            },
+        ],
+        timestamps: true,
     }
 );
 

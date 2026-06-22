@@ -154,6 +154,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
           isOpen={profile.showFollowersModal}
           onClose={() => profile.setShowFollowersModal(false)}
           type={profile.followersModalType}
+          members={profile.socialLists[profile.followersModalType]}
+          isLoading={profile.isSocialListLoading}
           triggerToast={triggerToast}
         />
 

@@ -1,8 +1,8 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from "../../../../config/databases/postgresql.js";
 
-const Post_Like = sequelize.define(
-    'Post_Like',
+const Post_Star = sequelize.define(
+    'Post_Star',
     {
         id: {
             type: DataTypes.UUID,
@@ -12,11 +12,10 @@ const Post_Like = sequelize.define(
         user_id: {
             type: DataTypes.UUID,
             allowNull: false,
-            // fk of Auth_User collection
         },
         post_id: {
             type: DataTypes.STRING,
-            // fk of Post collection
+            allowNull: false,
         },
         created_at: {
             type: DataTypes.DATE,
@@ -30,8 +29,8 @@ const Post_Like = sequelize.define(
                 fields: ["user_id", "post_id"],
             },
         ],
-        timestamps: true,
+        timestamps: false,
     }
 );
 
-export default Post_Like;
+export default Post_Star;
