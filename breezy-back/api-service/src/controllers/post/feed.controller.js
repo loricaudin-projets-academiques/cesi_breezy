@@ -1,5 +1,3 @@
-import { users, posts, commentsByPost, likedPostsByUser, starredPostsByUser } from "../../data/memory-store.js";
-import { createId } from "../../utils/ids.js";
 import feedService from "../../services/post/feed.service.js";
 
 function nowLabel() {
@@ -26,57 +24,65 @@ function getPostForUser(post, username) {
 }
 
 async function fetchPosts(req, res) {
+    const userId = req.user.id;
     const category = req.query.category;
-    const visiblePosts = category
-        ? posts.filter((post) => post.category === category)
-        : posts;
 
-    const result = feedService.getAllPosts();
-    return res.json(visiblePosts.map((post) => getPostForUser(post, req.user.username)));
+    const data = await feedService.getPosts({
+        userId,
+        category,
+    });
+
+    res.json(data);
 }
 
 async function createPost(req, res) {
-  const currentUser = users.get(req.user.username);
 
-  if (!currentUser) {
-    return res.status(401).json({ message: "Utilisateur introuvable." });
-  }
+    const userId = req.user.id;
 
-  const content = String(req.body.content || "").trim();
-  const category = req.body.category || "for-you";
+    const content = req.body.content;
+    const category = req.body.category;
+    const image = req.body.image;
 
-  if (!content) {
-    return res.status(400).json({ message: "Le contenu du post est obligatoire." });
-  }
 
-  const post = {
-    id: createId("post"),
-    authorName: currentUser.name,
-    authorUsername: currentUser.username,
-    avatar: currentUser.avatar,
-    content,
-    timestamp: nowLabel(),
-    likes: 0,
-    comments: 0,
-    shares: 0,
-    likedByUser: false,
-    starredByUser: false,
-    category,
-    image: req.body.image || undefined,
-  };
+    const result = await feedService.createPost({
+        userId,
+        content,
+        category,
+        image,
+    });
 
-  posts.unshift(post);
-  return res.status(201).json(getPostForUser(post, req.user.username));
+
+    if (result.error) {
+        return res
+            .status(result.status)
+            .json(result.error);
+    }
+
+
+    res
+        .status(201)
+        .json(result.data);
 };
 
-async function fetchComments(req, res) { // TODO : Déplacer une partie dans le service et faire appel à la BDD
-  const postId = req.query.postId;
 
-  if (postId) {
-    return res.json({ [postId]: commentsByPost.get(postId) || [] });
-  }
+async function fetchComments(req, res) {
 
-  return res.json(Object.fromEntries(commentsByPost.entries()));
+    const postId = req.query.postId;
+
+
+    const result = await feedService.getAllComments({
+        postId,
+    });
+
+
+    if (result.error) {
+        return res
+            .status(result.status)
+            .json(result.error);
+    }
+
+
+    res.json(result.data);
 }
 
 async function createPostComment(req, res) {
@@ -84,8 +90,7 @@ async function createPostComment(req, res) {
         const postId = req.params.postId;
         const { content, parentCommentId } = req.body;
 
-        //const currentUserId = req.user.id;
-        const currentUserId = "test";
+        const currentUserId = req.user.id;
 
         const comment = await feedService.createPostComment({
             postId,
@@ -103,45 +108,52 @@ async function createPostComment(req, res) {
     }
 };
 
-const likePost = (req, res) => { // TODO : Déplacer une partie dans le service et faire appel à la BDD
-  const post = posts.find((item) => item.id === req.params.postId);
-  if (!post) {
-    return res.status(404).json({ message: "Post introuvable." });
-  }
+async function toggleLikePost(req, res) {
 
-  const liked = getSet(likedPostsByUser, req.user.username);
-  if (liked.has(post.id)) {
-    liked.delete(post.id);
-    post.likes = Math.max(0, post.likes - 1);
-  } else {
-    liked.add(post.id);
-    post.likes += 1;
-  }
+    const userId = req.user.id;
+    const postId = req.params.postId;
 
-  return res.json(getPostForUser(post, req.user.username));
-};
 
-const starPost = (req, res) => { // TODO : Déplacer une partie dans le service et faire appel à la BDD
-  const post = posts.find((item) => item.id === req.params.postId);
-  if (!post) {
-    return res.status(404).json({ message: "Post introuvable." });
-  }
+    const result = await feedService.toggleLike({
+        userId,
+        postId,
+    });
 
-  const starred = getSet(starredPostsByUser, req.user.username);
-  if (starred.has(post.id)) {
-    starred.delete(post.id);
-  } else {
-    starred.add(post.id);
-  }
 
-  return res.json(getPostForUser(post, req.user.username));
-};
+    if (result.error) {
+        return res
+            .status(result.status)
+            .json(result.error);
+    }
+
+    res.json(result.data);
+}
+
+async function toggleStarPost(req, res) {
+
+    const userId = req.user.id;
+    const postId = req.params.postId;
+
+
+    const result = await feedService.toggleStar({
+        userId,
+        postId,
+    });
+
+    if (result.error) {
+        return res
+            .status(result.status)
+            .json(result.error);
+    }
+
+    res.json(result.data);
+}
 
 export {
     fetchPosts,
     createPost,
     fetchComments,
     createPostComment,
-    likePost,
-    starPost,
+    toggleLikePost,
+    toggleStarPost,
 };
