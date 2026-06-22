@@ -17,9 +17,11 @@ export default function ProfilePage() {
     postInteractions,
   } = useBreezyApp();
 
+  const { refreshCurrentUser } = profile;
+
   useEffect(() => {
-    void profile.refreshCurrentUser();
-  }, [profile.refreshCurrentUser]);
+    void refreshCurrentUser();
+  }, [refreshCurrentUser]);
 
   const handleProfileSubTabChange = (tab: ProfileSubTab) => {
     setActiveProfileSubTab(tab);
