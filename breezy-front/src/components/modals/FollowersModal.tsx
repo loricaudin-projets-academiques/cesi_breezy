@@ -5,8 +5,7 @@
 
 import { motion, AnimatePresence } from 'motion/react';
 import { UserCheck, UserPlus } from 'lucide-react';
-import { ProfileStatType } from '../../types';
-import { INITIAL_FOLLOWERS } from '../../mockData';
+import { Follower, ProfileStatType } from '../../types';
 import { playTick } from '../../audio';
 import { getAvatarUrl } from '../Avatar';
 
@@ -14,11 +13,13 @@ interface FollowersModalProps {
   isOpen: boolean;
   onClose: () => void;
   type: ProfileStatType;
+  members: Follower[];
+  isLoading: boolean;
   triggerToast: (msg: string) => void;
 }
 
 // Modal qui affiche la liste des abonnés, abonnements ou amis
-export default function FollowersModal({ isOpen, onClose, type, triggerToast }: FollowersModalProps) {
+export default function FollowersModal({ isOpen, onClose, type, members, isLoading, triggerToast }: FollowersModalProps) {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -49,18 +50,22 @@ export default function FollowersModal({ isOpen, onClose, type, triggerToast }: 
                 {type === 'following' && 'Abonnements'}
                 {type === 'friends' && 'Amis proches'}
               </span>
-              <span className="text-[10px] font-mono text-white/30">LOCAL</span>
+              <span className="text-[10px] font-mono text-white/30">DB</span>
             </div>
 
             {/* Liste des membres — scrollable si elle déborde */}
             <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col gap-2.5">
-              {INITIAL_FOLLOWERS.length === 0 ? (
+              {isLoading ? (
+                <div className="py-8 text-center text-white/30 text-[10.5px] font-sans">
+                  Synchronisation...
+                </div>
+              ) : members.length === 0 ? (
                 <div className="py-8 text-center text-white/30 text-[10.5px] font-sans">
                   Personne dans cette liste pour l'instant.
                 </div>
               ) : (
-                INITIAL_FOLLOWERS.map((m, idx) => (
-                  <div key={idx} className="p-2 bg-white/[0.02] border border-white/5 rounded-xl flex items-center justify-between gap-2">
+                members.map((m) => (
+                  <div key={m.username} className="p-2 bg-white/[0.02] border border-white/5 rounded-xl flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       {/* Avatar généré ou personnalisé */}
                       <img src={getAvatarUrl(m.avatar, m.username, m.name)} className="w-7 h-7 rounded-full object-cover border border-white/10" alt="" />

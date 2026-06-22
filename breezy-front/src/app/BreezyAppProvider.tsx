@@ -53,9 +53,9 @@ function useBreezyAppState() {
     }
   };
 
-  const handleRegister = async (name: string, username: string, passkey: string, apiUrl: string) => {
+  const handleRegister = async (name: string, username: string, email: string, passkey: string, apiUrl: string) => {
     try {
-      openSession(await authService.register(name, username, passkey, apiUrl));
+      openSession(await authService.register(name, username, email, passkey, apiUrl));
     } catch (error) {
       triggerToast(getErrorMessage(error, "Erreur lors de l'inscription."));
       throw error;

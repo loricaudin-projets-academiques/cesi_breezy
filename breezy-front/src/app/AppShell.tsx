@@ -93,7 +93,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <NotificationToast toasts={toasts} onRemove={handleRemoveToast} />
 
         {isLoginRoute ? (
-          children
+          <div className="flex-1 overflow-y-auto no-scrollbar">
+            {children}
+          </div>
         ) : (
           <>
             <div className="pt-8 px-4 pb-2.5 flex justify-between items-center bg-[#050508]/80 backdrop-blur-xl border-b border-white/[0.04] shrink-0 z-30">
@@ -154,6 +156,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
           isOpen={profile.showFollowersModal}
           onClose={() => profile.setShowFollowersModal(false)}
           type={profile.followersModalType}
+          members={profile.socialLists[profile.followersModalType]}
+          isLoading={profile.isSocialListLoading}
           triggerToast={triggerToast}
         />
 

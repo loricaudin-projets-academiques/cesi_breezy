@@ -10,13 +10,10 @@ import { Conversation, MessageItem } from '../types';
 import { playTick, playMessageSound, playChime } from '../audio';
 import { conversationService } from '../services/ServiceContainer';
 import { normalizeUsername } from '../utils/username';
+import { getErrorMessage } from '../utils/errors';
 import Avatar from './Avatar';
 
 // Heure courante au format HH:MM — affichée sous chaque bulle de message
-function currentTimeLabel(): string {
-  return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}
-
 // Applique une transformation à une seule conversation de la liste
 function updateConversation(
   conversations: Conversation[],
@@ -50,7 +47,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
   const selectedConv = conversations.find(c => c.id === activeConvId);
 
   // Crée une nouvelle conversation ou ouvre celle qui existe déjà
-  const handleCreateConvSubmit = (e: React.FormEvent) => {
+  const handleCreateConvSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!contactName.trim() || !contactUsername.trim()) return;
 
@@ -65,17 +62,22 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
       return;
     }
 
-    // C'est le service qui sait construire une conversation valide
-    const newConv = conversationService.createConversation(contactName, contactUsername, contactAvatar);
+    try {
+      const newConv = await conversationService.createRemoteConversation({
+        name: contactName,
+        username: contactUsername,
+        avatar: contactAvatar,
+      });
 
-    onUpdateConversations((prev) => [newConv, ...prev]);
-    setActiveConvId(newConv.id);
-
-    // On remet les champs du formulaire à vide
-    setContactName('');
-    setContactUsername('');
-    setContactAvatar('');
-    triggerToast(`Chat ouvert avec ${newConv.name}`);
+      onUpdateConversations((prev) => [newConv, ...prev.filter((conv) => conv.id !== newConv.id)]);
+      setActiveConvId(newConv.id);
+      setContactName('');
+      setContactUsername('');
+      setContactAvatar('');
+      triggerToast(`Chat ouvert avec ${newConv.name}`);
+    } catch (error) {
+      triggerToast(getErrorMessage(error, "Impossible d'ouvrir ce chat. Verifie que l'utilisateur existe."));
+    }
   };
 
   // Scroll automatique vers le bas quand un nouveau message arrive
@@ -106,41 +108,27 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
   };
 
   // Envoie notre message et attend la réponse (API ou bot local — c'est le service qui gère)
-  const handleSendMessage = (e?: React.FormEvent) => {
+  const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!inputText.trim() || !activeConvId || !selectedConv) return;
 
     const userMessage = inputText.trim();
     const convId = activeConvId;
-    const contact = { name: selectedConv.name, username: selectedConv.username };
-
-    appendMessage(convId, {
-      id: `me-${Date.now()}`,
-      sender: 'me',
-      text: userMessage,
-      time: currentTimeLabel()
-    });
     setInputText('');
-    playMessageSound(true);
-
     // On affiche les trois points "en train d'écrire..."
     setIsTyping(true);
 
     // On attend 1.5 secondes pour simuler un délai de frappe humain
-    setTimeout(async () => {
-      const replyText = await conversationService.fetchReply(userMessage, contact);
-
-      appendMessage(convId, {
-        id: `bot-${Date.now()}`,
-        sender: 'them',
-        text: replyText,
-        time: currentTimeLabel()
-      });
-
+    try {
+      const savedMessage = await conversationService.sendMessage(convId, userMessage);
+      appendMessage(convId, savedMessage);
       setIsTyping(false);
-      playMessageSound(false);
-      triggerToast(`Nouveau message de ${contact.name}`);
-    }, 1500);
+      playMessageSound(true);
+    } catch (error) {
+      setInputText(userMessage);
+      setIsTyping(false);
+      triggerToast(getErrorMessage(error, "Message non envoye."));
+    }
   };
 
   return (

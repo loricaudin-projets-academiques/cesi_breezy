@@ -1,4 +1,4 @@
-import { api, API_TOKEN_STORAGE_KEY } from "../api";
+import { api, API_TOKEN_STORAGE_KEY, setApiBaseUrl } from "../api";
 import { IAuthService } from "./IAuthService";
 import { IStorageProvider } from "../storage/IStorageProvider";
 import { UserProfile } from "../../types";
@@ -31,11 +31,19 @@ export class HttpAuthService implements IAuthService {
     return this.storage.get<UserProfile>(KEYS.currentUser) || INITIAL_USER;
   }
 
+  async fetchCurrentUser(): Promise<UserProfile> {
+    setApiBaseUrl(this.getApiUrl());
+    const { data } = await api.get<UserProfile>("/users/me");
+    this.saveCurrentUser(data);
+    return data;
+  }
+
   saveCurrentUser(user: UserProfile): void {
     this.storage.set<UserProfile>(KEYS.currentUser, user);
   }
 
   async login(username: string, passkey: string, apiUrl: string): Promise<UserProfile> {
+    setApiBaseUrl(apiUrl);
     const { data } = await api.post<AuthResponse>("/auth/login", {
       username,
       password: passkey,
@@ -45,10 +53,12 @@ export class HttpAuthService implements IAuthService {
     return data.user;
   }
 
-  async register(name: string, username: string, passkey: string, apiUrl: string): Promise<UserProfile> {
+  async register(name: string, username: string, email: string, passkey: string, apiUrl: string): Promise<UserProfile> {
+    setApiBaseUrl(apiUrl);
     const { data } = await api.post<AuthResponse>("/auth/register", {
       name,
       username,
+      email,
       password: passkey,
     });
 
@@ -67,6 +77,7 @@ export class HttpAuthService implements IAuthService {
   }
 
   private startSession(user: UserProfile, token: string, apiUrl: string): void {
+    setApiBaseUrl(apiUrl);
     this.storage.set<boolean>(KEYS.isLoggedIn, true);
     this.storage.set<string>(KEYS.apiUrl, apiUrl.trim() || DEFAULT_API_URL);
     this.saveCurrentUser(user);

@@ -5,8 +5,7 @@
 
 import { motion } from 'motion/react';
 import { Zap, Menu, Edit2, Music, Gamepad2, ImageIcon, Link as LinkIcon, Sparkles } from 'lucide-react';
-import { UserProfile, Post, ProfileStatType, ProfileSubTab } from '../types';
-import { INITIAL_FOLLOWERS } from '../mockData';
+import { Follower, UserProfile, Post, ProfileStatType, ProfileSubTab } from '../types';
 import SpotifyWidget from '../components/SpotifyWidget';
 import PostCard, { PostInteractionHandlers, PostListState } from '../components/PostCard';
 import { getAvatarUrl } from '../components/Avatar';
@@ -15,6 +14,8 @@ import { playTick, playChime } from '../audio';
 interface ProfileScreenProps extends PostInteractionHandlers, PostListState {
   user: UserProfile;
   posts: Post[];
+  socialMembers: Follower[];
+  isSocialListLoading: boolean;
   activeProfileSubTab: ProfileSubTab;
   setActiveProfileSubTab: (tab: ProfileSubTab) => void;
   onOpenHamburger: () => void;
@@ -33,6 +34,8 @@ const PROFILE_SUB_TABS: ProfileSubTab[] = ['posts', 'followers', 'following', 'f
 export default function ProfileScreen({
   user,
   posts,
+  socialMembers,
+  isSocialListLoading,
   activeProfileSubTab,
   setActiveProfileSubTab,
   onOpenHamburger,
@@ -356,11 +359,7 @@ export default function ProfileScreen({
               {activeProfileSubTab === 'friends' && "Amis proches"}
             </h5>
           </div>
-          {INITIAL_FOLLOWERS.filter((f) => {
-            if (activeProfileSubTab === 'friends') return f.followsMe && f.followedByMe;
-            if (activeProfileSubTab === 'following') return f.followedByMe;
-            return true; // tous pour "followers"
-          }).map((follower) => (
+          {(isSocialListLoading ? [] : socialMembers).map((follower) => (
             <div
               key={follower.username}
               className="glass rounded-[20px] p-3 flex items-center justify-between border border-white/5 shadow-md text-left"
@@ -383,6 +382,16 @@ export default function ProfileScreen({
               </button>
             </div>
           ))}
+          {isSocialListLoading && (
+            <div className="py-8 text-center text-white/30 text-[10.5px] font-sans">
+              Synchronisation...
+            </div>
+          )}
+          {!isSocialListLoading && socialMembers.length === 0 && (
+            <div className="py-8 text-center text-white/30 text-[10.5px] font-sans">
+              Personne dans cette liste pour l'instant.
+            </div>
+          )}
         </div>
       )}
 

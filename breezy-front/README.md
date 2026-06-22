@@ -29,7 +29,7 @@ The app runs at **http://localhost:3000**.
 
 | Variable | Description |
 |---|---|
-| `NEXT_PUBLIC_API_URL` | Backend API base URL, for example `http://localhost:3001/api` |
+| `NEXT_PUBLIC_API_URL` | Backend API base URL, for example `http://localhost:80/api` |
 
 ## Architecture
 

@@ -55,6 +55,10 @@ export class MockAuthService implements IAuthService {
     return user || INITIAL_USER;
   }
 
+  async fetchCurrentUser(): Promise<UserProfile> {
+    return this.getCurrentUser();
+  }
+
   // Met à jour les infos du profil dans le stockage local
   saveCurrentUser(user: UserProfile): void {
     this.storage.set<UserProfile>(KEYS.currentUser, user);
@@ -84,9 +88,12 @@ export class MockAuthService implements IAuthService {
   }
 
   // Crée un nouveau compte et connecte directement l'utilisateur
-  async register(name: string, username: string, passkey: string, apiUrl: string): Promise<UserProfile> {
+  async register(name: string, username: string, email: string, passkey: string, apiUrl: string): Promise<UserProfile> {
     if (!name.trim()) {
       throw new Error("Le nom complet est requis.");
+    }
+    if (!email.trim()) {
+      throw new Error("L'adresse email est requise.");
     }
     this.assertCredentials(username, passkey);
 

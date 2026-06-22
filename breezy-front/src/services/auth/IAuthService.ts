@@ -13,8 +13,9 @@ export interface IAuthService {
   isLoggedIn(): boolean;
   getApiUrl(): string;
   getCurrentUser(): UserProfile;
+  fetchCurrentUser(): Promise<UserProfile>;
   saveCurrentUser(user: UserProfile): void;
   login(username: string, passkey: string, apiUrl: string): Promise<UserProfile>;
-  register(name: string, username: string, passkey: string, apiUrl: string): Promise<UserProfile>;
+  register(name: string, username: string, email: string, passkey: string, apiUrl: string): Promise<UserProfile>;
   logout(): void;
 }
