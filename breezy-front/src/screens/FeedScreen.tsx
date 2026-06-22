@@ -27,6 +27,9 @@ export default function FeedScreen({
   onToggleComments,
   onCommentDraftChange,
   onAddComment,
+  onToggleArchive,
+  onTogglePin,
+  onDeletePost,
   triggerToast
 }: FeedScreenProps) {
   return (
@@ -81,6 +84,10 @@ export default function FeedScreen({
               onToggleComments={onToggleComments}
               onCommentDraftChange={onCommentDraftChange}
               onAddComment={onAddComment}
+              onToggleArchive={onToggleArchive}
+              onTogglePin={onTogglePin}
+              onDeletePost={onDeletePost}
+              canArchive={post.canArchive}
               triggerToast={triggerToast}
             />
           ))}

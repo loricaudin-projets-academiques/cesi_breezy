@@ -21,7 +21,8 @@ app.use(cors({
   origin: process.env.CORS_ORIGIN || "http://localhost:3000",
   credentials: true,
 }));
-app.use(json());
+app.use(json({ limit: "25mb" }));
+app.use("/uploads", express.static(resolve(process.cwd(), "uploads")));
 const port = 3000;
 
 const start = async () => {

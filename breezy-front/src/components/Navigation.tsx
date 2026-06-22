@@ -4,7 +4,8 @@
  */
 
 import { motion, AnimatePresence } from 'motion/react';
-import { Home, Search, MessageSquare, User } from 'lucide-react';
+import { Archive, Bookmark, Heart, Home, LogOut, Menu, MessageSquare, Search, Settings, User } from 'lucide-react';
+import type { PanelView } from './HamburgerPanel';
 
 export type TabType = 'home' | 'search' | 'messages' | 'profile';
 
@@ -12,13 +13,23 @@ interface NavigationProps {
   activeTab: TabType;
   onTabChange: (tab: TabType) => void;
   hasUnreadMessages: boolean; // Vrai s'il y a des messages non lus (affiche la pastille)
+  onOpenMenu?: () => void;
+  onOpenPanel?: (view: PanelView) => void;
+  onLogout?: () => void;
 }
 
 // Barre de navigation flottante en bas du téléphone
-export default function Navigation({ activeTab, onTabChange, hasUnreadMessages }: NavigationProps) {
+export default function Navigation({ activeTab, onTabChange, hasUnreadMessages, onOpenMenu, onOpenPanel, onLogout }: NavigationProps) {
+  const menuItems = [
+    { icon: Settings, label: 'Parametres', view: 'settings' as const },
+    { icon: Archive, label: 'Archive', view: 'archive' as const },
+    { icon: Heart, label: 'Likes', view: 'liked' as const },
+    { icon: Bookmark, label: 'Favoris', view: 'saved' as const },
+  ];
+
   return (
-    <div className="absolute bottom-6 left-6 right-6 z-40">
-      <div className="glassmorphism rounded-full p-2 px-4 flex items-center justify-around h-16 shadow-[0_12px_36px_rgba(0,0,0,0.85)] select-none">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 md:left-6 md:top-1/2 md:bottom-auto md:translate-y-[-50%] md:translate-x-0 z-40 w-[min(92vw,520px)] md:w-[116px]">
+      <div className="glassmorphism rounded-full md:rounded-3xl p-2 px-4 md:px-3 md:py-5 flex md:flex-col items-center justify-around md:justify-center md:gap-4 h-16 md:h-auto shadow-[0_12px_36px_rgba(0,0,0,0.85)] select-none">
         
         {/* Accueil */}
         <button
@@ -28,7 +39,7 @@ export default function Navigation({ activeTab, onTabChange, hasUnreadMessages }
             activeTab === 'home' ? 'text-white' : 'text-white/45 hover:text-white/70'
           }`}
         >
-          <Home className={`w-5 h-5 ${activeTab === 'home' ? 'active-nav-glow' : ''}`} />
+            <Home className={`w-5 h-5 md:w-6 md:h-6 ${activeTab === 'home' ? 'active-nav-glow' : ''}`} />
           <AnimatePresence>
             {activeTab === 'home' && (
               // Petit point lumineux qui glisse sous l'onglet actif grâce au layoutId partagé
@@ -48,7 +59,7 @@ export default function Navigation({ activeTab, onTabChange, hasUnreadMessages }
             activeTab === 'search' ? 'text-white' : 'text-white/45 hover:text-white/70'
           }`}
         >
-          <Search className={`w-5 h-5 ${activeTab === 'search' ? 'active-nav-glow' : ''}`} />
+          <Search className={`w-5 h-5 md:w-6 md:h-6 ${activeTab === 'search' ? 'active-nav-glow' : ''}`} />
           <AnimatePresence>
             {activeTab === 'search' && (
               <motion.div
@@ -68,7 +79,7 @@ export default function Navigation({ activeTab, onTabChange, hasUnreadMessages }
           }`}
         >
           <div className="relative">
-            <MessageSquare className={`w-5 h-5 ${activeTab === 'messages' ? 'active-nav-glow' : ''}`} />
+            <MessageSquare className={`w-5 h-5 md:w-6 md:h-6 ${activeTab === 'messages' ? 'active-nav-glow' : ''}`} />
             {/* Pastille violette quand on a des messages non lus */}
             {hasUnreadMessages && (
               <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-breezy-lavender border border-slate-950 block glow-lavender" />
@@ -92,7 +103,7 @@ export default function Navigation({ activeTab, onTabChange, hasUnreadMessages }
             activeTab === 'profile' ? 'text-white' : 'text-white/45 hover:text-white/70'
           }`}
         >
-          <User className={`w-5 h-5 ${activeTab === 'profile' ? 'active-nav-glow' : ''}`} />
+          <User className={`w-5 h-5 md:w-6 md:h-6 ${activeTab === 'profile' ? 'active-nav-glow' : ''}`} />
           <AnimatePresence>
             {activeTab === 'profile' && (
               <motion.div
@@ -102,6 +113,38 @@ export default function Navigation({ activeTab, onTabChange, hasUnreadMessages }
             )}
           </AnimatePresence>
         </button>
+
+        <div className="hidden md:flex w-full flex-col items-center gap-2 pt-3 mt-1 border-t border-white/10">
+          {menuItems.map(({ icon: Icon, label, view }) => (
+            <button
+              key={label}
+              onClick={() => onOpenPanel?.(view)}
+              className="w-full flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-2xl text-white/55 hover:text-breezy-neon hover:bg-white/[0.04] transition"
+              title={label}
+            >
+              <Icon className="w-5 h-5" />
+              <span className="text-[12px] leading-4 font-bold">{label}</span>
+            </button>
+          ))}
+
+          <button
+            onClick={onOpenMenu}
+            className="w-full flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-2xl text-white/55 hover:text-breezy-neon hover:bg-white/[0.04] transition"
+            title="Menu"
+          >
+            <Menu className="w-5 h-5" />
+            <span className="text-[12px] leading-4 font-bold">Menu</span>
+          </button>
+
+          <button
+            onClick={onLogout}
+            className="w-full flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-2xl text-rose-300/75 hover:text-rose-300 hover:bg-rose-500/10 transition"
+            title="Se deconnecter"
+          >
+            <LogOut className="w-5 h-5" />
+            <span className="text-[12px] leading-4 font-bold">Sortir</span>
+          </button>
+        </div>
 
       </div>
     </div>

@@ -1,16 +1,15 @@
 "use client";
 
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence } from "motion/react";
 import { MessageSquareDiff } from "lucide-react";
 
 import { playTick } from "../audio";
 import AmbientGlow from "../components/AmbientGlow";
-import PhoneFrame from "../components/PhoneFrame";
 import Navigation, { TabType } from "../components/Navigation";
 import NotificationToast from "../components/NotificationToast";
-import HamburgerPanel from "../components/HamburgerPanel";
+import HamburgerPanel, { PanelView } from "../components/HamburgerPanel";
 import PostCreationModal from "../components/PostCreationModal";
 import NoteEditorModal from "../components/modals/NoteEditorModal";
 import BioEditorModal from "../components/modals/BioEditorModal";
@@ -32,30 +31,19 @@ function getActiveTab(pathname: string): TabType {
   return "home";
 }
 
-function getTitle(activeTab: TabType) {
-  if (activeTab === "home") {
-    return (
-      <span className="flex items-center gap-1">
-        Breezy <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-breezy-neon/10 text-breezy-neon border border-breezy-neon/20 uppercase tracking-widest leading-none glow-neon">Feed</span>
-      </span>
-    );
-  }
-
-  if (activeTab === "search") return "Search Grid";
-  if (activeTab === "messages") return "Secure Direct";
-  return "Identity Core";
-}
-
 export default function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const activeTab = getActiveTab(pathname);
   const isLoginRoute = pathname.startsWith("/login");
+  const [hamburgerInitialView, setHamburgerInitialView] = useState<PanelView>("menu");
 
   const {
     isLoggedIn,
     ambientGlow,
     setAmbientGlow,
+    isLightTheme,
+    setIsLightTheme,
     toasts,
     handleRemoveToast,
     conversations,
@@ -84,25 +72,31 @@ export default function AppShell({ children }: { children: ReactNode }) {
     router.push(tabRoutes[tab]);
   };
 
-  return (
-    <div className="min-h-screen bg-[#050505] bg-gradient-custom text-icy flex flex-col justify-center items-center p-3 relative overflow-hidden font-sans">
-      <AmbientGlow enabled={ambientGlow} />
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none z-0" />
+  const openPanel = (view: PanelView = "menu") => {
+    setHamburgerInitialView(view);
+    setIsHamburgerOpen(true);
+  };
 
-      <PhoneFrame>
+  const closePanel = () => {
+    setIsHamburgerOpen(false);
+    setHamburgerInitialView("menu");
+  };
+
+  return (
+    <div className={`${isLightTheme ? "theme-light" : ""} min-h-screen bg-[#050505] bg-gradient-custom text-icy flex flex-col items-center relative overflow-hidden font-sans`}>
+      <AmbientGlow enabled={ambientGlow && !isLightTheme} />
+      {!isLightTheme && (
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none z-0" />
+      )}
+
+      <main className="w-full min-h-screen md:max-w-[980px] md:w-[calc(100%-10rem)] md:ml-32 md:my-4 md:min-h-[calc(100vh-2rem)] md:rounded-3xl md:border md:border-white/10 bg-[#050505]/70 md:bg-[#050505]/55 flex flex-col relative overflow-hidden z-10 box-border">
         <NotificationToast toasts={toasts} onRemove={handleRemoveToast} />
 
         {isLoginRoute ? (
           children
         ) : (
           <>
-            <div className="pt-8 px-4 pb-2.5 flex justify-between items-center bg-[#050508]/80 backdrop-blur-xl border-b border-white/[0.04] shrink-0 z-30">
-              <div className="flex items-center gap-1.5 select-none">
-                <span className="text-sm font-display font-semibold text-breezy-icy uppercase tracking-wide">
-                  {getTitle(activeTab)}
-                </span>
-              </div>
-
+            <div className="pt-5 md:pt-6 px-4 md:px-8 pb-2.5 flex justify-end items-center bg-[#050508]/80 backdrop-blur-xl border-b border-white/[0.04] shrink-0 z-30">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => {
@@ -126,6 +120,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
               activeTab={activeTab}
               onTabChange={handleTabChange}
               hasUnreadMessages={conversations.conversations.some((c) => c.unreadCount > 0)}
+              onOpenMenu={() => openPanel("menu")}
+              onOpenPanel={openPanel}
+              onLogout={handleLogout}
             />
           </>
         )}
@@ -161,11 +158,23 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
         <HamburgerPanel
           isOpen={isHamburgerOpen}
-          onClose={() => setIsHamburgerOpen(false)}
+          initialView={hamburgerInitialView}
+          onClose={closePanel}
           posts={feed.posts}
           onToggleLike={feed.handleToggleLike}
           ambientGlow={ambientGlow}
           onToggleAmbientGlow={() => setAmbientGlow(!ambientGlow)}
+          isLightTheme={isLightTheme}
+          onToggleLightTheme={() => setIsLightTheme(!isLightTheme)}
+          language={profile.user.language || "fr"}
+          onToggleLanguage={() => void profile.updateCurrentUser({ language: profile.user.language === "en" ? "fr" : "en" })}
+          isPrivate={profile.user.isPrivate}
+          onTogglePrivate={() => void profile.updateCurrentUser({ isPrivate: !profile.user.isPrivate })}
+          notificationsEnabled={profile.user.notificationsEnabled !== false}
+          onToggleNotifications={() => void profile.updateCurrentUser({ notificationsEnabled: profile.user.notificationsEnabled === false })}
+          onLoadArchive={feed.loadArchivedPosts}
+          onToggleArchive={feed.handleToggleArchive}
+          onDeletePost={feed.handleDeletePost}
           triggerToast={triggerToast}
           onLogout={handleLogout}
         />
@@ -175,7 +184,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           onClose={() => setIsPostModalOpen(false)}
           onAddPost={feed.handleAddPost}
         />
-      </PhoneFrame>
+      </main>
     </div>
   );
 }

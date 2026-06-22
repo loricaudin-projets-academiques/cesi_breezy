@@ -15,6 +15,9 @@ export const INITIAL_USER: UserProfile = {
   friends: 0,
   avatar: "",
   note: "",
+  isPrivate: false,
+  language: "fr",
+  notificationsEnabled: true,
   music: {
     title: "",
     artist: "",

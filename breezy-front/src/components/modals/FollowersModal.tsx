@@ -1,10 +1,6 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import { motion, AnimatePresence } from 'motion/react';
 import { UserCheck, UserPlus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Follower, ProfileStatType } from '../../types';
 import { playTick } from '../../audio';
 import { getAvatarUrl } from '../Avatar';
@@ -18,13 +14,19 @@ interface FollowersModalProps {
   triggerToast: (msg: string) => void;
 }
 
-// Modal qui affiche la liste des abonnés, abonnements ou amis
 export default function FollowersModal({ isOpen, onClose, type, members, isLoading, triggerToast }: FollowersModalProps) {
+  const router = useRouter();
+
+  const openProfile = (username: string) => {
+    playTick();
+    onClose();
+    router.push(`/profile/${encodeURIComponent(username)}`);
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center p-6">
-          {/* Fond flouté cliquable pour fermer */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.5 }}
@@ -35,25 +37,22 @@ export default function FollowersModal({ isOpen, onClose, type, members, isLoadi
             }}
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
           />
-          
-          {/* Contenu de la modal */}
+
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
-            className="w-full max-w-xs glassmorphism-premium rounded-2.5xl p-5 border border-white/10 z-10 flex flex-col max-h-[460px]"
+            className="w-full max-w-xs glassmorphism-premium rounded-3xl p-5 border border-white/10 z-10 flex flex-col max-h-[460px]"
           >
-            {/* Titre qui change selon l'onglet sélectionné */}
             <div className="flex justify-between items-center mb-4 pb-2 border-b border-white/5">
               <span className="text-xs font-mono text-breezy-neon uppercase tracking-wider font-bold">
-                {type === 'followers' && 'Abonnés'}
+                {type === 'followers' && 'Abonnes'}
                 {type === 'following' && 'Abonnements'}
                 {type === 'friends' && 'Amis proches'}
               </span>
               <span className="text-[10px] font-mono text-white/30">DB</span>
             </div>
 
-            {/* Liste des membres — scrollable si elle déborde */}
             <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col gap-2.5">
               {isLoading ? (
                 <div className="py-8 text-center text-white/30 text-[10.5px] font-sans">
@@ -64,25 +63,36 @@ export default function FollowersModal({ isOpen, onClose, type, members, isLoadi
                   Personne dans cette liste pour l'instant.
                 </div>
               ) : (
-                members.map((m) => (
-                  <div key={m.username} className="p-2 bg-white/[0.02] border border-white/5 rounded-xl flex items-center justify-between gap-2">
+                members.map((member) => (
+                  <div
+                    key={member.username}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => openProfile(member.username)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        openProfile(member.username);
+                      }
+                    }}
+                    className="p-2 bg-white/[0.02] border border-white/5 rounded-xl flex items-center justify-between gap-2 hover:border-breezy-border-active/50 hover:bg-white/[0.04] cursor-pointer transition"
+                  >
                     <div className="flex items-center gap-2 min-w-0">
-                      {/* Avatar généré ou personnalisé */}
-                      <img src={getAvatarUrl(m.avatar, m.username, m.name)} className="w-7 h-7 rounded-full object-cover border border-white/10" alt="" />
+                      <img src={getAvatarUrl(member.avatar, member.username, member.name)} className="w-7 h-7 rounded-full object-cover border border-white/10" alt="" />
                       <div className="min-w-0">
-                        <p className="text-[10px] font-sans font-medium text-breezy-icy truncate">{m.name}</p>
-                        <p className="text-[8.5px] font-mono text-white/40 truncate">{m.username}</p>
+                        <p className="text-[10px] font-sans font-medium text-breezy-icy truncate">{member.name}</p>
+                        <p className="text-[8.5px] font-mono text-white/40 truncate">{member.username}</p>
                       </div>
                     </div>
-                    {/* Bouton d'action (follow / unfollow) */}
                     <button
-                      onClick={() => {
+                      onClick={(event) => {
+                        event.stopPropagation();
                         playTick();
-                        triggerToast(`Action effectuée pour ${m.name}`);
+                        triggerToast(`Action effectuee pour ${member.name}`);
                       }}
                       className="py-1 px-2 text-[8px] font-bold font-mono rounded bg-white/5 hover:bg-white/10 border border-white/5 transition shrink-0 active:scale-95"
                     >
-                      {m.followedByMe ? (
+                      {member.followedByMe ? (
                         <span className="text-[#AEEBFF] flex items-center gap-0.5">
                           <UserCheck className="w-2.5 h-2.5" /> suivi
                         </span>

@@ -10,17 +10,19 @@ export interface ToastItem {
   message: string;
 }
 
-export function useToast() {
+export function useToast(enabled = true) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
   const triggerToast = useCallback((message: string) => {
+    if (!enabled) return;
+
     const id = `toast-${Date.now()}`;
     setToasts((prev) => [...prev, { id, message }]);
 
     setTimeout(() => {
       setToasts((prev) => prev.filter((toast) => toast.id !== id));
     }, 3800);
-  }, []);
+  }, [enabled]);
 
   const handleRemoveToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));

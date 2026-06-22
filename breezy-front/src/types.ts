@@ -4,14 +4,13 @@
  */
 
 // Les catégories possibles d'un post — réutilisées partout (feed, modal de création, filtres)
-export type PostCategory = 'for-you' | 'following' | 'friends' | 'starred';
+export type PostCategory = 'for-you' | 'following' | 'friends';
 
 // Libellés affichés pour chaque catégorie — une seule définition pour toute l'app
 export const POST_CATEGORIES: ReadonlyArray<{ key: PostCategory; label: string }> = [
   { key: 'for-you', label: 'For You' },
   { key: 'following', label: 'Following' },
   { key: 'friends', label: 'Friends' },
-  { key: 'starred', label: 'Starred' },
 ];
 
 // Représente une publication dans le fil d'actualité
@@ -20,8 +19,10 @@ export interface Post {
   authorName: string;
   authorUsername: string;
   avatar: string;
+  title?: string;
   content: string;
   timestamp: string;
+  createdAt?: string;
   likes: number;
   comments: number;
   shares: number;
@@ -29,6 +30,11 @@ export interface Post {
   starredByUser: boolean;
   category: PostCategory;
   image?: string; // Photo optionnelle jointe au post
+  images?: string[];
+  archived?: boolean;
+  pinned?: boolean;
+  canArchive?: boolean;
+  canManage?: boolean;
 }
 
 // Un commentaire publié sous un post
@@ -82,6 +88,9 @@ export interface UserProfile {
   friends: number;
   avatar: string;
   note: string;   // La petite phrase d'humeur visible sur le profil
+  isPrivate: boolean;
+  language: 'fr' | 'en';
+  notificationsEnabled: boolean;
   music: MusicState; // La musique qu'il écoute en ce moment
 }
 
@@ -93,6 +102,7 @@ export interface Follower {
   followsMe: boolean;
   followedByMe: boolean;
   isFriend: boolean;
+  canViewPrivate?: boolean;
 }
 
 // Les trois types de statistiques sociales du profil

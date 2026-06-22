@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, MessageCircle, UserCheck, UserPlus } from "lucide-react";
+import { ArrowLeft, Lock, MessageCircle, UserCheck, UserPlus } from "lucide-react";
 
 import { playTick } from "../../../audio";
 import Avatar from "../../../components/Avatar";
@@ -16,6 +16,7 @@ import { useBreezyApp } from "../../BreezyAppProvider";
 type PublicUserProfile = UserProfile & Follower & {
   id?: string;
   isFriend?: boolean;
+  canViewPrivate?: boolean;
 };
 
 function getRouteUsername(value: string | string[] | undefined) {
@@ -137,6 +138,8 @@ export default function PublicProfilePage() {
     );
   }
 
+  const isPrivateLocked = Boolean(publicUser.isPrivate && !publicUser.canViewPrivate);
+
   return (
     <div className="p-4 flex flex-col gap-4 text-left">
       <div className="flex items-center justify-between">
@@ -150,9 +153,7 @@ export default function PublicProfilePage() {
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
-        <span className="text-[10px] font-mono tracking-widest text-[#AEEBFF] uppercase">
-          Profil public
-        </span>
+        <span />
       </div>
 
       <section className="glassmorphic rounded-2xl border border-white/5 p-4 flex flex-col gap-4">
@@ -230,7 +231,13 @@ export default function PublicProfilePage() {
           </span>
         </div>
 
-        {userPosts.length === 0 ? (
+        {isPrivateLocked ? (
+          <div className="py-12 text-center text-white/45 text-xs bg-[#0d0d12]/20 rounded-2xl border border-white/5 flex flex-col items-center gap-2">
+            <Lock className="w-7 h-7 text-breezy-lavender" />
+            <span className="font-bold text-breezy-icy">Compte privé</span>
+            <span>Ses posts, sa musique et sa note sont visibles uniquement par ses amis.</span>
+          </div>
+        ) : userPosts.length === 0 ? (
           <div className="py-10 text-center text-white/30 text-xs bg-[#0d0d12]/20 rounded-2xl border border-white/5">
             Aucun post visible pour l'instant.
           </div>

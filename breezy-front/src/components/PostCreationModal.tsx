@@ -5,46 +5,62 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Globe } from 'lucide-react';
-import { PostCategory, POST_CATEGORIES } from '../types';
+import { X, Globe, ImagePlus } from 'lucide-react';
+import { PostCategory } from '../types';
 import { playTick, playChime } from '../audio';
 
 interface PostCreationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddPost: (content: string, category: PostCategory, image?: string) => void;
+  onAddPost: (title: string, content: string, category: PostCategory, image?: string, images?: string[]) => void;
 }
 
-// Fenêtre de composition d'un nouveau post
 export default function PostCreationModal({
   isOpen,
   onClose,
   onAddPost
 }: PostCreationModalProps) {
-  // Les champs du formulaire
+  const [title, setTitle] = useState('');
   const [text, setText] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<PostCategory>('for-you');
   const [imageUrl, setImageUrl] = useState('');
+  const [localImages, setLocalImages] = useState<string[]>([]);
 
-  // Publication du post et fermeture de la modal
+  const handleImageFiles = async (files: FileList | null) => {
+    if (!files) return;
+
+    const selectedFiles = Array.from(files)
+      .filter((file) => file.type.startsWith('image/'))
+      .slice(0, Math.max(0, 5 - localImages.length));
+
+    const nextImages = await Promise.all(
+      selectedFiles.map((file) => new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      }))
+    );
+
+    setLocalImages((prev) => [...prev, ...nextImages].slice(0, 5));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!text.trim()) return;
 
-    onAddPost(text.trim(), selectedCategory, imageUrl.trim() || undefined);
+    onAddPost(title.trim(), text.trim(), 'for-you', imageUrl.trim() || undefined, localImages);
     playChime();
-    
-    // On remet les champs à vide pour la prochaine fois
+    setTitle('');
     setText('');
     setImageUrl('');
+    setLocalImages([]);
     onClose();
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center p-4">
-          {/* Fond sombre — cliquer dessus ferme la modal */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.6 }}
@@ -53,7 +69,6 @@ export default function PostCreationModal({
             className="absolute inset-0 bg-black/80 backdrop-blur-md cursor-pointer"
           />
 
-          {/* La modal elle-même */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0, y: 15 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -61,67 +76,86 @@ export default function PostCreationModal({
             transition={{ type: "spring", damping: 25, stiffness: 350 }}
             className="w-full max-w-sm glassmorphism-premium rounded-3xl p-5 border border-white/10 relative shadow-[0_20px_50px_rgba(0,0,0,0.85)] z-10 flex flex-col"
           >
-            {/* En-tête avec titre et bouton de fermeture */}
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-1.5">
                 <Globe className="w-3.5 h-3.5 text-breezy-neon" />
-                <span className="text-[10px] font-mono tracking-widest text-[#AEEBFF] uppercase select-none">
+                <span className="text-[13px] font-bold text-[#AEEBFF] uppercase select-none">
                   Nouvelle publication
                 </span>
               </div>
               <button
                 onClick={() => { playTick(); onClose(); }}
-                className="w-7 h-7 rounded-lg hover:bg-white/5 flex items-center justify-center text-white/40 hover:text-white/80 transition"
+                className="w-7 h-7 rounded-lg hover:bg-white/5 flex items-center justify-center text-white/60 hover:text-white transition"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
-              
-              {/* Choix de la catégorie de destination */}
               <div className="flex flex-col gap-1.5">
-                <span className="text-[9px] font-mono text-white/30 uppercase tracking-widest px-0.5">Catégorie</span>
-                <div className="grid grid-cols-4 gap-1.5 text-[10px]">
-                  {POST_CATEGORIES.map(({ key, label }) => {
-                    const isActive = selectedCategory === key;
-                    return (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => { playTick(); setSelectedCategory(key); }}
-                        className={`py-1.5 px-0.5 rounded-lg border text-center font-medium font-sans transition truncate ${
-                          isActive
-                            ? 'bg-breezy-icy text-slate-950 border-breezy-icy'
-                            : 'bg-white/[0.02] text-white/50 border-white/5 hover:border-white/15'
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
-                </div>
+                <span className="text-[13px] font-bold text-white/65 px-0.5">Titre</span>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Titre du post"
+                  maxLength={120}
+                  className="w-full text-[15px] leading-5 p-3 rounded-2xl glassmorphism-light text-breezy-icy placeholder-white/35 border border-white/5 focus:outline-none focus:border-breezy-border-active transition"
+                />
               </div>
 
-              {/* Zone de texte principale */}
               <div className="flex flex-col gap-1.5">
-                <span className="text-[9px] font-mono text-white/30 uppercase tracking-widest px-0.5">Ton message</span>
+                <span className="text-[13px] font-bold text-white/65 px-0.5">Description</span>
                 <textarea
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   placeholder="Quoi de neuf ?"
-                  maxLength={280}
-                  rows={4}
-                  className="w-full text-xs p-3 rounded-2xl glassmorphism-light text-breezy-icy placeholder-white/35 border border-white/5 focus:outline-none focus:border-breezy-border-active resize-none transition-all"
+                  rows={6}
+                  className="w-full text-[15px] leading-5 p-3 rounded-2xl glassmorphism-light text-breezy-icy placeholder-white/35 border border-white/5 focus:outline-none focus:border-breezy-border-active resize-none transition-all"
                 />
-                <div className="text-right text-[8px] font-mono text-white/20 mt-0.5">
-                  {text.length}/280 caractères
-                </div>
               </div>
 
-              {/* Champ optionnel pour ajouter une image par URL */}
+              <div className="flex flex-col gap-2 font-sans">
+                <span className="text-[13px] font-bold text-white/65 px-0.5">
+                  Images depuis l'appareil
+                </span>
+                <label className="w-full min-h-20 rounded-2xl glassmorphism-light border border-white/5 hover:border-breezy-border-active cursor-pointer flex flex-col items-center justify-center gap-2 text-white/65 transition">
+                  <ImagePlus className="w-5 h-5 text-breezy-neon" />
+                  <span className="text-[13px] font-bold">Choisir jusqu'a 5 images</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(event) => {
+                      void handleImageFiles(event.target.files);
+                      event.currentTarget.value = '';
+                    }}
+                  />
+                </label>
+
+                {localImages.length > 0 && (
+                  <div className={`grid gap-1.5 overflow-hidden rounded-2xl border border-white/5 p-1.5 bg-black/20 ${
+                    localImages.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
+                  }`}>
+                    {localImages.map((image, index) => (
+                      <div key={`${image.slice(0, 24)}-${index}`} className="relative aspect-square overflow-hidden rounded-xl bg-white/5">
+                        <img src={image} alt="" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => setLocalImages((prev) => prev.filter((_, itemIndex) => itemIndex !== index))}
+                          className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 text-white/80 flex items-center justify-center hover:bg-black"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="flex flex-col gap-1.5 font-sans">
-                <span className="text-[9px] font-mono text-white/30 uppercase tracking-widest px-0.5">
+                <span className="text-[13px] font-bold text-white/65 px-0.5">
                   URL d'image (optionnel)
                 </span>
                 <input
@@ -129,18 +163,17 @@ export default function PostCreationModal({
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
                   placeholder="https://images.unsplash.com/photo-..."
-                  className="w-full text-xs p-3 rounded-2xl glassmorphism-light text-breezy-icy placeholder-white/35 border border-white/5 focus:outline-none focus:border-breezy-border-active transition"
+                  className="w-full text-[15px] leading-5 p-3 rounded-2xl glassmorphism-light text-breezy-icy placeholder-white/35 border border-white/5 focus:outline-none focus:border-breezy-border-active transition"
                 />
               </div>
 
-              {/* Bouton de publication */}
               <div className="flex items-center justify-end pt-2 border-t border-white/5 mt-1 font-sans">
                 <button
                   type="submit"
                   disabled={!text.trim()}
-                  className="py-2.5 px-6 rounded-xl bg-breezy-icy text-slate-950 font-sans font-bold text-xs hover:bg-breezy-neon disabled:opacity-40 disabled:hover:bg-breezy-icy transition active:scale-95 shadow-md flex items-center gap-1.5 cursor-pointer"
+                  className="py-2.5 px-6 rounded-xl bg-breezy-icy text-slate-950 font-bold text-[15px] leading-5 hover:bg-breezy-neon disabled:opacity-40 disabled:hover:bg-breezy-icy transition active:scale-95 shadow-md flex items-center gap-1.5 cursor-pointer"
                 >
-                  Publier &rarr;
+                  Publier
                 </button>
               </div>
             </form>
