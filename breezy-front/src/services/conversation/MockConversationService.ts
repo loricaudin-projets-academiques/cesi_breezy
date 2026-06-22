@@ -6,7 +6,7 @@
 import { IConversationService } from './IConversationService';
 import { IStorageProvider } from '../storage/IStorageProvider';
 import { IAuthService } from '../auth/IAuthService';
-import { Conversation } from '../../types';
+import { Conversation, MessageItem } from '../../types';
 import { INITIAL_CONVERSATIONS } from '../../mockData';
 import { normalizeUsername } from '../../utils/username';
 
@@ -48,6 +48,28 @@ export class MockConversationService implements IConversationService {
     const conversation = this.createConversation(payload.name, payload.username, payload.avatar);
     this.saveConversations([conversation, ...this.getConversations()]);
     return conversation;
+  }
+
+  async sendMessage(conversationId: string, text: string): Promise<MessageItem> {
+    const message: MessageItem = {
+      id: `me-${Date.now()}`,
+      sender: 'me',
+      text,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    this.saveConversations(this.getConversations().map((conversation) => (
+      conversation.id === conversationId
+        ? {
+            ...conversation,
+            messages: [...conversation.messages, message],
+            lastMessage: message.text,
+            time: message.time,
+          }
+        : conversation
+    )));
+
+    return message;
   }
 
   async fetchReply(message: string, contact: Pick<Conversation, 'name' | 'username'>): Promise<string> {

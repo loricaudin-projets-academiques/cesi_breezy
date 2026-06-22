@@ -92,6 +92,7 @@ export interface Follower {
   avatar: string;
   followsMe: boolean;
   followedByMe: boolean;
+  isFriend: boolean;
 }
 
 // Les trois types de statistiques sociales du profil

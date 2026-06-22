@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 const PrivateMessageSchema = new mongoose.Schema({
 
     conversation_id: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Conversation' },
-    sender_id: { type: mongoose.Schema.Types.UUID, required: true },
+    sender_id: { type: String, required: true },
     content: { type: String, required: true },
     media: { type: [String], default: [] },
     is_read: { type: Boolean, default: false },

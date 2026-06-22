@@ -3,13 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
-import { ProfileStatType, UserProfile } from '../types';
+import { useCallback, useState, useEffect } from 'react';
+import { Follower, ProfileStatType, UserProfile } from '../types';
 import { playChime, playTick } from '../audio';
 import { authService } from '../services/ServiceContainer';
+import { api } from '../services/api';
+import { getErrorMessage } from '../utils/errors';
 import { PROFILE_BIO_MAX_LENGTH, PROFILE_NOTE_MAX_LENGTH } from '../profileLimits';
 
 const limitProfileText = (value: string, maxLength: number) => value.trim().slice(0, maxLength);
+const emptySocialLists: Record<ProfileStatType, Follower[]> = {
+  followers: [],
+  following: [],
+  friends: [],
+};
 
 // Gère tout ce qui concerne le profil utilisateur : édition, musique, modals d'édition
 export function useProfile(triggerToast: (msg: string) => void) {
@@ -24,11 +31,52 @@ export function useProfile(triggerToast: (msg: string) => void) {
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
   const [showFollowersModal, setShowFollowersModal] = useState(false);
   const [followersModalType, setFollowersModalType] = useState<ProfileStatType>('followers');
+  const [socialLists, setSocialLists] = useState<Record<ProfileStatType, Follower[]>>(emptySocialLists);
+  const [isSocialListLoading, setIsSocialListLoading] = useState(false);
 
   // À chaque modification du profil, on sauvegarde discrètement en arrière-plan
   useEffect(() => {
     authService.saveCurrentUser(user);
   }, [user]);
+
+  const refreshCurrentUser = useCallback(async () => {
+    if (!authService.isLoggedIn()) {
+      const localUser = authService.getCurrentUser();
+      setUser(localUser);
+      return localUser;
+    }
+
+    const freshUser = await authService.fetchCurrentUser();
+    setUser(freshUser);
+    return freshUser;
+  }, []);
+
+  useEffect(() => {
+    if (!authService.isLoggedIn()) return;
+
+    refreshCurrentUser().catch(() => {
+      // Keep the cached profile usable if the API is temporarily unavailable.
+    });
+  }, [refreshCurrentUser]);
+
+  const loadSocialList = useCallback(async (type: ProfileStatType) => {
+    if (!authService.isLoggedIn()) {
+      setSocialLists(emptySocialLists);
+      return [];
+    }
+
+    setIsSocialListLoading(true);
+    try {
+      const { data } = await api.get<Follower[]>(`/users/${type}`);
+      setSocialLists((prev) => ({ ...prev, [type]: data }));
+      return data;
+    } catch (error) {
+      triggerToast(getErrorMessage(error, 'Liste indisponible.'));
+      return [];
+    } finally {
+      setIsSocialListLoading(false);
+    }
+  }, [triggerToast]);
 
   // Enregistre la note d'humeur — si vide, on met un message par défaut
   const handleSaveNote = (newNote: string) => {
@@ -64,6 +112,7 @@ export function useProfile(triggerToast: (msg: string) => void) {
     playTick();
     setFollowersModalType(type);
     setShowFollowersModal(true);
+    void loadSocialList(type);
   };
 
   // Met la musique en pause ou la relance
@@ -99,6 +148,10 @@ export function useProfile(triggerToast: (msg: string) => void) {
     showFollowersModal,
     setShowFollowersModal,
     followersModalType,
+    refreshCurrentUser,
+    socialLists,
+    isSocialListLoading,
+    loadSocialList,
     handleSaveNote,
     handleSaveBio,
     handleSelectAvatar,
