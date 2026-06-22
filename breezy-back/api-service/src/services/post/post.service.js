@@ -1,6 +1,7 @@
-module.exports = {
+async function getPostById(id) {
+    return `Id = ${id}`;
+}
 
-    getPostById: async (id) => {
-        return `Id = ${id}`;
-    }
+export default {
+    getPostById
 };

@@ -1,10 +1,7 @@
-const PostService = require('../../services/post/post.service');
+import postService from '../../services/post/post.service.js';
 
-module.exports = {
-
-    getPostById: async (req, res) => { // TODO
-        const id = req.params['id'];
-        const post = await PostService.getPostById(id);
-        res.status(200).json({test: post})
-    }
+export async function getPostById(req, res) {
+    const id = req.params.id;
+    const post = await postService.getPostById(id);
+    res.status(200).json({ test: post });
 }

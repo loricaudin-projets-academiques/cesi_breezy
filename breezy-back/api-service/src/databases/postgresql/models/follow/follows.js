@@ -1,9 +1,14 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require("../../../../config/databases/postgresql");
+import { DataTypes } from 'sequelize';
+import { sequelize } from "../../../../config/databases/postgresql.js";
 
 const Follow = sequelize.define(
     'Follow',
     {
+        id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
+            primaryKey: true,
+        },
         follower_id: {
             type: DataTypes.UUID,
             allowNull: false,
@@ -16,8 +21,17 @@ const Follow = sequelize.define(
         },
         created_at: {
             type: DataTypes.DATE,
+            defaultValue: DataTypes.NOW,
         }
+    },
+    {
+        indexes: [
+            {
+                unique: true,
+                fields: ["follower_id", "followed_id"],
+            },
+        ],
     }
 );
 
-module.exports = Follow;
+export default Follow;

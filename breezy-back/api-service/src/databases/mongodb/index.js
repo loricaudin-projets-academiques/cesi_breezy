@@ -1,7 +1,7 @@
-const { mongoose, MONGO_URI } = require("../../config/databases/mongodb");
+import { mongoose, MONGO_URI } from "../../config/databases/mongodb.js";
 
 async function connectMongoDB() {
     await mongoose.connect(MONGO_URI);
 }
 
-module.exports = connectMongoDB;
+export default connectMongoDB;

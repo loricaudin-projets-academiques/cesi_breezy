@@ -8,7 +8,7 @@ services:
       - "3000"
     command: npm run dev
     volumes:
-      - ./api-service:/api
+      - api_node_modules:/api/node_modules
     depends_on:
       - db_sql
       - db_mongo
@@ -23,18 +23,43 @@ services:
       MONGO_USER: ${MONGO_USER}
       MONGO_PASSWORD: ${MONGO_PASSWORD}
       MONGO_DB: ${MONGO_DB}
+      JWT_SECRET: ${JWT_SECRET}
+    networks:
+      - backend
+
+  auth:
+    container_name: breezy-back-auth
+    build:
+      context: ./auth-service
+      dockerfile: dockerfile
+    ports:
+      - "3001"
+    command: npm run dev
+    volumes:
+      - auth_node_modules:/auth/node_modules
+    depends_on:
+      - db_sql
+    environment:
+      AUTH_PORT: 3001
+      POSTGRES_HOST: db-sql
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
     networks:
       - backend
 
   api_gateway:
-    image: nginx:latest
     container_name: api_gateway
+    build:
+      context: ./gateway
+      dockerfile: dockerfile
     ports:
       - "80:80"
-    volumes:
-      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - api
+      - auth
     networks:
       - backend
 
@@ -53,28 +78,26 @@ services:
       postgres -c log_statement=none -c logging_collector=off
     networks:
       - backend
-  
+
   db_sql_admin:
     image: dpage/pgadmin4
     container_name: db-sql-admin
     depends_on:
       - db_sql
     ports:
-      - "8888:80"
+      - "8082:80"
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@breezy.com
       PGADMIN_DEFAULT_PASSWORD: root
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     volumes:
       - pgadmin-data:/var/lib/pgadmin
-      - ./pgadmin/servers.json:/pgadmin4/servers.json
     networks:
       - backend
 
   db_mongo:
-    image: mongo:8
+    image: mongo:7
     container_name: db-mongo
-    command: [ "mongod", "--quiet" ]
     ports:
       - "${MONGO_PORT}:27017"
     environment:
@@ -86,10 +109,28 @@ services:
     networks:
       - backend
 
-networks:
-  backend:
+  db_mongo_admin:
+    image: mongo-express:latest
+    container_name: mongo-express
+    depends_on:
+      - db_mongo
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@db_mongo:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: admin@breezy.com
+      ME_CONFIG_BASICAUTH_PASSWORD: root
+    networks:
+      - backend
 
 volumes:
+  api_node_modules:
+  auth_node_modules:
   postgres_data:
   mongo_data:
   pgadmin-data:
+
+networks:
+  backend:
