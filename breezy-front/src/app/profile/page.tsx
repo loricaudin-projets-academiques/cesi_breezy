@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect } from "react";
 import { playTick } from "../../audio";
 import ProfileScreen from "../../screens/ProfileScreen";
 import { useBreezyApp } from "../BreezyAppProvider";
+import { ProfileSubTab } from "../../types";
 
 export default function ProfilePage() {
   const {
@@ -15,13 +17,26 @@ export default function ProfilePage() {
     postInteractions,
   } = useBreezyApp();
 
+  useEffect(() => {
+    void profile.refreshCurrentUser();
+  }, [profile.refreshCurrentUser]);
+
+  const handleProfileSubTabChange = (tab: ProfileSubTab) => {
+    setActiveProfileSubTab(tab);
+    if (tab !== "posts") {
+      void profile.loadSocialList(tab);
+    }
+  };
+
   return (
     <ProfileScreen
       key="profile"
       user={profile.user}
       posts={feed.posts}
+      socialMembers={activeProfileSubTab === "posts" ? [] : profile.socialLists[activeProfileSubTab]}
+      isSocialListLoading={profile.isSocialListLoading}
       activeProfileSubTab={activeProfileSubTab}
-      setActiveProfileSubTab={setActiveProfileSubTab}
+      setActiveProfileSubTab={handleProfileSubTabChange}
       onOpenHamburger={() => {
         playTick();
         setIsHamburgerOpen(true);

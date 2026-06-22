@@ -54,6 +54,10 @@ export class MockFeedService implements IFeedService {
     return this.getPosts();
   }
 
+  async fetchUserPosts(username: string): Promise<Post[]> {
+    return this.getPosts().filter((post) => post.authorUsername === username);
+  }
+
   async fetchComments(): Promise<CommentsByPost> {
     return this.getComments();
   }

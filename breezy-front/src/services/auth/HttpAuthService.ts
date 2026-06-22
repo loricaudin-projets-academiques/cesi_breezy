@@ -31,6 +31,13 @@ export class HttpAuthService implements IAuthService {
     return this.storage.get<UserProfile>(KEYS.currentUser) || INITIAL_USER;
   }
 
+  async fetchCurrentUser(): Promise<UserProfile> {
+    setApiBaseUrl(this.getApiUrl());
+    const { data } = await api.get<UserProfile>("/users/me");
+    this.saveCurrentUser(data);
+    return data;
+  }
+
   saveCurrentUser(user: UserProfile): void {
     this.storage.set<UserProfile>(KEYS.currentUser, user);
   }

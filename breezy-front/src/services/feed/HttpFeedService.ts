@@ -51,6 +51,11 @@ export class HttpFeedService implements IFeedService {
     return data;
   }
 
+  async fetchUserPosts(username: string): Promise<Post[]> {
+    const { data } = await api.get<Post[]>(`/feed/users/${encodeURIComponent(username)}/posts`);
+    return data;
+  }
+
   async fetchComments(postId?: string): Promise<CommentsByPost> {
     const { data } = await api.get<CommentsByPost>("/feed/comments", {
       params: postId ? { postId } : undefined,
