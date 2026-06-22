@@ -10,7 +10,7 @@ function requireAuth(req, res, next) {
     return res.status(401).json({ message: "Token JWT manquant." });
   }
 
-  try {
+  try { 
     req.user = jwt.verify(token, JWT_SECRET);
     return next();
   } catch {

@@ -7,8 +7,6 @@ import conversationRouter from './conversation/conversation.routes.js';
 
 const router = Router();
 
-router.use('/posts', postRouter);
-router.use('/posts/:id/comments', commentRouter);
 router.use('/auth', authRouter);
 router.use('/feed', feedRouter);
 router.use('/conversations', conversationRouter);
