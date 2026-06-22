@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getMediaUrl } from '../utils/mediaUrl';
+
 interface AvatarProps {
   name: string;
   username?: string;
@@ -14,7 +16,7 @@ interface AvatarProps {
 // Si l'utilisateur n'a pas encore mis de photo, on génère un avatar unique
 // basé sur son pseudo grâce à Dicebear — chaque seed donne toujours le même résultat
 export function getAvatarUrl(url?: string, username?: string, name?: string): string {
-  if (url && url.trim()) return url;
+  if (url && url.trim()) return getMediaUrl(url);
   
   // On nettoie le @ si présent avant de l'utiliser comme graine de génération
   const seed = (username || name || "default").trim().replace(/^@/, '');

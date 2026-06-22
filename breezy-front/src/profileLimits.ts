@@ -1,2 +1,2 @@
 export const PROFILE_BIO_MAX_LENGTH = 120;
-export const PROFILE_NOTE_MAX_LENGTH = 40;
+export const PROFILE_NOTE_MAX_LENGTH = 80;

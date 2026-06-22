@@ -36,7 +36,7 @@ export default function BioEditorModal({ isOpen, onClose, initialValue, onSave }
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
           {/* Cliquer en dehors annule les modifications */}
           <motion.div
             initial={{ opacity: 0 }}

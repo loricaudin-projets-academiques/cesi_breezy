@@ -34,7 +34,7 @@ export default function NoteEditorModal({ isOpen, onClose, initialValue, onSave 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
           {/* Zone cliquable pour fermer sans sauvegarder */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -57,7 +57,7 @@ export default function NoteEditorModal({ isOpen, onClose, initialValue, onSave 
             <h4 className="text-xs font-mono text-breezy-neon uppercase tracking-wider mb-2.5 font-bold">
               Ta note du moment
             </h4>
-            {/* Champ court — max 40 caractères pour rester concis */}
+            {/* Champ court — max 80 caractères pour rester concis */}
             <input
               type="text"
               placeholder="Ce que tu ressens là..."
@@ -67,7 +67,7 @@ export default function NoteEditorModal({ isOpen, onClose, initialValue, onSave 
               className="w-full text-xs p-2.5 bg-white/[0.04] rounded-xl text-breezy-icy border border-white/5 focus:outline-none focus:border-breezy-border-active"
             />
             <p className="text-[8px] font-mono text-white/30 text-right mt-1">
-              {inputValue.length}/40 caractères
+              {inputValue.length}/80 caractères
             </p>
             
             {/* Boutons de validation ou d'annulation */}

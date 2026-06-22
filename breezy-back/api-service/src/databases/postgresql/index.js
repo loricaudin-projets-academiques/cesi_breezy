@@ -9,7 +9,7 @@ import "./models/interaction/post_stars.js";
 
 async function connectPostgreSQL() {
     await sequelize.authenticate();
-    await sequelize.sync();
+    await sequelize.sync({ alter: true });
 }
 
 export default connectPostgreSQL;

@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-display: "Space Grotesk", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-sans: "Roboto", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Roboto", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "Roboto", ui-sans-serif, system-ui, -apple-system, sans-serif;
   
   --color-breezy-bg: #050508;
   --color-breezy-card: rgba(13, 13, 18, 0.6);
@@ -22,8 +22,72 @@ body {
   background-color: #050505;
   color: #F5FAFF;
   font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 400;
   overflow-x: hidden;
   margin: 0;
+}
+
+button,
+input,
+textarea {
+  font-family: var(--font-sans);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 700;
+}
+
+@media (min-width: 768px) {
+  body {
+    font-size: 17px;
+    line-height: 24px;
+  }
+
+  main p,
+  main span,
+  main button,
+  main input,
+  main textarea,
+  main label {
+    font-size: 16px !important;
+    line-height: 22px !important;
+  }
+
+  main [class*="text-[7"],
+  main [class*="text-[8"],
+  main [class*="text-[9"],
+  main [class*="text-[10"],
+  main [class*="text-[11"],
+  main .text-xs {
+    font-size: 14px !important;
+    line-height: 18px !important;
+  }
+
+  main h1,
+  main h2,
+  main h3,
+  main h4,
+  main h5,
+  main h6 {
+    font-size: 22px !important;
+    line-height: 28px !important;
+  }
+}
+
+.font-medium,
+.font-semibold,
+.font-bold,
+.font-black {
+  font-weight: 700 !important;
 }
 
 /* Elegant Dark Gradient & Glass Definitions */
@@ -123,3 +187,122 @@ body {
   filter: drop-shadow(0 0 6px rgb(174, 235, 255)) drop-shadow(0 0 12px rgba(174, 235, 255, 0.5));
 }
 
+.theme-light {
+  background: #f7f9fc !important;
+  color: #120034 !important;
+}
+
+.theme-light .bg-gradient-custom {
+  background: #f7f9fc !important;
+}
+
+.theme-light main {
+  background: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.1) !important;
+  box-shadow: 0 16px 50px rgba(15, 23, 42, 0.08);
+}
+
+.theme-light .glass,
+.theme-light .glass-bright,
+.theme-light .glassmorphism,
+.theme-light .glassmorphism-light,
+.theme-light .glassmorphism-premium {
+  background: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: rgba(15, 23, 42, 0.1) !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06) !important;
+}
+
+.theme-light [class*="bg-[#050505]"],
+.theme-light [class*="bg-[#050508]"],
+.theme-light [class*="bg-[#08080c]"],
+.theme-light [class*="bg-[#0d0d12]"],
+.theme-light [class*="bg-black"] {
+  background-color: #ffffff !important;
+}
+
+.theme-light [class*="bg-white/"],
+.theme-light [class*="bg-white\\["] {
+  background-color: #f8fafc !important;
+}
+
+.theme-light [class*="text-white"],
+.theme-light .text-icy,
+.theme-light .text-breezy-icy {
+  color: #120034 !important;
+}
+
+.theme-light [class*="text-white/30"],
+.theme-light [class*="text-white/35"],
+.theme-light [class*="text-white/40"],
+.theme-light [class*="text-white/45"],
+.theme-light [class*="text-white/50"],
+.theme-light [class*="text-white/60"] {
+  color: #111827 !important;
+}
+
+.theme-light main,
+.theme-light main p,
+.theme-light main span,
+.theme-light main button,
+.theme-light main label,
+.theme-light main h1,
+.theme-light main h2,
+.theme-light main h3,
+.theme-light main h4,
+.theme-light main h5,
+.theme-light main h6 {
+  color: #090022 !important;
+}
+
+.theme-light main input,
+.theme-light main textarea {
+  color: #090022 !important;
+}
+
+.theme-light .text-breezy-neon,
+.theme-light [class*="text-[#AEEBFF]"] {
+  color: #0052cc !important;
+}
+
+.theme-light .text-breezy-lavender,
+.theme-light .text-breezy-purple,
+.theme-light [class*="text-purple"],
+.theme-light [class*="text-[#C8B6FF]"],
+.theme-light [class*="text-[#E4B5FF]"] {
+  color: #4c00b8 !important;
+}
+
+.theme-light [class*="text-rose"] {
+  color: #be123c !important;
+}
+
+.theme-light [class*="text-pink"] {
+  color: #db2777 !important;
+}
+
+.theme-light [class*="border-white/"],
+.theme-light [class*="border-white\\["] {
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+.theme-light input,
+.theme-light textarea {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: rgba(15, 23, 42, 0.14) !important;
+}
+
+.theme-light input::placeholder,
+.theme-light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+.theme-light .active-nav-glow,
+.theme-light .glow-neon,
+.theme-light .glow-lavender,
+.theme-light .glow-white {
+  filter: none !important;
+  box-shadow: none !important;
+}

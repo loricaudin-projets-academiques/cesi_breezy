@@ -97,7 +97,7 @@ export default function LoginScreen({ onLogin, onRegister, triggerToast }: Login
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="p-6 flex flex-col justify-center items-stretch h-full w-full select-none"
+      className="p-6 flex flex-col justify-center items-stretch min-h-screen w-full max-w-md mx-auto select-none"
     >
       {/* Logo et titre de la page */}
       <div className="text-center mb-6 mt-2 flex flex-col items-center">
@@ -227,7 +227,6 @@ export default function LoginScreen({ onLogin, onRegister, triggerToast }: Login
           >
             {isConnecting ? (
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-slate-950 animate-ping" />
                 {isSignUp ? "Création en cours..." : "Vérification..."}
               </span>
             ) : (

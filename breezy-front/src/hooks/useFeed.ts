@@ -27,7 +27,7 @@ export function useFeed(
     async function loadFeed() {
       try {
         const [nextPosts, nextComments] = await Promise.all([
-          feedService.fetchPosts(),
+          feedService.fetchPosts(homeCategory),
           feedService.fetchComments(),
         ]);
 
@@ -47,7 +47,7 @@ export function useFeed(
     return () => {
       cancelled = true;
     };
-  }, [currentUser.username, triggerToast]);
+  }, [currentUser.username, homeCategory, triggerToast]);
 
   useEffect(() => {
     feedService.savePosts(posts);
@@ -101,9 +101,67 @@ export function useFeed(
     }
   };
 
-  const handleAddPost = async (content: string, category: PostCategory, image?: string) => {
+  const handleToggleArchive = async (postId: string) => {
+    playChime();
+
     try {
-      const newPost = await feedService.createRemotePost({ content, category, image });
+      const updatedPost = await feedService.toggleArchive(postId);
+      setPosts((prev) => updatedPost.archived
+        ? prev.filter((post) => post.id !== postId)
+        : [updatedPost, ...prev.filter((post) => post.id !== postId)]
+      );
+      triggerToast(updatedPost.archived ? "Publication archivee." : "Publication restauree.");
+    } catch (error) {
+      triggerToast(getErrorMessage(error, "Impossible d'archiver."));
+    }
+  };
+
+  const handleTogglePin = async (postId: string) => {
+    const target = posts.find((p) => p.id === postId);
+    if (!target) return;
+
+    playChime();
+
+    try {
+      const updatedPost = await feedService.togglePin(postId);
+      setPosts((prev) => [updatedPost, ...prev.filter((post) => post.id !== postId)]);
+      triggerToast(updatedPost.pinned ? "Publication epinglee." : "Publication desenpinglee.");
+    } catch (error) {
+      triggerToast(getErrorMessage(error, "Impossible d'epingler."));
+    }
+  };
+
+  const handleDeletePost = async (postId: string, fallbackName?: string) => {
+    const target = posts.find((p) => p.id === postId);
+    const name = target?.title || fallbackName || target?.content || "ce post";
+
+    if (!window.confirm(`Supprimer le post "${name}" ?`)) return false;
+
+    playChime();
+
+    try {
+      await feedService.deletePost(postId);
+      setPosts((prev) => prev.filter((post) => post.id !== postId));
+      triggerToast("Publication supprimee.");
+      return true;
+    } catch (error) {
+      triggerToast(getErrorMessage(error, "Impossible de supprimer."));
+      return false;
+    }
+  };
+
+  const loadArchivedPosts = async () => {
+    try {
+      return await feedService.fetchArchivedPosts();
+    } catch (error) {
+      triggerToast(getErrorMessage(error, "Archive indisponible."));
+      return [];
+    }
+  };
+
+  const handleAddPost = async (title: string, content: string, category: PostCategory, image?: string, images: string[] = []) => {
+    try {
+      const newPost = await feedService.createRemotePost({ title, content, category, image, images });
       setPosts((prev) => [newPost, ...prev.filter((post) => post.id !== newPost.id)]);
       triggerToast(`Publication ajoutee dans "${category}" !`);
     } catch (error) {
@@ -163,10 +221,7 @@ export function useFeed(
     setShowCommentsForPost({});
   };
 
-  const filteredPosts = posts.filter((post) => {
-    if (homeCategory === 'starred') return post.starredByUser;
-    return post.category === homeCategory;
-  });
+  const filteredPosts = posts;
 
   return {
     posts,
@@ -178,6 +233,10 @@ export function useFeed(
     filteredPosts,
     handleToggleLike,
     handleToggleStar,
+    handleToggleArchive,
+    handleTogglePin,
+    handleDeletePost,
+    loadArchivedPosts,
     handleAddPost,
     handleToggleComments,
     handleCommentDraftChange,
