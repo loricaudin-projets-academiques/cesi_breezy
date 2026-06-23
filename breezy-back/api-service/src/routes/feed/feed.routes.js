@@ -1,5 +1,4 @@
 import { Router } from "express";
-import mongoose from "mongoose";
 
 import { requireAuth } from "../../middlewares/auth.middleware.js";
 import { createPost, fetchComments, fetchPosts, createPostComment, toggleLikePost, toggleStarPost } from "../../controllers/post/feed.controller.js";

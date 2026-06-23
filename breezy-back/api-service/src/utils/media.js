@@ -5,10 +5,18 @@ import { join } from "path";
 const UPLOAD_ROOT = "uploads";
 
 function extensionFromMime(mime) {
-  if (mime === "image/jpeg") return ".jpg";
-  if (mime === "image/png") return ".png";
-  if (mime === "image/gif") return ".gif";
-  if (mime === "image/webp") return ".webp";
+  if (mime === "image/jpeg") {
+    return ".jpg";
+  }
+  if (mime === "image/png") {
+    return ".png";
+  }
+  if (mime === "image/gif") {
+    return ".gif";
+  }
+  if (mime === "image/webp") {
+    return ".webp";
+  }
   return ".bin";
 }
 
@@ -40,7 +48,9 @@ async function storeGalleryImages(userId, values) {
   const stored = [];
   for (const value of values) {
     const next = await storeDataUrlForUser(userId, "gallery", value);
-    if (next) stored.push(next);
+    if (next) {
+      stored.push(next);
+    }
   }
   return stored;
 }
@@ -51,7 +61,9 @@ function isLocalUpload(value) {
 
 async function deleteLocalUploads(values = []) {
   for (const value of values) {
-    if (!isLocalUpload(value)) continue;
+    if (!isLocalUpload(value)) {
+      continue;
+    }
 
     const relativePath = value.replace(/^\/uploads\//, "");
     try {

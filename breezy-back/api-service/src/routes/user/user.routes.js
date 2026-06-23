@@ -245,14 +245,11 @@ router.get("/:type", requireAuth, async (req, res) => {
   const outgoingIds = new Set(outgoing.map((follow) => follow.followed_id));
   const incomingIds = new Set(incoming.map((follow) => follow.follower_id));
 
-  let ids = [];
-  if (type === "followers") {
-    ids = [...incomingIds];
-  } else if (type === "following") {
-    ids = [...outgoingIds];
-  } else {
-    ids = [...outgoingIds].filter((id) => incomingIds.has(id));
-  }
+  const ids = type === "followers"
+    ? [...incomingIds]
+    : type === "following"
+      ? [...outgoingIds]
+      : [...outgoingIds].filter((id) => incomingIds.has(id));
 
   if (ids.length === 0) {
     return res.json([]);

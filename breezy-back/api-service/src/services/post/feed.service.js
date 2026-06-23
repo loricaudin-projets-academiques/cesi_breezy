@@ -14,12 +14,18 @@ function timeLabel(date) {
         (Date.now() - new Date(date).getTime()) / 60000
     );
 
-    if (diffMinutes < 1) return "A l'instant";
-    if (diffMinutes < 60) return `${diffMinutes} min`;
+    if (diffMinutes < 1) {
+        return "A l'instant";
+    }
+    if (diffMinutes < 60) {
+        return `${diffMinutes} min`;
+    }
 
     const diffHours = Math.floor(diffMinutes / 60);
 
-    if (diffHours < 24) return `${diffHours} h`;
+    if (diffHours < 24) {
+        return `${diffHours} h`;
+    }
 
     return new Date(date).toLocaleDateString();
 }

@@ -1,28 +1,5 @@
 import feedService from "../../services/post/feed.service.js";
 
-function nowLabel() {
-    return "A l'instant";
-}
-
-function getSet(map, key) {
-    if (!map.has(key)) {
-        map.set(key, new Set());
-    }
-
-    return map.get(key);
-}
-
-function getPostForUser(post, username) {
-    const liked = getSet(likedPostsByUser, username);
-    const starred = getSet(starredPostsByUser, username);
-
-    return {
-        ...post,
-        likedByUser: liked.has(post.id),
-        starredByUser: starred.has(post.id),
-    };
-}
-
 async function fetchPosts(req, res) {
     const userId = req.user.id;
     const category = req.query.category;
@@ -70,7 +47,7 @@ async function fetchComments(req, res) {
     const postId = req.query.postId;
 
 
-    const result = await feedService.getAllComments({
+    const result = await feedService.getComments({
         postId,
     });
 
@@ -90,11 +67,11 @@ async function createPostComment(req, res) {
         const postId = req.params.postId;
         const { content, parentCommentId } = req.body;
 
-        const currentUserId = req.user.id;
+        const userId = req.user.id;
 
         const comment = await feedService.createPostComment({
             postId,
-            currentUserId,
+            userId,
             content,
             parentCommentId
         });
