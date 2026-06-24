@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { CommentsByPost, Post, PostCategory, UserProfile } from '../types';
 import { playTick, playChime } from '../audio';
 import { feedService } from '../services/ServiceContainer';
@@ -11,7 +11,8 @@ import { getErrorMessage } from '../utils/errors';
 
 export function useFeed(
   currentUser: UserProfile,
-  triggerToast: (msg: string) => void
+  triggerToast: (msg: string) => void,
+  enabled = true
 ) {
   const [posts, setPosts] = useState<Post[]>(() => feedService.getPosts());
   const [userPosts, setUserPosts] = useState<Post[]>([]);
@@ -22,9 +23,10 @@ export function useFeed(
   const [commentPages, setCommentPages] = useState<Record<string, number>>({});
   const [commentHasMore, setCommentHasMore] = useState<Record<string, boolean>>({});
   const [loadingComments, setLoadingComments] = useState<Record<string, boolean>>({});
+  const commentsInFlight = useRef(new Set<string>());
 
   useEffect(() => {
-    if (!currentUser.username) return;
+    if (!enabled || !currentUser.username) return;
 
     let cancelled = false;
 
@@ -47,10 +49,10 @@ export function useFeed(
     return () => {
       cancelled = true;
     };
-  }, [currentUser.username, homeCategory, triggerToast]);
+  }, [currentUser.username, enabled, homeCategory, triggerToast]);
 
   useEffect(() => {
-    if (!currentUser.username) return;
+    if (!enabled || !currentUser.username) return;
 
     let cancelled = false;
 
@@ -73,7 +75,7 @@ export function useFeed(
     return () => {
       cancelled = true;
     };
-  }, [currentUser.username, triggerToast]);
+  }, [currentUser.username, enabled, triggerToast]);
 
   useEffect(() => {
     feedService.savePosts(posts);
@@ -197,14 +199,14 @@ export function useFeed(
     }
   };
 
-  const loadArchivedPosts = async () => {
+  const loadArchivedPosts = useCallback(async () => {
     try {
       return await feedService.fetchArchivedPosts();
     } catch (error) {
       triggerToast(getErrorMessage(error, "Archive indisponible."));
       return [];
     }
-  };
+  }, [triggerToast]);
 
   const handleAddPost = async (title: string, content: string, category: PostCategory, image?: string, images: string[] = []) => {
     try {
@@ -218,8 +220,10 @@ export function useFeed(
   };
 
   const loadCommentsPage = async (postId: string, page = 1) => {
-    if (loadingComments[postId]) return;
+    const requestKey = `${postId}:${page}`;
+    if (commentsInFlight.current.has(requestKey)) return;
 
+    commentsInFlight.current.add(requestKey);
     setLoadingComments((prev) => ({ ...prev, [postId]: true }));
 
     try {
@@ -234,6 +238,7 @@ export function useFeed(
     } catch (error) {
       triggerToast(getErrorMessage(error, "Impossible de charger les commentaires."));
     } finally {
+      commentsInFlight.current.delete(requestKey);
       setLoadingComments((prev) => ({ ...prev, [postId]: false }));
     }
   };
@@ -302,6 +307,7 @@ export function useFeed(
     setCommentPages({});
     setCommentHasMore({});
     setLoadingComments({});
+    commentsInFlight.current.clear();
   };
 
   const filteredPosts = posts;

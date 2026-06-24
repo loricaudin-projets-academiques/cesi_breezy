@@ -289,11 +289,6 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                     {/* Avatar avec indicateur de présence */}
                     <div className="relative shrink-0">
                       <Avatar name={conv.name} username={conv.username} url={conv.avatar} className="w-12 h-12" />
-                      {conv.online && (
-                        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-breezy-bg flex items-center justify-center">
-                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                        </div>
-                      )}
                     </div>
 
                     {/* Aperçu du dernier message */}
@@ -414,6 +409,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                 type="text"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
+                maxLength={5000}
                 placeholder="Écrire un message..."
                 className="flex-1 text-xs rounded-xl glassmorphism-light py-3 px-4 text-breezy-icy placeholder-white/30 focus:outline-none focus:border-breezy-border-active transition"
               />

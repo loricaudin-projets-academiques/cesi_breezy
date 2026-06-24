@@ -244,6 +244,7 @@ async function getRelationList({ authUser, type }) {
   const users = await User.findAll({
     where: { id: { [Op.in]: ids } },
     order: [["username", "ASC"]],
+    limit: 20,
   });
 
   return Promise.all(users.map((user) => userWithRelation(currentUser.id, user)));

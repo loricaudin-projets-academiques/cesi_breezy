@@ -12,6 +12,20 @@ import { createHttpError } from "../../utils/httpError.js";
 import { createNotification } from "../notification/notification.service.js";
 
 const PARIS_TIME_ZONE = "Europe/Paris";
+const MAX_PAGE_SIZE = 20;
+
+function paginationValues(page = 1, limit = MAX_PAGE_SIZE) {
+  const currentPage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+  const pageSize = Math.min(
+    Math.max(Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : MAX_PAGE_SIZE, 1),
+    MAX_PAGE_SIZE
+  );
+
+  return {
+    skip: (currentPage - 1) * pageSize,
+    limit: pageSize,
+  };
+}
 
 function isValidPostId(postId) {
   return mongoose.Types.ObjectId.isValid(postId);
@@ -133,14 +147,18 @@ async function filterPrivatePosts(posts, currentUser) {
   });
 }
 
-async function getVisiblePosts(query = {}) {
+async function getVisiblePosts(query = {}, page = 1, limit = MAX_PAGE_SIZE) {
+  const pagination = paginationValues(page, limit);
   return Post.find({
     status: "published",
     ...query,
-  }).sort({ pinned: -1, created_at: -1 });
+  })
+    .sort({ pinned: -1, created_at: -1 })
+    .skip(pagination.skip)
+    .limit(pagination.limit);
 }
 
-async function getFeedPosts({ authUser, category }) {
+async function getFeedPosts({ authUser, category, page = 1, limit = MAX_PAGE_SIZE }) {
   const currentUser = await getCurrentUser(authUser);
   let query;
 
@@ -164,11 +182,11 @@ async function getFeedPosts({ authUser, category }) {
     query = { author_id: { $ne: currentUser.id } };
   }
 
-  const posts = await filterPrivatePosts(await getVisiblePosts(query), currentUser);
+  const posts = await filterPrivatePosts(await getVisiblePosts(query, page, limit), currentUser);
   return postsToDtos(posts, currentUser);
 }
 
-async function getUserPosts({ authUser, username }) {
+async function getUserPosts({ authUser, username, page = 1, limit = MAX_PAGE_SIZE }) {
   const currentUser = await getCurrentUser(authUser);
   const targetUsername = normalizeUsername(username);
   const targetUser = await User.findOne({ where: { username: targetUsername } });
@@ -187,16 +205,20 @@ async function getUserPosts({ authUser, username }) {
     }
   }
 
-  const posts = await getVisiblePosts({ author_id: targetUser.id });
+  const posts = await getVisiblePosts({ author_id: targetUser.id }, page, limit);
   return postsToDtos(posts, currentUser);
 }
 
-async function getArchivedPosts({ authUser }) {
+async function getArchivedPosts({ authUser, page = 1, limit = MAX_PAGE_SIZE }) {
   const currentUser = await getCurrentUser(authUser);
+  const pagination = paginationValues(page, limit);
   const posts = await Post.find({
     status: "archived",
     author_id: currentUser.id,
-  }).sort({ pinned: -1, created_at: -1 });
+  })
+    .sort({ pinned: -1, created_at: -1 })
+    .skip(pagination.skip)
+    .limit(pagination.limit);
 
   return postsToDtos(posts, currentUser);
 }
@@ -295,7 +317,7 @@ async function getComments({ postId, page = 1, limit = 20 }) {
   }
 
   const currentPage = Number.isFinite(page) && page > 0 ? page : 1;
-  const pageSize = Math.min(Math.max(Number.isFinite(limit) && limit > 0 ? limit : 20, 1), 20);
+  const pageSize = paginationValues(1, limit).limit;
   const query = { status: "published" };
   if (postId) {
     query.post_id = postId;

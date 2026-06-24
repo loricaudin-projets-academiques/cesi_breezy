@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Bell, CheckCheck } from "lucide-react";
 import { motion } from "motion/react";
 
@@ -27,7 +27,7 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<AccountNotification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
     setIsLoading(true);
     try {
       const { data } = await api.get<AccountNotification[]>("/notifications");
@@ -37,11 +37,11 @@ export default function NotificationsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [triggerToast]);
 
   useEffect(() => {
     void loadNotifications();
-  }, []);
+  }, [loadNotifications]);
 
   const markRead = async (notification: AccountNotification) => {
     if (!notification.isRead) {
