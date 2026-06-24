@@ -1,7 +1,7 @@
 import { api } from "../api";
 import { IStorageProvider } from "../storage/IStorageProvider";
 import { IFeedService } from "./IFeedService";
-import { Comment, CommentsByPost, Post, PostCategory, UserProfile } from "../../types";
+import { Comment, CommentsByPost, PaginatedComments, Post, PostCategory, UserProfile } from "../../types";
 
 const KEYS = {
   posts: "breezy_posts",
@@ -65,14 +65,17 @@ export class HttpFeedService implements IFeedService {
     return data;
   }
 
-  async fetchComments(postId?: string): Promise<CommentsByPost> {
-    const { data } = await api.get<CommentsByPost>("/feed/comments", {
-      params: postId ? { postId } : undefined,
+  async fetchComments(postId: string, page = 1, limit = 20): Promise<PaginatedComments> {
+    const { data } = await api.get<PaginatedComments>("/feed/comments", {
+      params: { postId, page, limit },
     });
 
-    const nextComments = postId ? { ...this.getComments(), ...data } : data;
+    const nextComments = {
+      ...this.getComments(),
+      [postId]: page === 1 ? data.comments : [...(this.getComments()[postId] || []), ...data.comments],
+    };
     this.saveComments(nextComments);
-    return nextComments;
+    return data;
   }
 
   async createRemotePost(payload: {

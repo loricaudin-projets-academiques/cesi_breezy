@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Globe, ImagePlus } from 'lucide-react';
 import { PostCategory } from '../types';
 import { playTick, playChime } from '../audio';
+import { POST_CONTENT_MAX_LENGTH, POST_TITLE_MAX_LENGTH } from '../profileLimits';
 
 interface PostCreationModalProps {
   isOpen: boolean;
@@ -48,7 +49,7 @@ export default function PostCreationModal({
     e.preventDefault();
     if (!text.trim()) return;
 
-    onAddPost(title.trim(), text.trim(), 'for-you', imageUrl.trim() || undefined, localImages);
+    onAddPost(title.trim().slice(0, POST_TITLE_MAX_LENGTH), text.trim().slice(0, POST_CONTENT_MAX_LENGTH), 'for-you', imageUrl.trim() || undefined, localImages);
     playChime();
     setTitle('');
     setText('');
@@ -97,22 +98,25 @@ export default function PostCreationModal({
                 <input
                   type="text"
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) => setTitle(e.target.value.slice(0, POST_TITLE_MAX_LENGTH))}
                   placeholder="Titre du post"
-                  maxLength={120}
+                  maxLength={POST_TITLE_MAX_LENGTH}
                   className="w-full text-[15px] leading-5 p-3 rounded-2xl glassmorphism-light text-breezy-icy placeholder-white/35 border border-white/5 focus:outline-none focus:border-breezy-border-active transition"
                 />
+                <span className="text-[10px] text-white/35 text-right">{title.length}/{POST_TITLE_MAX_LENGTH}</span>
               </div>
 
               <div className="flex flex-col gap-1.5">
                 <span className="text-[13px] font-bold text-white/65 px-0.5">Description</span>
                 <textarea
                   value={text}
-                  onChange={(e) => setText(e.target.value)}
+                  onChange={(e) => setText(e.target.value.slice(0, POST_CONTENT_MAX_LENGTH))}
                   placeholder="Quoi de neuf ?"
+                  maxLength={POST_CONTENT_MAX_LENGTH}
                   rows={6}
                   className="w-full text-[15px] leading-5 p-3 rounded-2xl glassmorphism-light text-breezy-icy placeholder-white/35 border border-white/5 focus:outline-none focus:border-breezy-border-active resize-none transition-all"
                 />
+                <span className="text-[10px] text-white/35 text-right">{text.length}/{POST_CONTENT_MAX_LENGTH}</span>
               </div>
 
               <div className="flex flex-col gap-2 font-sans">

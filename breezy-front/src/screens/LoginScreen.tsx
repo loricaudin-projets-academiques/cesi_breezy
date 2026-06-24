@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { User, Lock, Zap, Shield, ArrowRight, UserPlus } from 'lucide-react';
+import { User, Lock, Zap, Shield, ArrowRight, UserPlus, Moon, Sun } from 'lucide-react';
 import { playTick, playChime } from '../audio';
 import { DEFAULT_API_URL } from '../config';
 import { normalizeUsername } from '../utils/username';
@@ -14,10 +14,12 @@ interface LoginScreenProps {
   onLogin: (username: string, passkey: string, apiUrl: string) => void | Promise<void>;
   onRegister: (name: string, username: string, passkey: string, apiUrl: string) => void | Promise<void>;
   triggerToast: (msg: string) => void;
+  isLightTheme: boolean;
+  onToggleTheme: () => void;
 }
 
 // Page de connexion et d'inscription
-export default function LoginScreen({ onLogin, onRegister, triggerToast }: LoginScreenProps) {
+export default function LoginScreen({ onLogin, onRegister, triggerToast, isLightTheme, onToggleTheme }: LoginScreenProps) {
   // isSignUp contrôle si on est en mode connexion ou en mode création de compte
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState('');
@@ -115,9 +117,20 @@ export default function LoginScreen({ onLogin, onRegister, triggerToast }: Login
         <h1 className="text-xl font-display font-black tracking-wider text-breezy-icy uppercase">
           {isSignUp ? 'CRÉER UN COMPTE' : 'BREEZY'}
         </h1>
-        <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest mt-1">
+        <p className="hidden">
           {isSignUp ? 'Rejoins le réseau' : 'Accès au réseau'}
         </p>
+        <button
+          type="button"
+          onClick={() => {
+            playTick();
+            onToggleTheme();
+          }}
+          className="mt-3 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-[11px] font-bold flex items-center gap-1.5 self-center"
+        >
+          {isLightTheme ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+          {isLightTheme ? 'Theme clair' : 'Theme sombre'}
+        </button>
       </div>
 
       {/* Formulaire principal */}
@@ -251,7 +264,7 @@ export default function LoginScreen({ onLogin, onRegister, triggerToast }: Login
       </div>
 
       {/* Note de sécurité en bas de la page */}
-      <div className="mt-6 p-3 rounded-xl bg-white/[0.01] border border-white/[0.03] flex items-center gap-2.5 text-left select-none">
+      <div className="hidden">
         <Shield className="w-4 h-4 text-breezy-lavender shrink-0" />
         <p className="text-[9px] text-white/30 leading-snug">
           Tout est stocké localement dans ton navigateur. Aucune donnée n'est envoyée sans ton accord.

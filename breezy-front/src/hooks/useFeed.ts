@@ -14,10 +14,14 @@ export function useFeed(
   triggerToast: (msg: string) => void
 ) {
   const [posts, setPosts] = useState<Post[]>(() => feedService.getPosts());
+  const [userPosts, setUserPosts] = useState<Post[]>([]);
   const [homeCategory, setHomeCategory] = useState<PostCategory>('for-you');
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
   const [postComments, setPostComments] = useState<CommentsByPost>(() => feedService.getComments());
   const [showCommentsForPost, setShowCommentsForPost] = useState<Record<string, boolean>>({});
+  const [commentPages, setCommentPages] = useState<Record<string, number>>({});
+  const [commentHasMore, setCommentHasMore] = useState<Record<string, boolean>>({});
+  const [loadingComments, setLoadingComments] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!currentUser.username) return;
@@ -26,14 +30,10 @@ export function useFeed(
 
     async function loadFeed() {
       try {
-        const [nextPosts, nextComments] = await Promise.all([
-          feedService.fetchPosts(homeCategory),
-          feedService.fetchComments(),
-        ]);
+        const nextPosts = await feedService.fetchPosts(homeCategory);
 
         if (!cancelled) {
           setPosts(nextPosts);
-          setPostComments(nextComments);
         }
       } catch (error) {
         if (!cancelled) {
@@ -50,6 +50,32 @@ export function useFeed(
   }, [currentUser.username, homeCategory, triggerToast]);
 
   useEffect(() => {
+    if (!currentUser.username) return;
+
+    let cancelled = false;
+
+    async function loadUserPosts() {
+      try {
+        const nextUserPosts = await feedService.fetchUserPosts(currentUser.username);
+
+        if (!cancelled) {
+          setUserPosts(nextUserPosts);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          triggerToast(getErrorMessage(error, "Impossible de charger tes publications."));
+        }
+      }
+    }
+
+    loadUserPosts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser.username, triggerToast]);
+
+  useEffect(() => {
     feedService.savePosts(posts);
   }, [posts]);
 
@@ -61,6 +87,22 @@ export function useFeed(
     setPosts((pList) =>
       pList.map((p) => (p.authorUsername === currentUser.username ? { ...p, avatar: avatarUrl } : p))
     );
+    setUserPosts((pList) =>
+      pList.map((p) => (p.authorUsername === currentUser.username ? { ...p, avatar: avatarUrl } : p))
+    );
+  };
+
+  const findKnownPost = (postId: string) =>
+    posts.find((p) => p.id === postId) || userPosts.find((p) => p.id === postId);
+
+  const updateKnownPost = (updatedPost: Post) => {
+    setPosts((prev) => prev.map((post) => (post.id === updatedPost.id ? updatedPost : post)));
+    setUserPosts((prev) => prev.map((post) => (post.id === updatedPost.id ? updatedPost : post)));
+  };
+
+  const removeKnownPost = (postId: string) => {
+    setPosts((prev) => prev.filter((post) => post.id !== postId));
+    setUserPosts((prev) => prev.filter((post) => post.id !== postId));
   };
 
   const handleCategoryChange = (cat: PostCategory) => {
@@ -69,14 +111,14 @@ export function useFeed(
   };
 
   const handleToggleLike = async (postId: string) => {
-    const target = posts.find((p) => p.id === postId);
+    const target = findKnownPost(postId);
     if (!target) return;
 
     playTick();
 
     try {
       const updatedPost = await feedService.toggleLike(postId);
-      setPosts((prev) => prev.map((post) => (post.id === postId ? updatedPost : post)));
+      updateKnownPost(updatedPost);
 
       if (updatedPost.likedByUser) {
         triggerToast(`Tu as aime la publication de ${target.authorName}`);
@@ -87,14 +129,14 @@ export function useFeed(
   };
 
   const handleToggleStar = async (postId: string) => {
-    const target = posts.find((p) => p.id === postId);
+    const target = findKnownPost(postId);
     if (!target) return;
 
     playChime();
 
     try {
       const updatedPost = await feedService.toggleStar(postId);
-      setPosts((prev) => prev.map((post) => (post.id === postId ? updatedPost : post)));
+      updateKnownPost(updatedPost);
       triggerToast(updatedPost.starredByUser ? "Ajoute aux favoris" : "Retire des favoris");
     } catch (error) {
       triggerToast(getErrorMessage(error, "Impossible de mettre a jour le favori."));
@@ -110,6 +152,10 @@ export function useFeed(
         ? prev.filter((post) => post.id !== postId)
         : [updatedPost, ...prev.filter((post) => post.id !== postId)]
       );
+      setUserPosts((prev) => updatedPost.archived
+        ? prev.filter((post) => post.id !== postId)
+        : [updatedPost, ...prev.filter((post) => post.id !== postId)]
+      );
       triggerToast(updatedPost.archived ? "Publication archivee." : "Publication restauree.");
     } catch (error) {
       triggerToast(getErrorMessage(error, "Impossible d'archiver."));
@@ -117,7 +163,7 @@ export function useFeed(
   };
 
   const handleTogglePin = async (postId: string) => {
-    const target = posts.find((p) => p.id === postId);
+    const target = findKnownPost(postId);
     if (!target) return;
 
     playChime();
@@ -125,6 +171,7 @@ export function useFeed(
     try {
       const updatedPost = await feedService.togglePin(postId);
       setPosts((prev) => [updatedPost, ...prev.filter((post) => post.id !== postId)]);
+      setUserPosts((prev) => [updatedPost, ...prev.filter((post) => post.id !== postId)]);
       triggerToast(updatedPost.pinned ? "Publication epinglee." : "Publication desenpinglee.");
     } catch (error) {
       triggerToast(getErrorMessage(error, "Impossible d'epingler."));
@@ -132,7 +179,7 @@ export function useFeed(
   };
 
   const handleDeletePost = async (postId: string, fallbackName?: string) => {
-    const target = posts.find((p) => p.id === postId);
+    const target = findKnownPost(postId);
     const name = target?.title || fallbackName || target?.content || "ce post";
 
     if (!window.confirm(`Supprimer le post "${name}" ?`)) return false;
@@ -141,7 +188,7 @@ export function useFeed(
 
     try {
       await feedService.deletePost(postId);
-      setPosts((prev) => prev.filter((post) => post.id !== postId));
+      removeKnownPost(postId);
       triggerToast("Publication supprimee.");
       return true;
     } catch (error) {
@@ -163,14 +210,46 @@ export function useFeed(
     try {
       const newPost = await feedService.createRemotePost({ title, content, category, image, images });
       setPosts((prev) => [newPost, ...prev.filter((post) => post.id !== newPost.id)]);
+      setUserPosts((prev) => [newPost, ...prev.filter((post) => post.id !== newPost.id)]);
       triggerToast(`Publication ajoutee dans "${category}" !`);
     } catch (error) {
       triggerToast(getErrorMessage(error, "Impossible de publier."));
     }
   };
 
+  const loadCommentsPage = async (postId: string, page = 1) => {
+    if (loadingComments[postId]) return;
+
+    setLoadingComments((prev) => ({ ...prev, [postId]: true }));
+
+    try {
+      const result = await feedService.fetchComments(postId, page, 20);
+
+      setPostComments((prev) => ({
+        ...prev,
+        [postId]: page === 1 ? result.comments : [...(prev[postId] || []), ...result.comments],
+      }));
+      setCommentPages((prev) => ({ ...prev, [postId]: result.page }));
+      setCommentHasMore((prev) => ({ ...prev, [postId]: result.hasMore }));
+    } catch (error) {
+      triggerToast(getErrorMessage(error, "Impossible de charger les commentaires."));
+    } finally {
+      setLoadingComments((prev) => ({ ...prev, [postId]: false }));
+    }
+  };
+
   const handleToggleComments = (postId: string) => {
-    setShowCommentsForPost((prev) => ({ ...prev, [postId]: !prev[postId] }));
+    setShowCommentsForPost((prev) => {
+      const nextValue = !prev[postId];
+      if (nextValue && !commentPages[postId]) {
+        void loadCommentsPage(postId, 1);
+      }
+      return { ...prev, [postId]: nextValue };
+    });
+  };
+
+  const handleLoadMoreComments = (postId: string) => {
+    void loadCommentsPage(postId, (commentPages[postId] || 1) + 1);
   };
 
   const handleCommentDraftChange = (postId: string, text: string) => {
@@ -216,20 +295,27 @@ export function useFeed(
   const resetFeed = () => {
     feedService.clearData();
     setPosts([]);
+    setUserPosts([]);
     setPostComments({});
     setCommentDrafts({});
     setShowCommentsForPost({});
+    setCommentPages({});
+    setCommentHasMore({});
+    setLoadingComments({});
   };
 
   const filteredPosts = posts;
 
   return {
     posts,
+    userPosts,
     homeCategory,
     handleCategoryChange,
     commentDrafts,
     postComments,
     showCommentsForPost,
+    commentHasMore,
+    loadingComments,
     filteredPosts,
     handleToggleLike,
     handleToggleStar,
@@ -239,6 +325,7 @@ export function useFeed(
     loadArchivedPosts,
     handleAddPost,
     handleToggleComments,
+    handleLoadMoreComments,
     handleCommentDraftChange,
     handleAddComment,
     searchPosts,

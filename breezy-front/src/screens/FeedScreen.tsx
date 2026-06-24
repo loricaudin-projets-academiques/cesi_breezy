@@ -22,9 +22,12 @@ export default function FeedScreen({
   postComments,
   commentDrafts,
   showCommentsForPost,
+  commentHasMore,
+  loadingComments,
   onToggleStar,
   onToggleLike,
   onToggleComments,
+  onLoadMoreComments,
   onCommentDraftChange,
   onAddComment,
   onToggleArchive,
@@ -79,9 +82,12 @@ export default function FeedScreen({
               comments={postComments[post.id]}
               commentDraft={commentDrafts[post.id]}
               showComments={showCommentsForPost[post.id]}
+              hasMoreComments={commentHasMore[post.id]}
+              isLoadingComments={loadingComments[post.id]}
               onToggleStar={onToggleStar}
               onToggleLike={onToggleLike}
               onToggleComments={onToggleComments}
+              onLoadMoreComments={onLoadMoreComments}
               onCommentDraftChange={onCommentDraftChange}
               onAddComment={onAddComment}
               onToggleArchive={onToggleArchive}

@@ -48,8 +48,8 @@ h6 {
 
 @media (min-width: 768px) {
   body {
-    font-size: 17px;
-    line-height: 24px;
+    font-size: 22px;
+    line-height: 31px;
   }
 
   main p,
@@ -58,8 +58,8 @@ h6 {
   main input,
   main textarea,
   main label {
-    font-size: 16px !important;
-    line-height: 22px !important;
+    font-size: 21px !important;
+    line-height: 29px !important;
   }
 
   main [class*="text-[7"],
@@ -68,8 +68,8 @@ h6 {
   main [class*="text-[10"],
   main [class*="text-[11"],
   main .text-xs {
-    font-size: 14px !important;
-    line-height: 18px !important;
+    font-size: 18px !important;
+    line-height: 24px !important;
   }
 
   main h1,
@@ -78,9 +78,40 @@ h6 {
   main h4,
   main h5,
   main h6 {
-    font-size: 22px !important;
-    line-height: 28px !important;
+    font-size: 28px !important;
+    line-height: 36px !important;
   }
+}
+
+.lucide {
+  width: 1.25em;
+  height: 1.25em;
+  min-width: 1.25em;
+}
+
+.breezy-nav-shell span {
+  font-size: 14px !important;
+  line-height: 18px !important;
+}
+
+.breezy-nav-shell .lucide {
+  width: 28px;
+  height: 28px;
+}
+
+.breezy-chat-surface {
+  background: #050508;
+  color: #f5faff;
+}
+
+.theme-light .breezy-chat-surface {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+.theme-light .breezy-chat-surface .glassmorphism,
+.theme-light .breezy-chat-surface .glassmorphism-light {
+  background: #ffffff !important;
 }
 
 .font-medium,

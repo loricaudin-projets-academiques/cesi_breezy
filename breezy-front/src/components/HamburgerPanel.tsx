@@ -6,10 +6,11 @@
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Archive, Bookmark, Check, Heart, HeartCrack, Settings, ShieldAlert, Sparkles, Trash2, X } from 'lucide-react';
+import { Archive, Bookmark, Check, Heart, HeartCrack, Settings, ShieldAlert, Trash2, X } from 'lucide-react';
 import { Post, UserProfile } from '../types';
 import { getAvatarUrl } from './Avatar';
 import { playTick, playChime, isSoundEnabled, setSoundEnabled } from '../audio';
+import { forceNavigate } from '../utils/navigation';
 
 interface HamburgerPanelProps {
   isOpen: boolean;
@@ -25,8 +26,6 @@ interface HamburgerPanelProps {
   onToggleLanguage: () => void;
   isPrivate: boolean;
   onTogglePrivate: () => void;
-  notificationsEnabled: boolean;
-  onToggleNotifications: () => void;
   onLoadArchive: () => Promise<Post[]>;
   onToggleArchive: (postId: string) => void;
   onDeletePost: (postId: string, title?: string) => boolean | Promise<boolean>;
@@ -63,8 +62,6 @@ export default function HamburgerPanel({
   onToggleLanguage,
   isPrivate,
   onTogglePrivate,
-  notificationsEnabled,
-  onToggleNotifications,
   onLoadArchive,
   onToggleArchive,
   onDeletePost,
@@ -74,6 +71,7 @@ export default function HamburgerPanel({
   const [activeView, setActiveView] = useState<PanelView>('menu');
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [archivedPosts, setArchivedPosts] = useState<Post[]>([]);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const isEnglish = language === 'en';
 
   const likedPosts = posts.filter((post) => post.likedByUser);
@@ -209,13 +207,6 @@ export default function HamburgerPanel({
                       </div>
                     </button>
 
-                    <div className="mt-6 p-4 rounded-2xl bg-gradient-to-br from-[#120f26]/40 to-[#0c142b]/40 border border-breezy-border-active/10 text-center select-none relative overflow-hidden">
-                      <Sparkles className="w-5 h-5 mx-auto mb-1.5 text-breezy-neon active-nav-glow" />
-                      <h5 className="text-[13px] leading-4 font-bold text-[#AEEBFF] uppercase">Breezy</h5>
-                      <p className="text-[13px] leading-4 text-white/45 mt-1">
-                        {isEnglish ? 'React, Next and API backed by the database.' : 'React, Next et API connectes a la base de donnees.'}
-                      </p>
-                    </div>
                   </motion.div>
                 )}
 
@@ -239,10 +230,6 @@ export default function HamburgerPanel({
                       <Toggle enabled={isPrivate} onClick={() => { playTick(); onTogglePrivate(); }} accent="bg-breezy-purple" />
                     </SettingCard>
 
-                    <SettingCard title={isEnglish ? 'In-app notifications' : 'Notifications internes'} description={isEnglish ? 'Enable or disable the red system toasts.' : 'Active ou coupe les notifications internes.'}>
-                      <Toggle enabled={notificationsEnabled} onClick={() => { playTick(); onToggleNotifications(); }} />
-                    </SettingCard>
-
                     <SettingCard title={isEnglish ? 'Ambient halo' : 'Halo ambiant'} description={isEnglish ? 'Shows color halos behind the interface.' : "Active les halos de couleur derriere l'interface."}>
                       <Toggle enabled={ambientGlow} onClick={() => { playTick(); onToggleAmbientGlow(); }} />
                     </SettingCard>
@@ -260,6 +247,7 @@ export default function HamburgerPanel({
                     posts={likedPosts}
                     backLabel={labels.back}
                     onBack={() => transitionTo('menu')}
+                    onPostOpen={setSelectedPost}
                     action={(post) => (
                       <button onClick={() => handleUnlikeFromList(post.id, post.authorName)} className="w-6 h-6 rounded-md hover:bg-rose-500/10 text-rose-400 flex items-center justify-center transition shrink-0">
                         <X className="w-3.5 h-3.5" />
@@ -275,6 +263,7 @@ export default function HamburgerPanel({
                     posts={savedPosts}
                     backLabel={labels.back}
                     onBack={() => transitionTo('menu')}
+                    onPostOpen={setSelectedPost}
                     action={() => <div className="p-1 rounded bg-breezy-lavender/10 text-breezy-lavender shrink-0"><Check className="w-3 h-3" /></div>}
                   />
                 )}
@@ -286,6 +275,7 @@ export default function HamburgerPanel({
                     posts={archivedPosts}
                     backLabel={labels.back}
                     onBack={() => transitionTo('menu')}
+                    onPostOpen={setSelectedPost}
                     action={(post) => (
                       <div className="flex items-center gap-1.5">
                         <button
@@ -320,6 +310,49 @@ export default function HamburgerPanel({
               Breezy Social Client v1.2.0
             </div>
           </motion.div>
+
+          <AnimatePresence>
+            {selectedPost && (
+              <motion.div
+                key="post-drawer"
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                drag="x"
+                dragConstraints={{ left: 0, right: 180 }}
+                onDragEnd={(_, info) => {
+                  if (info.offset.x > 100) setSelectedPost(null);
+                }}
+                className="fixed right-0 top-0 bottom-0 w-[88%] max-w-[420px] bg-[#08080c] border-l border-white/10 z-[60] shadow-[-12px_0_44px_rgba(0,0,0,0.9)] p-5 flex flex-col gap-4"
+              >
+                <button
+                  onClick={() => setSelectedPost(null)}
+                  className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/85"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+
+                <button
+                  onClick={() => forceNavigate(`/profile/${encodeURIComponent(selectedPost.authorUsername)}`)}
+                  className="flex items-center gap-3 text-left"
+                >
+                  <img src={getAvatarUrl(selectedPost.avatar, selectedPost.authorUsername, selectedPost.authorName)} className="w-11 h-11 rounded-full object-cover border border-white/10" alt="" />
+                  <div>
+                    <h3 className="text-sm font-bold text-breezy-icy">{selectedPost.authorName}</h3>
+                    <p className="text-xs font-mono text-purple-300">{selectedPost.authorUsername}</p>
+                  </div>
+                </button>
+
+                <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 overflow-y-auto no-scrollbar">
+                  {selectedPost.title && <h2 className="text-lg font-bold mb-2">{selectedPost.title}</h2>}
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{selectedPost.content}</p>
+                  {selectedPost.images?.[0] && (
+                    <img src={selectedPost.images[0]} className="mt-4 rounded-xl w-full object-cover" alt="" />
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </>
       )}
     </AnimatePresence>
@@ -344,6 +377,7 @@ function PostMiniList({
   emptyText,
   backLabel,
   onBack,
+  onPostOpen,
   action,
 }: {
   posts: Post[];
@@ -351,6 +385,7 @@ function PostMiniList({
   emptyText: string;
   backLabel: string;
   onBack: () => void;
+  onPostOpen: (post: Post) => void;
   action: (post: Post) => ReactNode;
 }) {
   return (
@@ -367,7 +402,7 @@ function PostMiniList({
       ) : (
         <div className="flex flex-col gap-2">
           {posts.map((post) => (
-            <div key={post.id} className="p-3 rounded-lg bg-white/[0.02] border border-white/5 flex items-center justify-between gap-2">
+            <button key={post.id} onClick={() => onPostOpen(post)} className="w-full p-3 rounded-lg bg-white/[0.02] border border-white/5 flex items-center justify-between gap-2 text-left hover:border-breezy-border-active/40">
               <div className="flex items-center gap-2 min-w-0">
                 <img src={getAvatarUrl(post.avatar, post.authorUsername, post.authorName)} className="w-6 h-6 rounded-full object-cover border border-white/10" alt="" />
                 <div className="min-w-0">
@@ -375,8 +410,8 @@ function PostMiniList({
                   <p className="text-[13px] leading-4 text-white/45 truncate">{post.content}</p>
                 </div>
               </div>
-              {action(post)}
-            </div>
+              <span onClick={(event) => event.stopPropagation()}>{action(post)}</span>
+            </button>
           ))}
         </div>
       )}

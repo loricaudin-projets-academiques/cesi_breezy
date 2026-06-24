@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Comment, CommentsByPost, Post, PostCategory, UserProfile } from '../../types';
+import { Comment, CommentsByPost, PaginatedComments, Post, PostCategory, UserProfile } from '../../types';
 
 export interface IFeedService {
   getPosts(): Post[];
@@ -14,7 +14,7 @@ export interface IFeedService {
   fetchPosts(category?: PostCategory): Promise<Post[]>;
   fetchUserPosts(username: string): Promise<Post[]>;
   fetchArchivedPosts(): Promise<Post[]>;
-  fetchComments(postId?: string): Promise<CommentsByPost>;
+  fetchComments(postId: string, page?: number, limit?: number): Promise<PaginatedComments>;
   createRemotePost(payload: { title?: string; content: string; category: PostCategory; image?: string; images?: string[] }): Promise<Post>;
   addComment(postId: string, text: string): Promise<Comment>;
   toggleLike(postId: string): Promise<Post>;

@@ -55,7 +55,7 @@ export class MockConversationService implements IConversationService {
       id: `me-${Date.now()}`,
       sender: 'me',
       text,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }),
     };
 
     this.saveConversations(this.getConversations().map((conversation) => (
