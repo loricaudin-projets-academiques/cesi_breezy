@@ -56,7 +56,7 @@ async function listNotifications({ authUser }) {
   const notifications = await Notification.findAll({
     where: { recipient_id: currentUser.id },
     order: [["created_at", "DESC"]],
-    limit: 80,
+    limit: 20,
   });
 
   const actorIds = [...new Set(notifications.map((notification) => notification.actor_id))];

@@ -9,6 +9,8 @@ const KEYS = {
 } as const;
 
 export class HttpFeedService implements IFeedService {
+  private postsRequests = new Map<string, Promise<Post[]>>();
+
   constructor(private storage: IStorageProvider) {}
 
   getPosts(): Post[] {
@@ -48,21 +50,55 @@ export class HttpFeedService implements IFeedService {
   }
 
   async fetchPosts(category?: PostCategory): Promise<Post[]> {
-    const { data } = await api.get<Post[]>("/feed/posts", {
-      params: category && category !== "for-you" ? { category } : undefined,
+    const requestKey = category || "for-you";
+    const existingRequest = this.postsRequests.get(requestKey);
+    if (existingRequest) return existingRequest;
+
+    const request = api.get<Post[]>("/feed/posts", {
+      params: {
+        ...(category && category !== "for-you" ? { category } : {}),
+        page: 1,
+        limit: 20,
+      },
+    }).then(({ data }) => {
+      this.savePosts(data);
+      return data;
+    }).finally(() => {
+      this.postsRequests.delete(requestKey);
     });
-    this.savePosts(data);
-    return data;
+
+    this.postsRequests.set(requestKey, request);
+    return request;
   }
 
   async fetchUserPosts(username: string): Promise<Post[]> {
-    const { data } = await api.get<Post[]>(`/feed/users/${encodeURIComponent(username)}/posts`);
-    return data;
+    const requestKey = `user:${username}`;
+    const existingRequest = this.postsRequests.get(requestKey);
+    if (existingRequest) return existingRequest;
+
+    const request = api.get<Post[]>(`/feed/users/${encodeURIComponent(username)}/posts`, {
+      params: { page: 1, limit: 20 },
+    }).then(({ data }) => data).finally(() => {
+      this.postsRequests.delete(requestKey);
+    });
+
+    this.postsRequests.set(requestKey, request);
+    return request;
   }
 
   async fetchArchivedPosts(): Promise<Post[]> {
-    const { data } = await api.get<Post[]>("/feed/archive/posts");
-    return data;
+    const requestKey = "archive";
+    const existingRequest = this.postsRequests.get(requestKey);
+    if (existingRequest) return existingRequest;
+
+    const request = api.get<Post[]>("/feed/archive/posts", {
+      params: { page: 1, limit: 20 },
+    }).then(({ data }) => data).finally(() => {
+      this.postsRequests.delete(requestKey);
+    });
+
+    this.postsRequests.set(requestKey, request);
+    return request;
   }
 
   async fetchComments(postId: string, page = 1, limit = 20): Promise<PaginatedComments> {

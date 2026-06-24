@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useState, useEffect } from 'react';
-import { Follower, ProfileStatType, UserProfile } from '../types';
+import { Follower, MusicState, ProfileStatType, UserProfile } from '../types';
 import { playChime, playTick } from '../audio';
 import { authService } from '../services/ServiceContainer';
 import { api } from '../services/api';
@@ -150,10 +150,10 @@ export function useProfile(triggerToast: (msg: string) => void) {
   };
 
   // Met à jour les infos de la chanson en cours (titre, artiste, pochette...)
-  const handleMusicChange = (updates: Partial<typeof user.music>) => {
+  const handleMusicChange = useCallback((updates: Partial<MusicState>) => {
     const nextMusic = { ...user.music, ...updates };
     void updateCurrentUser({ music: nextMusic });
-  };
+  }, [updateCurrentUser, user.music]);
 
   return {
     user,

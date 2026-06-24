@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 
 import { UserProfile } from "../types";
 import { getErrorMessage } from "../utils/errors";
@@ -24,12 +24,12 @@ function useBreezyAppState() {
     return window.localStorage.getItem(GUEST_THEME_STORAGE_KEY) === "light" ? "light" : "dark";
   });
 
-  const triggerToast = (_message: string) => {
+  const triggerToast = useCallback((_message: string) => {
     void _message;
-  };
+  }, []);
   const profile = useProfile(triggerToast);
-  const feed = useFeed(profile.user, triggerToast);
-  const conversations = useConversations();
+  const feed = useFeed(profile.user, triggerToast, isLoggedIn);
+  const conversations = useConversations(isLoggedIn);
   const ambientGlow = profile.user.ambientGlow !== false;
   const isLightTheme = isLoggedIn ? profile.user.theme === "light" : guestTheme === "light";
   const setAmbientGlow = (enabled: boolean) => {

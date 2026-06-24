@@ -40,7 +40,7 @@ async function conversationToDto(conversation, currentUser) {
   const otherUserId = conversation.participants_ids.find((id) => id !== currentUser.id);
   const [otherUser, messages, lastMessage] = await Promise.all([
     User.findByPk(otherUserId),
-    PrivateMessage.find({ conversation_id: conversation._id }).sort({ created_at: 1 }),
+    PrivateMessage.find({ conversation_id: conversation._id }).sort({ created_at: -1 }).limit(20),
     conversation.last_message_id
       ? PrivateMessage.findById(conversation.last_message_id)
       : PrivateMessage.findOne({ conversation_id: conversation._id }).sort({ created_at: -1 }),
@@ -54,8 +54,8 @@ async function conversationToDto(conversation, currentUser) {
     lastMessage: lastMessage?.content || "Conversation demarree",
     unreadCount: 0,
     time: lastMessage ? timeLabel(lastMessage.created_at) : "A l'instant",
-    online: true,
-    messages: messages.map((message) => messageToDto(message, currentUser.id)),
+    online: false,
+    messages: messages.reverse().map((message) => messageToDto(message, currentUser.id)),
   };
 }
 
@@ -91,7 +91,7 @@ async function listConversations({ authUser }) {
   const currentUser = await getCurrentUser(authUser);
   const conversations = await Conversation.find({
     participants_ids: currentUser.id,
-  }).sort({ updated_at: -1 });
+  }).sort({ updated_at: -1 }).limit(20);
 
   const friendConversations = [];
   for (const conversation of conversations) {
@@ -157,8 +157,10 @@ async function findConversationForCurrentUser({ authUser, conversationId }) {
 
 async function listMessages({ authUser, conversationId }) {
   const { currentUser, conversation } = await findConversationForCurrentUser({ authUser, conversationId });
-  const messages = await PrivateMessage.find({ conversation_id: conversation._id }).sort({ created_at: 1 });
-  return messages.map((message) => messageToDto(message, currentUser.id));
+  const messages = await PrivateMessage.find({ conversation_id: conversation._id })
+    .sort({ created_at: -1 })
+    .limit(20);
+  return messages.reverse().map((message) => messageToDto(message, currentUser.id));
 }
 
 async function sendMessage({ authUser, conversationId, text }) {
@@ -167,6 +169,9 @@ async function sendMessage({ authUser, conversationId, text }) {
 
   if (!cleanText) {
     throw createHttpError(400, "Le message est vide.");
+  }
+  if (cleanText.length > 5000) {
+    throw createHttpError(400, "Le message ne peut pas depasser 5000 caracteres.");
   }
 
   const message = await PrivateMessage.create({

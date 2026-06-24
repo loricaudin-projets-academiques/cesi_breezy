@@ -15,7 +15,9 @@ import {
 async function fetchPosts(req, res, next) {
   try {
     const category = String(req.query.category || "").trim();
-    const posts = await getFeedPosts({ authUser: req.user, category });
+    const page = Number.parseInt(String(req.query.page || "1"), 10);
+    const limit = Number.parseInt(String(req.query.limit || "20"), 10);
+    const posts = await getFeedPosts({ authUser: req.user, category, page, limit });
     return res.json(posts);
   } catch (error) {
     return next(error);
@@ -27,6 +29,8 @@ async function fetchUserPosts(req, res, next) {
     const posts = await getUserPosts({
       authUser: req.user,
       username: req.params.username,
+      page: Number.parseInt(String(req.query.page || "1"), 10),
+      limit: Number.parseInt(String(req.query.limit || "20"), 10),
     });
     return res.json(posts);
   } catch (error) {
@@ -36,7 +40,11 @@ async function fetchUserPosts(req, res, next) {
 
 async function fetchArchivedPosts(req, res, next) {
   try {
-    return res.json(await getArchivedPosts({ authUser: req.user }));
+    return res.json(await getArchivedPosts({
+      authUser: req.user,
+      page: Number.parseInt(String(req.query.page || "1"), 10),
+      limit: Number.parseInt(String(req.query.limit || "20"), 10),
+    }));
   } catch (error) {
     return next(error);
   }

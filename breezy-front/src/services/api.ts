@@ -5,6 +5,7 @@ export const API_TOKEN_STORAGE_KEY = "breezy_jwt";
 
 export const api = axios.create({
   baseURL: DEFAULT_API_URL,
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -12,6 +13,7 @@ export const api = axios.create({
 
 export const authApi = axios.create({
   baseURL: DEFAULT_API_URL,
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
   },
