@@ -1,10 +1,9 @@
 "use client";
 
-import { createContext, ReactNode, useCallback, useContext, useState } from "react";
+import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 
 import { UserProfile } from "../types";
 import { getErrorMessage } from "../utils/errors";
-import { useToast } from "../hooks/useToast";
 import { useProfile } from "../hooks/useProfile";
 import { useFeed } from "../hooks/useFeed";
 import { useConversations } from "../hooks/useConversations";
@@ -13,32 +12,50 @@ import { authService } from "../services/ServiceContainer";
 type BreezyAppContextValue = ReturnType<typeof useBreezyAppState>;
 
 const BreezyAppContext = createContext<BreezyAppContextValue | null>(null);
+const GUEST_THEME_STORAGE_KEY = "breezy_guest_theme_v2";
 
 function useBreezyAppState() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => authService.isLoggedIn());
   const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
-  const [ambientGlow, setAmbientGlow] = useState(true);
-  const [isLightTheme, setIsLightTheme] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [guestTheme, setGuestTheme] = useState<"dark" | "light">(() => {
+    if (typeof window === "undefined") return "dark";
+    return window.localStorage.getItem(GUEST_THEME_STORAGE_KEY) === "light" ? "light" : "dark";
+  });
 
-  const { toasts, triggerToast: rawTriggerToast, handleRemoveToast } = useToast();
-  const profile = useProfile(rawTriggerToast);
-  const triggerToast = useCallback((message: string) => {
-    if (profile.user.notificationsEnabled !== false) {
-      rawTriggerToast(message);
+  const triggerToast = useCallback((_message: string) => {
+    void _message;
+  }, []);
+  const profile = useProfile(triggerToast);
+  const feed = useFeed(profile.user, triggerToast, isLoggedIn);
+  const conversations = useConversations(isLoggedIn);
+  const ambientGlow = profile.user.ambientGlow !== false;
+  const isLightTheme = isLoggedIn ? profile.user.theme === "light" : guestTheme === "light";
+  const setAmbientGlow = (enabled: boolean) => {
+    void profile.updateCurrentUser({ ambientGlow: enabled });
+  };
+  const setIsLightTheme = (enabled: boolean) => {
+    const nextTheme = enabled ? "light" : "dark";
+    if (!isLoggedIn) {
+      setGuestTheme(nextTheme);
+      window.localStorage.setItem(GUEST_THEME_STORAGE_KEY, nextTheme);
+      return;
     }
-  }, [profile.user.notificationsEnabled, rawTriggerToast]);
-  const feed = useFeed(profile.user, triggerToast);
-  const conversations = useConversations();
+
+    void profile.updateCurrentUser({ theme: nextTheme });
+  };
 
   const postInteractions = {
     postComments: feed.postComments,
     commentDrafts: feed.commentDrafts,
     showCommentsForPost: feed.showCommentsForPost,
+    commentHasMore: feed.commentHasMore,
+    loadingComments: feed.loadingComments,
     onToggleStar: feed.handleToggleStar,
     onToggleLike: feed.handleToggleLike,
     onToggleComments: feed.handleToggleComments,
+    onLoadMoreComments: feed.handleLoadMoreComments,
     onCommentDraftChange: feed.handleCommentDraftChange,
     onAddComment: feed.handleAddComment,
     onToggleArchive: feed.handleToggleArchive,
@@ -56,7 +73,7 @@ function useBreezyAppState() {
     try {
       openSession(await authService.login(username, passkey, apiUrl));
     } catch (error) {
-      triggerToast(getErrorMessage(error, "Erreur de connexion."));
+      console.error(getErrorMessage(error, "Erreur de connexion."));
       throw error;
     }
   };
@@ -65,7 +82,7 @@ function useBreezyAppState() {
     try {
       openSession(await authService.register(name, username, passkey, apiUrl));
     } catch (error) {
-      triggerToast(getErrorMessage(error, "Erreur lors de l'inscription."));
+      console.error(getErrorMessage(error, "Erreur lors de l'inscription."));
       throw error;
     }
   };
@@ -90,9 +107,7 @@ function useBreezyAppState() {
     setIsLightTheme,
     searchQuery,
     setSearchQuery,
-    toasts,
     triggerToast,
-    handleRemoveToast,
     profile,
     feed,
     conversations,
@@ -106,6 +121,15 @@ function useBreezyAppState() {
 
 export function BreezyAppProvider({ children }: { children: ReactNode }) {
   const value = useBreezyAppState();
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  if (!isHydrated) {
+    return null;
+  }
 
   return (
     <BreezyAppContext.Provider value={value}>

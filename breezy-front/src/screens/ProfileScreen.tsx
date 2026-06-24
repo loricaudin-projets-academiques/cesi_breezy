@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Menu, Edit2, Music, Gamepad2, ImageIcon, Link as LinkIcon, Sparkles } from 'lucide-react';
+import { Menu, Edit2, Music, Gamepad2, ImageIcon } from 'lucide-react';
 import { UserProfile, Post, ProfileStatType } from '../types';
 import SpotifyWidget from '../components/SpotifyWidget';
 import PostCard, { PostInteractionHandlers, PostListState } from '../components/PostCard';
@@ -33,9 +33,12 @@ export default function ProfileScreen({
   postComments,
   commentDrafts,
   showCommentsForPost,
+  commentHasMore,
+  loadingComments,
   onToggleStar,
   onToggleLike,
   onToggleComments,
+  onLoadMoreComments,
   onCommentDraftChange,
   onAddComment,
   onToggleArchive,
@@ -82,7 +85,7 @@ export default function ProfileScreen({
               <button
                 onClick={onOpenBioEditor}
                 className="p-1 rounded-full bg-white/5 hover:bg-white/10 text-white/55 hover:text-breezy-neon select-none"
-                title="Modifier la bio"
+                title="Modifier le nom et la bio"
               >
                 <Edit2 className="w-3 h-3" />
               </button>
@@ -153,11 +156,13 @@ export default function ProfileScreen({
 
             <button
               onClick={onOpenNoteEditor}
-              className="absolute -top-1 -right-4 glass-bright border border-[#C8B6FF] rounded-2xl px-2 py-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.6)] cursor-pointer hover:border-breezy-neon transition min-w-[72px] max-w-[190px] z-20 text-[9px] text-left leading-tight transform hover:-translate-y-0.5 text-white"
+              className="mt-2 glass-bright border border-[#C8B6FF] rounded-2xl px-2 py-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.6)] cursor-pointer hover:border-breezy-neon transition w-full max-w-[170px] z-20 text-[9px] text-left leading-tight transform hover:-translate-y-0.5 text-white"
               title="Modifier ta note"
             >
               <p className="font-mono text-[7px] text-[#AEEBFF] font-black uppercase tracking-widest -mb-0.5">Note</p>
-              <p className="whitespace-normal break-words">{user.note || <span className="text-white/40 italic">Ajouter...</span>}</p>
+              <p className="whitespace-normal break-words">
+                {user.note ? (user.note.length > 15 ? `${user.note.slice(0, 15)}...` : user.note) : <span className="text-white/40 italic">Ajouter...</span>}
+              </p>
             </button>
           </div>
 
@@ -233,8 +238,6 @@ export default function ProfileScreen({
         </span>
         <div className="flex items-center gap-3 text-white/70 group-hover:text-white transition">
           <ImageIcon className="w-3.5 h-3.5 hover:text-breezy-neon" />
-          <LinkIcon className="w-3.5 h-3.5 hover:text-breezy-lavender" />
-          <Sparkles className="w-3.5 h-3.5 hover:text-breezy-purple active-nav-glow animate-pulse" />
         </div>
       </button>
 
@@ -243,7 +246,6 @@ export default function ProfileScreen({
           <h5 className="text-[10px] font-mono tracking-widest text-[#F5FAFF]/30 uppercase select-none">
             Mes publications
           </h5>
-          <span className="text-[9px] font-mono text-breezy-neon select-none">Synchronise</span>
         </div>
 
         {userPosts.length === 0 ? (
@@ -259,9 +261,12 @@ export default function ProfileScreen({
                 comments={postComments[post.id]}
                 commentDraft={commentDrafts[post.id]}
                 showComments={showCommentsForPost[post.id]}
+                hasMoreComments={commentHasMore[post.id]}
+                isLoadingComments={loadingComments[post.id]}
                 onToggleStar={onToggleStar}
                 onToggleLike={onToggleLike}
                 onToggleComments={onToggleComments}
+                onLoadMoreComments={onLoadMoreComments}
                 onCommentDraftChange={onCommentDraftChange}
                 onAddComment={onAddComment}
                 onToggleArchive={onToggleArchive}

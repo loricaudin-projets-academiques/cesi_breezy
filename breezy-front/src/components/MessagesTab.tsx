@@ -5,13 +5,14 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MessageSquare, Send, ArrowLeft, MoreVertical, Sparkles, MessageSquarePlus, X } from 'lucide-react';
-import { Conversation, MessageItem } from '../types';
+import { MessageSquare, Send, ArrowLeft, MoreVertical, Search, X } from 'lucide-react';
+import { Conversation, Follower, MessageItem } from '../types';
 import { playTick, playMessageSound, playChime } from '../audio';
 import { conversationService } from '../services/ServiceContainer';
 import { normalizeUsername } from '../utils/username';
 import { getErrorMessage } from '../utils/errors';
 import Avatar from './Avatar';
+import { api } from '../services/api';
 
 // Heure courante au format HH:MM — affichée sous chaque bulle de message
 // Applique une transformation à une seule conversation de la liste
@@ -40,11 +41,61 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
   const [contactName, setContactName] = useState('');
   const [contactUsername, setContactUsername] = useState('');
   const [contactAvatar, setContactAvatar] = useState('');
+  const [contactResults, setContactResults] = useState<Follower[]>([]);
   
   // Référence pour faire défiler jusqu'au dernier message automatiquement
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const selectedConv = conversations.find(c => c.id === activeConvId);
+
+  useEffect(() => {
+    if (!isSelectContactOpen) return;
+
+    let cancelled = false;
+    const query = contactUsername.trim();
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        const { data } = query
+          ? await api.get<Follower[]>('/users/search', { params: { q: query } })
+          : await api.get<Follower[]>('/users/friends');
+        if (!cancelled) setContactResults(data);
+      } catch {
+        if (!cancelled) setContactResults([]);
+      }
+    }, query ? 250 : 0);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [contactUsername, isSelectContactOpen]);
+
+  const openChatWithUser = async (user: Follower) => {
+    setContactName(user.name);
+    setContactUsername(user.username);
+    setContactAvatar(user.avatar);
+    playChime();
+    setIsSelectContactOpen(false);
+
+    const existing = conversations.find((conversation) => conversation.username === user.username);
+    if (existing) {
+      setActiveConvId(existing.id);
+      return;
+    }
+
+    try {
+      const newConv = await conversationService.createRemoteConversation({
+        name: user.name,
+        username: user.username,
+        avatar: user.avatar,
+      });
+      onUpdateConversations((prev) => [newConv, ...prev.filter((conv) => conv.id !== newConv.id)]);
+      setActiveConvId(newConv.id);
+      triggerToast(`Chat ouvert avec ${newConv.name}`);
+    } catch (error) {
+      triggerToast(getErrorMessage(error, "Impossible d'ouvrir ce chat."));
+    }
+  };
 
   // Crée une nouvelle conversation ou ouvre celle qui existe déjà
   const handleCreateConvSubmit = async (e: React.FormEvent) => {
@@ -153,9 +204,9 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                 <button
                   onClick={() => setIsSelectContactOpen(true)}
                   className="p-1 rounded-md bg-white/5 hover:bg-white/10 hover:text-breezy-neon text-white/50 transition cursor-pointer"
-                  title="Nouveau chat"
+                  title="Rechercher un utilisateur"
                 >
-                  <MessageSquarePlus className="w-4 h-4" />
+                  <Search className="w-4 h-4" />
                 </button>
               </div>
               <span className="text-[10px] font-mono text-white/40 tracking-wider">MESSAGERIE</span>
@@ -178,7 +229,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                       setContactUsername(e.target.value);
                       setContactName(e.target.value.replace(/^@/, ''));
                     }}
-                    placeholder="Rechercher un utilisateur @username"
+                  placeholder="Rechercher un utilisateur..."
                     className="flex-1 text-xs font-sans rounded-xl bg-white/[0.04] p-3 text-breezy-icy placeholder-white/35 border border-white/5 focus:outline-none focus:border-breezy-border-active transition"
                     autoFocus
                   />
@@ -196,6 +247,22 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                   >
                     <X className="w-4 h-4" />
                   </button>
+                  <div className="md:col-span-3 flex flex-col gap-1.5">
+                    {contactResults.map((user) => (
+                      <button
+                        key={user.username}
+                        type="button"
+                        onClick={() => void openChatWithUser(user)}
+                        className="w-full flex items-center gap-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/5 p-2 text-left"
+                      >
+                        <Avatar name={user.name} username={user.username} url={user.avatar} className="w-8 h-8" />
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold truncate">{user.name} {user.isFriend ? 'AMI' : ''}</p>
+                          <p className="text-[10px] text-white/45 truncate">{user.username}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </motion.form>
               )}
             </AnimatePresence>
@@ -222,11 +289,6 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                     {/* Avatar avec indicateur de présence */}
                     <div className="relative shrink-0">
                       <Avatar name={conv.name} username={conv.username} url={conv.avatar} className="w-12 h-12" />
-                      {conv.online && (
-                        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-breezy-bg flex items-center justify-center">
-                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                        </div>
-                      )}
                     </div>
 
                     {/* Aperçu du dernier message */}
@@ -252,7 +314,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
           /* VUE 2 : La discussion en cours */
           <motion.div
             key="chat"
-            className="flex-1 flex flex-col h-full bg-breezy-bg z-10"
+            className="breezy-chat-surface flex-1 flex flex-col h-full z-10"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
@@ -272,18 +334,11 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                   <Avatar name={selectedConv?.name || ''} username={selectedConv?.username} url={selectedConv?.avatar} className="w-9 h-9" />
                   <div>
                     <h3 className="text-xs font-sans font-semibold text-breezy-icy">{selectedConv?.name}</h3>
-                    <p className="text-[10px] font-mono text-breezy-neon flex items-center gap-1">
-                      <span className={`w-1.5 h-1.5 rounded-full ${selectedConv?.online ? 'bg-emerald-500' : 'bg-white/30'}`} />
-                      {selectedConv?.online ? 'En ligne' : 'Hors ligne'}
-                    </p>
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <div className="p-1 rounded bg-breezy-purple/10 text-breezy-purple">
-                  <Sparkles className="w-3.5 h-3.5 active-nav-glow" />
-                </div>
                 <button className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50">
                   <MoreVertical className="w-4 h-4" />
                 </button>
@@ -354,6 +409,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                 type="text"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
+                maxLength={5000}
                 placeholder="Écrire un message..."
                 className="flex-1 text-xs rounded-xl glassmorphism-light py-3 px-4 text-breezy-icy placeholder-white/30 focus:outline-none focus:border-breezy-border-active transition"
               />

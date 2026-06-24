@@ -17,6 +17,8 @@ export const INITIAL_USER: UserProfile = {
   note: "",
   isPrivate: false,
   language: "fr",
+  theme: "dark",
+  ambientGlow: true,
   notificationsEnabled: true,
   music: {
     title: "",

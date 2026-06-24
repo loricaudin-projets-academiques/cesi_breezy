@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { playTick } from "../../audio";
 import ProfileScreen from "../../screens/ProfileScreen";
 import { useBreezyApp } from "../BreezyAppProvider";
@@ -13,16 +12,11 @@ export default function ProfilePage() {
     setIsPostModalOpen,
     postInteractions,
   } = useBreezyApp();
-
-  useEffect(() => {
-    void profile.refreshCurrentUser();
-  }, [profile.refreshCurrentUser]);
-
   return (
     <ProfileScreen
       key="profile"
       user={profile.user}
-      posts={feed.posts}
+      posts={feed.userPosts}
       onOpenHamburger={() => {
         playTick();
         setIsHamburgerOpen(true);

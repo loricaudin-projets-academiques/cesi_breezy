@@ -5,7 +5,7 @@
 
 import { IFeedService } from './IFeedService';
 import { IStorageProvider } from '../storage/IStorageProvider';
-import { Comment, CommentsByPost, Post, PostCategory, UserProfile } from '../../types';
+import { Comment, CommentsByPost, PaginatedComments, Post, PostCategory, UserProfile } from '../../types';
 import { INITIAL_POSTS } from '../../mockData';
 
 const KEYS = {
@@ -64,8 +64,20 @@ export class MockFeedService implements IFeedService {
     return this.getPosts().filter((post) => post.archived);
   }
 
-  async fetchComments(): Promise<CommentsByPost> {
-    return this.getComments();
+  async fetchComments(postId: string, page = 1, limit = 20): Promise<PaginatedComments> {
+    const allComments = this.getComments()[postId] || [];
+    const pageSize = Math.min(Math.max(limit, 1), 20);
+    const currentPage = Math.max(page, 1);
+    const start = (currentPage - 1) * pageSize;
+    const comments = allComments.slice(start, start + pageSize);
+
+    return {
+      comments,
+      page: currentPage,
+      limit: pageSize,
+      total: allComments.length,
+      hasMore: start + pageSize < allComments.length,
+    };
   }
 
   async createRemotePost(payload: { title?: string; content: string; category: PostCategory; image?: string; images?: string[] }): Promise<Post> {
@@ -80,6 +92,8 @@ export class MockFeedService implements IFeedService {
       note: "",
       isPrivate: false,
       language: "fr",
+      theme: "dark",
+      ambientGlow: true,
       notificationsEnabled: true,
       music: { title: "", artist: "", cover: "", isPlaying: false, progressPercent: 0 },
     };

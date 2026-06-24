@@ -7,12 +7,14 @@ import { useState, useEffect } from 'react';
 import { Conversation } from '../types';
 import { conversationService } from '../services/ServiceContainer';
 
-export function useConversations() {
+export function useConversations(enabled = true) {
   const [conversations, setConversations] = useState<Conversation[]>(() => {
     return conversationService.getConversations();
   });
 
   useEffect(() => {
+    if (!enabled) return;
+
     let cancelled = false;
 
     conversationService.fetchConversations()
@@ -28,7 +30,7 @@ export function useConversations() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
     conversationService.saveConversations(conversations);

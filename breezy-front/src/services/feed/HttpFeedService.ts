@@ -1,7 +1,7 @@
 import { api } from "../api";
 import { IStorageProvider } from "../storage/IStorageProvider";
 import { IFeedService } from "./IFeedService";
-import { Comment, CommentsByPost, Post, PostCategory, UserProfile } from "../../types";
+import { Comment, CommentsByPost, PaginatedComments, Post, PostCategory, UserProfile } from "../../types";
 
 const KEYS = {
   posts: "breezy_posts",
@@ -9,6 +9,8 @@ const KEYS = {
 } as const;
 
 export class HttpFeedService implements IFeedService {
+  private postsRequests = new Map<string, Promise<Post[]>>();
+
   constructor(private storage: IStorageProvider) {}
 
   getPosts(): Post[] {
@@ -48,31 +50,68 @@ export class HttpFeedService implements IFeedService {
   }
 
   async fetchPosts(category?: PostCategory): Promise<Post[]> {
-    const { data } = await api.get<Post[]>("/feed/posts", {
-      params: category && category !== "for-you" ? { category } : undefined,
+    const requestKey = category || "for-you";
+    const existingRequest = this.postsRequests.get(requestKey);
+    if (existingRequest) return existingRequest;
+
+    const request = api.get<Post[]>("/feed/posts", {
+      params: {
+        ...(category && category !== "for-you" ? { category } : {}),
+        page: 1,
+        limit: 20,
+      },
+    }).then(({ data }) => {
+      this.savePosts(data);
+      return data;
+    }).finally(() => {
+      this.postsRequests.delete(requestKey);
     });
-    this.savePosts(data);
-    return data;
+
+    this.postsRequests.set(requestKey, request);
+    return request;
   }
 
   async fetchUserPosts(username: string): Promise<Post[]> {
-    const { data } = await api.get<Post[]>(`/feed/users/${encodeURIComponent(username)}/posts`);
-    return data;
+    const requestKey = `user:${username}`;
+    const existingRequest = this.postsRequests.get(requestKey);
+    if (existingRequest) return existingRequest;
+
+    const request = api.get<Post[]>(`/feed/users/${encodeURIComponent(username)}/posts`, {
+      params: { page: 1, limit: 20 },
+    }).then(({ data }) => data).finally(() => {
+      this.postsRequests.delete(requestKey);
+    });
+
+    this.postsRequests.set(requestKey, request);
+    return request;
   }
 
   async fetchArchivedPosts(): Promise<Post[]> {
-    const { data } = await api.get<Post[]>("/feed/archive/posts");
-    return data;
-  }
+    const requestKey = "archive";
+    const existingRequest = this.postsRequests.get(requestKey);
+    if (existingRequest) return existingRequest;
 
-  async fetchComments(postId?: string): Promise<CommentsByPost> {
-    const { data } = await api.get<CommentsByPost>("/feed/comments", {
-      params: postId ? { postId } : undefined,
+    const request = api.get<Post[]>("/feed/archive/posts", {
+      params: { page: 1, limit: 20 },
+    }).then(({ data }) => data).finally(() => {
+      this.postsRequests.delete(requestKey);
     });
 
-    const nextComments = postId ? { ...this.getComments(), ...data } : data;
+    this.postsRequests.set(requestKey, request);
+    return request;
+  }
+
+  async fetchComments(postId: string, page = 1, limit = 20): Promise<PaginatedComments> {
+    const { data } = await api.get<PaginatedComments>("/feed/comments", {
+      params: { postId, page, limit },
+    });
+
+    const nextComments = {
+      ...this.getComments(),
+      [postId]: page === 1 ? data.comments : [...(this.getComments()[postId] || []), ...data.comments],
+    };
     this.saveComments(nextComments);
-    return nextComments;
+    return data;
   }
 
   async createRemotePost(payload: {

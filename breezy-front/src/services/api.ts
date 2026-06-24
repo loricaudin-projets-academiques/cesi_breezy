@@ -1,10 +1,19 @@
-import axios, { AxiosHeaders } from "axios";
+import axios, { AxiosHeaders, InternalAxiosRequestConfig } from "axios";
 import { DEFAULT_API_URL } from "../config";
 
 export const API_TOKEN_STORAGE_KEY = "breezy_jwt";
 
 export const api = axios.create({
   baseURL: DEFAULT_API_URL,
+  timeout: 15000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+export const authApi = axios.create({
+  baseURL: DEFAULT_API_URL,
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -14,7 +23,11 @@ export function setApiBaseUrl(apiUrl?: string) {
   api.defaults.baseURL = apiUrl?.trim() || DEFAULT_API_URL;
 }
 
-api.interceptors.request.use((config) => {
+export function setAuthBaseUrl(apiUrl?: string) {
+  authApi.defaults.baseURL = apiUrl?.trim() || DEFAULT_API_URL;
+}
+
+function attachAuthToken(config: InternalAxiosRequestConfig) {
   if (typeof window === "undefined") {
     return config;
   }
@@ -27,4 +40,7 @@ api.interceptors.request.use((config) => {
   }
 
   return config;
-});
+}
+
+api.interceptors.request.use(attachAuthToken);
+authApi.interceptors.request.use(attachAuthToken);

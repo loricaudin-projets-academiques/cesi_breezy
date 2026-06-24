@@ -6,11 +6,11 @@
 import { motion } from 'motion/react';
 import { useState } from 'react';
 import { Archive, Bookmark, Heart, MessageCircle, MoreHorizontal, Pin, Send, Share2, Trash2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { Comment, CommentsByPost, Post } from '../types';
 import { playTick, playChime } from '../audio';
 import Avatar from './Avatar';
 import { getMediaUrl } from '../utils/mediaUrl';
+import { forceNavigate } from '../utils/navigation';
 
 // Les actions possibles sur un post — définies une seule fois et réutilisées
 // par tous les écrans qui affichent des posts (feed, profil...)
@@ -18,6 +18,7 @@ export interface PostInteractionHandlers {
   onToggleStar: (id: string) => void;
   onToggleLike: (id: string) => void;
   onToggleComments: (id: string) => void;
+  onLoadMoreComments: (id: string) => void;
   onCommentDraftChange: (id: string, text: string) => void;
   onAddComment: (id: string) => void;
   onToggleArchive: (id: string) => void;
@@ -31,6 +32,8 @@ export interface PostListState {
   postComments: CommentsByPost;
   commentDrafts: Record<string, string>;
   showCommentsForPost: Record<string, boolean>;
+  commentHasMore: Record<string, boolean>;
+  loadingComments: Record<string, boolean>;
 }
 
 interface PostCardProps extends PostInteractionHandlers {
@@ -38,6 +41,8 @@ interface PostCardProps extends PostInteractionHandlers {
   comments: Comment[];
   commentDraft: string;
   showComments: boolean;
+  hasMoreComments?: boolean;
+  isLoadingComments?: boolean;
   canArchive?: boolean;
 }
 
@@ -47,10 +52,13 @@ export default function PostCard({
   comments = [],
   commentDraft = '',
   showComments = false,
+  hasMoreComments = false,
+  isLoadingComments = false,
   canArchive = false,
   onToggleStar,
   onToggleLike,
   onToggleComments,
+  onLoadMoreComments,
   onCommentDraftChange,
   onAddComment,
   onToggleArchive,
@@ -58,7 +66,6 @@ export default function PostCard({
   onDeletePost,
   triggerToast
 }: PostCardProps) {
-  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const images = post.images?.length ? post.images : post.image ? [post.image] : [];
   const canManage = canArchive || post.canManage;
@@ -85,7 +92,7 @@ export default function PostCard({
       {/* Qui a publié ce post et quand */}
       <div className="flex items-center justify-between">
         <button
-          onClick={() => router.push(`/profile/${encodeURIComponent(post.authorUsername)}`)}
+          onClick={() => forceNavigate(`/profile/${encodeURIComponent(post.authorUsername)}`)}
           className="flex items-center gap-2.5 min-w-0 text-left hover:opacity-80 transition"
         >
           <Avatar name={post.authorName} username={post.authorUsername} url={post.avatar} className="w-9 h-9" />
@@ -206,7 +213,7 @@ export default function PostCard({
           }`}
         >
           <MessageCircle className="w-3.5 h-3.5" />
-          <span className="text-[10px]">{comments.length}</span>
+          <span className="text-[10px]">{post.comments}</span>
         </button>
 
         {/* Copie le lien du post dans le presse-papier */}
@@ -234,6 +241,21 @@ export default function PostCard({
               <p className="text-white/80 mt-1">{cmt.text}</p>
             </div>
           ))}
+
+          {isLoadingComments && comments.length === 0 && (
+            <p className="text-[10px] text-white/35 text-center py-2">Chargement des commentaires...</p>
+          )}
+
+          {hasMoreComments && (
+            <button
+              type="button"
+              disabled={isLoadingComments}
+              onClick={() => onLoadMoreComments(post.id)}
+              className="self-center px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.03] text-[10px] font-semibold text-white/65 hover:text-breezy-neon hover:border-breezy-border-active disabled:opacity-40 transition"
+            >
+              {isLoadingComments ? 'Chargement...' : 'Charger plus de commentaires'}
+            </button>
+          )}
 
           {/* Champ pour écrire un nouveau commentaire */}
           <div className="flex items-center gap-1.5">
