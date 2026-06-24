@@ -18,6 +18,8 @@ function toPublicUser(user) {
     note: plainUser.note,
     isPrivate: plainUser.isPrivate,
     language: plainUser.language,
+    theme: plainUser.theme || "dark",
+    ambientGlow: plainUser.ambientGlow !== false,
     notificationsEnabled: plainUser.notificationsEnabled,
     music: plainUser.music,
     role: plainUser.role,

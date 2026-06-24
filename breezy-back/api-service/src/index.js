@@ -80,9 +80,10 @@ const start = async () => {
     res.status(404).json({ message: "Route API introuvable." });
   });
 
-  app.use((err, req, res) => {
+  app.use((err, req, res, _next) => {
     console.error("Erreur API :", err);
-    res.status(500).json({ message: "Erreur serveur." });
+    const status = Number(err.status) || 500;
+    res.status(status).json({ message: err.message || "Erreur serveur." });
   });
 
   app.listen(port, () => {
