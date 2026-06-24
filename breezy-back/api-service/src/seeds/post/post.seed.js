@@ -17,6 +17,7 @@ export default async function runPostSeed() {
         
         await Post.create({
             _id: post._id,
+            author_id: post.author_id,
             content: post.content,
             tags: post.tags,
             media: post.media,
