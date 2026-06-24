@@ -13,6 +13,7 @@ services:
       - api_node_modules:/api/node_modules
     depends_on:
       - db_sql
+      - media
       - db_mongo
     environment:
       POSTGRES_HOST: db-sql
@@ -20,11 +21,104 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGIN: ${CORS_ORIGIN}
       MONGO_HOST: db-mongo
       MONGO_PORT: 27017
       MONGO_USER: ${MONGO_USER}
       MONGO_PASSWORD: ${MONGO_PASSWORD}
       MONGO_DB: ${MONGO_DB}
+      MEDIA_SERVICE_URL: http://media:3000
+    networks:
+      - backend
+
+  auth:
+    container_name: breezy-back-auth
+    build:
+      context: ./auth-service
+      dockerfile: dockerfile
+    ports:
+      - "3001:3000"
+    command: npm run dev
+    volumes:
+      - ./auth-service:/auth
+      - auth_node_modules:/auth/node_modules
+    depends_on:
+      - db_sql
+    environment:
+      POSTGRES_HOST: db-sql
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+    networks:
+      - backend
+
+  user:
+    container_name: breezy-back-user
+    build:
+      context: ./user-service
+      dockerfile: dockerfile
+    ports:
+      - "3002:3000"
+    command: npm run dev
+    volumes:
+      - ./user-service:/user
+      - ./uploads:/user/uploads
+      - user_node_modules:/user/node_modules
+    depends_on:
+      - db_sql
+      - media
+    environment:
+      POSTGRES_HOST: db-sql
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      MEDIA_SERVICE_URL: http://media:3000
+    networks:
+      - backend
+
+  media:
+    container_name: breezy-back-media
+    build:
+      context: ./media-service
+      dockerfile: dockerfile
+    ports:
+      - "3003:3000"
+    command: npm run dev
+    volumes:
+      - ./media-service:/media
+      - ./uploads:/media/uploads
+      - media_node_modules:/media/node_modules
+    depends_on:
+      - minio
+    environment:
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-breezy}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-breezy_password}
+      MINIO_BUCKET: ${MINIO_BUCKET:-breezy-media}
+    networks:
+      - backend
+
+  minio:
+    image: minio/minio:latest
+    container_name: breezy-minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-breezy}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-breezy_password}
+    volumes:
+      - minio_data:/data
     networks:
       - backend
 
@@ -37,6 +131,9 @@ services:
       - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - api
+      - auth
+      - user
+      - media
     networks:
       - backend
 
@@ -105,8 +202,12 @@ services:
 
 volumes:
   api_node_modules:
+  auth_node_modules:
+  user_node_modules:
+  media_node_modules:
   postgres_data:
   mongo_data:
+  minio_data:
   pgadmin-data:
 
 networks:

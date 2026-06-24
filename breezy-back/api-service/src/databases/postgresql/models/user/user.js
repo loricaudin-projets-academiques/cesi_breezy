@@ -64,6 +64,17 @@ const User = sequelize.define(
       allowNull: false,
       defaultValue: "fr",
     },
+    theme: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "dark",
+    },
+    ambientGlow: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+      field: "ambient_glow",
+    },
     notificationsEnabled: {
       type: DataTypes.BOOLEAN,
       allowNull: false,

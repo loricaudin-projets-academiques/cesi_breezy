@@ -1,35 +1,24 @@
-import { randomUUID } from "crypto";
-import { mkdir, unlink, writeFile } from "fs/promises";
-import { join } from "path";
-
-const UPLOAD_ROOT = "uploads";
-
-function extensionFromMime(mime) {
-  if (mime === "image/jpeg") return ".jpg";
-  if (mime === "image/png") return ".png";
-  if (mime === "image/gif") return ".gif";
-  if (mime === "image/webp") return ".webp";
-  return ".bin";
-}
+const MEDIA_SERVICE_URL = process.env.MEDIA_SERVICE_URL || "http://media:3000";
 
 async function storeDataUrlForUser(userId, category, value) {
   if (!value || !value.startsWith("data:image/")) {
     return value || "";
   }
 
-  const match = value.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
-  if (!match) {
-    return "";
+  const response = await fetch(`${MEDIA_SERVICE_URL}/upload/data-url`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ userId, category, value }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Impossible de stocker le media.");
   }
 
-  const [, mime, base64] = match;
-  const folder = join(UPLOAD_ROOT, "users", userId, category);
-  await mkdir(folder, { recursive: true });
-
-  const filename = `${Date.now()}-${randomUUID()}${extensionFromMime(mime)}`;
-  await writeFile(join(folder, filename), Buffer.from(base64, "base64"));
-
-  return `/uploads/users/${userId}/${category}/${filename}`;
+  const uploaded = await response.json();
+  return uploaded.url;
 }
 
 async function storeProfilePhoto(userId, value) {
@@ -40,7 +29,7 @@ async function storeGalleryImages(userId, values) {
   const stored = [];
   for (const value of values) {
     const next = await storeDataUrlForUser(userId, "gallery", value);
-    if (next) stored.push(next);
+    if (next) {stored.push(next);}
   }
   return stored;
 }
@@ -51,11 +40,10 @@ function isLocalUpload(value) {
 
 async function deleteLocalUploads(values = []) {
   for (const value of values) {
-    if (!isLocalUpload(value)) continue;
+    if (!isLocalUpload(value)) {continue;}
 
-    const relativePath = value.replace(/^\/uploads\//, "");
     try {
-      await unlink(join(UPLOAD_ROOT, relativePath));
+      await fetch(`${MEDIA_SERVICE_URL}${value}`, { method: "DELETE" });
     } catch {
       // Ignore missing files: the database state is the source of truth.
     }
