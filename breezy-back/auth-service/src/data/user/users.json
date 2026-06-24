@@ -1,0 +1,21 @@
+[
+    {
+        "id": "a96435db-e872-452a-b9bf-8ac1c8106ce7",
+        "name": "Jean Dupont",
+        "username": "@jeandupont",
+        "password": "cenestpasmonmotdepasse!",
+        "bio": "voici ma bio",
+        "followers": 0,
+        "following": 0,
+        "friends": 0,
+        "avatar": "",
+        "note": "En mode Breezy...",
+        "isPrivate": false,
+        "language": "fr",
+        "theme": "light",
+        "ambientGlow": false,
+        "notificationsEnabled": true,
+        "role": "user",
+        "music": false
+    }
+]

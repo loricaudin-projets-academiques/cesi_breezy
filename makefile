@@ -13,4 +13,4 @@ lint-front:
 seed:
 	cd breezy-back && \
 	docker compose up -d && \
-	docker compose exec api npm run seed
+	docker compose exec auth npm run seed
