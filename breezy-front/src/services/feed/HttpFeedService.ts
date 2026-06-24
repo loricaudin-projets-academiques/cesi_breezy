@@ -1,7 +1,7 @@
 import { api } from "../api";
 import { IStorageProvider } from "../storage/IStorageProvider";
 import { IFeedService } from "./IFeedService";
-import { Comment, CommentsByPost, PaginatedComments, Post, PostCategory, UserProfile } from "../../types";
+import { Comment, CommentsByPost, PaginatedComments, PaginatedPosts, Post, PostCategory, UserProfile } from "../../types";
 
 const KEYS = {
   posts: "breezy_posts",
@@ -9,8 +9,6 @@ const KEYS = {
 } as const;
 
 export class HttpFeedService implements IFeedService {
-  private postsRequests = new Map<string, Promise<Post[]>>();
-
   constructor(private storage: IStorageProvider) {}
 
   getPosts(): Post[] {
@@ -37,7 +35,7 @@ export class HttpFeedService implements IFeedService {
       avatar: author.avatar,
       title,
       content,
-      timestamp: "A l'instant",
+      timestamp: "À l'instant",
       likes: 0,
       comments: 0,
       shares: 0,
@@ -49,56 +47,32 @@ export class HttpFeedService implements IFeedService {
     };
   }
 
-  async fetchPosts(category?: PostCategory): Promise<Post[]> {
-    const requestKey = category || "for-you";
-    const existingRequest = this.postsRequests.get(requestKey);
-    if (existingRequest) return existingRequest;
-
-    const request = api.get<Post[]>("/feed/posts", {
+  async fetchPosts(category?: PostCategory, page = 1): Promise<PaginatedPosts> {
+    const { data } = await api.get<PaginatedPosts>("/feed/posts", {
       params: {
         ...(category && category !== "for-you" ? { category } : {}),
-        page: 1,
+        page,
         limit: 20,
       },
-    }).then(({ data }) => {
-      this.savePosts(data);
-      return data;
-    }).finally(() => {
-      this.postsRequests.delete(requestKey);
     });
-
-    this.postsRequests.set(requestKey, request);
-    return request;
+    if (page === 1) {
+      this.savePosts(data.posts);
+    } else {
+      const existing = this.getPosts();
+      const existingIds = new Set(existing.map((p) => p.id));
+      this.savePosts([...existing, ...data.posts.filter((p) => !existingIds.has(p.id))]);
+    }
+    return data;
   }
 
   async fetchUserPosts(username: string): Promise<Post[]> {
-    const requestKey = `user:${username}`;
-    const existingRequest = this.postsRequests.get(requestKey);
-    if (existingRequest) return existingRequest;
-
-    const request = api.get<Post[]>(`/feed/users/${encodeURIComponent(username)}/posts`, {
-      params: { page: 1, limit: 20 },
-    }).then(({ data }) => data).finally(() => {
-      this.postsRequests.delete(requestKey);
-    });
-
-    this.postsRequests.set(requestKey, request);
-    return request;
+    const { data } = await api.get<Post[]>(`/feed/users/${encodeURIComponent(username)}/posts`);
+    return data;
   }
 
   async fetchArchivedPosts(): Promise<Post[]> {
-    const requestKey = "archive";
-    const existingRequest = this.postsRequests.get(requestKey);
-    if (existingRequest) return existingRequest;
-
-    const request = api.get<Post[]>("/feed/archive/posts", {
-      params: { page: 1, limit: 20 },
-    }).then(({ data }) => data).finally(() => {
-      this.postsRequests.delete(requestKey);
-    });
-
-    this.postsRequests.set(requestKey, request);
-    return request;
+    const { data } = await api.get<Post[]>("/feed/archive/posts");
+    return data;
   }
 
   async fetchComments(postId: string, page = 1, limit = 20): Promise<PaginatedComments> {
@@ -120,9 +94,17 @@ export class HttpFeedService implements IFeedService {
     category: PostCategory;
     image?: string;
     images?: string[];
+    tags?: string[];
   }): Promise<Post> {
     const { data } = await api.post<Post>("/feed/posts", payload);
     this.savePosts([data, ...this.getPosts().filter((post) => post.id !== data.id)]);
+    return data;
+  }
+
+  async searchByTag(tag: string, page = 1): Promise<PaginatedPosts> {
+    const { data } = await api.get<PaginatedPosts>("/feed/search", {
+      params: { tag, page, limit: 20 },
+    });
     return data;
   }
 
@@ -132,6 +114,19 @@ export class HttpFeedService implements IFeedService {
     this.saveComments({
       ...comments,
       [postId]: [...(comments[postId] || []), data],
+    });
+    return data;
+  }
+
+  async fetchCommentReplies(commentId: string): Promise<Comment[]> {
+    const { data } = await api.get<Comment[]>(`/feed/comments/${encodeURIComponent(commentId)}/replies`);
+    return data;
+  }
+
+  async addReply(postId: string, commentId: string, text: string): Promise<Comment> {
+    const { data } = await api.post<Comment>(`/feed/posts/${postId}/comments`, {
+      text,
+      parentCommentId: commentId,
     });
     return data;
   }
@@ -166,6 +161,12 @@ export class HttpFeedService implements IFeedService {
   async deletePost(postId: string): Promise<void> {
     await api.delete(`/feed/posts/${postId}`);
     this.savePosts(this.getPosts().filter((post) => post.id !== postId));
+  }
+
+  async updatePost(postId: string, title: string, content: string): Promise<Post> {
+    const { data } = await api.put<Post>(`/feed/posts/${postId}`, { title, content });
+    this.savePosts(this.getPosts().map((post) => (post.id === data.id ? data : post)));
+    return data;
   }
 
   clearData(): void {

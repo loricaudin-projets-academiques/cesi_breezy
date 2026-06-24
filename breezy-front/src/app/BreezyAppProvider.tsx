@@ -8,28 +8,73 @@ import { useProfile } from "../hooks/useProfile";
 import { useFeed } from "../hooks/useFeed";
 import { useConversations } from "../hooks/useConversations";
 import { authService } from "../services/ServiceContainer";
+import { API_TOKEN_STORAGE_KEY } from "../services/api";
 
 type BreezyAppContextValue = ReturnType<typeof useBreezyAppState>;
 
 const BreezyAppContext = createContext<BreezyAppContextValue | null>(null);
 const GUEST_THEME_STORAGE_KEY = "breezy_guest_theme_v2";
 
+// Vérifie que le JWT stocké n'est pas expiré (décodage sans bibliothèque)
+function isStoredJwtValid(): boolean {
+  if (typeof window === "undefined") return false;
+  const token = window.localStorage.getItem(API_TOKEN_STORAGE_KEY);
+  if (!token) return false;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return typeof payload.exp === "number" && payload.exp * 1000 > Date.now();
+  } catch {
+    return false;
+  }
+}
+
 function useBreezyAppState() {
-  const [isLoggedIn, setIsLoggedIn] = useState(() => authService.isLoggedIn());
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [guestTheme, setGuestTheme] = useState<"dark" | "light">(() => {
-    if (typeof window === "undefined") return "dark";
-    return window.localStorage.getItem(GUEST_THEME_STORAGE_KEY) === "light" ? "light" : "dark";
-  });
+  const [guestTheme, setGuestTheme] = useState<"dark" | "light">("dark");
 
-  const triggerToast = useCallback((_message: string) => {
-    void _message;
+  const [toasts, setToasts] = useState<{ id: string; message: string }[]>([]);
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean;
+    postId: string;
+    postTitle: string;
+    resolve: (value: boolean) => void;
+  } | null>(null);
+
+  useEffect(() => {
+    setIsLoggedIn(authService.isLoggedIn() && isStoredJwtValid());
+    if (typeof window !== "undefined") {
+      const stored = window.localStorage.getItem(GUEST_THEME_STORAGE_KEY);
+      if (stored === "light") {
+        setGuestTheme("light");
+      }
+    }
   }, []);
+
+  const triggerToast = useCallback((message: string) => {
+    const id = Math.random().toString(36).substring(2, 9);
+    setToasts((prev) => [...prev, { id, message }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 4000);
+  }, []);
+
+  const confirmDelete = useCallback((postId: string, postTitle: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setDeleteConfirm({
+        isOpen: true,
+        postId,
+        postTitle,
+        resolve,
+      });
+    });
+  }, []);
+
   const profile = useProfile(triggerToast);
-  const feed = useFeed(profile.user, triggerToast, isLoggedIn);
-  const conversations = useConversations(isLoggedIn);
+  const feed = useFeed(profile.user, triggerToast, confirmDelete);
+  const conversations = useConversations();
   const ambientGlow = profile.user.ambientGlow !== false;
   const isLightTheme = isLoggedIn ? profile.user.theme === "light" : guestTheme === "light";
   const setAmbientGlow = (enabled: boolean) => {
@@ -52,6 +97,8 @@ function useBreezyAppState() {
     showCommentsForPost: feed.showCommentsForPost,
     commentHasMore: feed.commentHasMore,
     loadingComments: feed.loadingComments,
+    commentReplies: feed.commentReplies,
+    showRepliesForComment: feed.showRepliesForComment,
     onToggleStar: feed.handleToggleStar,
     onToggleLike: feed.handleToggleLike,
     onToggleComments: feed.handleToggleComments,
@@ -61,6 +108,9 @@ function useBreezyAppState() {
     onToggleArchive: feed.handleToggleArchive,
     onTogglePin: feed.handleTogglePin,
     onDeletePost: feed.handleDeletePost,
+    onEditPost: feed.handleEditPost,
+    onToggleReplies: feed.handleToggleReplies,
+    onAddReply: feed.handleAddReply,
     triggerToast,
   };
 
@@ -73,16 +123,16 @@ function useBreezyAppState() {
     try {
       openSession(await authService.login(username, passkey, apiUrl));
     } catch (error) {
-      console.error(getErrorMessage(error, "Erreur de connexion."));
+      triggerToast(getErrorMessage(error, "Identifiant ou mot de passe incorrect."));
       throw error;
     }
   };
 
-  const handleRegister = async (name: string, username: string, passkey: string, apiUrl: string) => {
+  const handleRegister = async (name: string, email: string, username: string, passkey: string, apiUrl: string) => {
     try {
-      openSession(await authService.register(name, username, passkey, apiUrl));
+      openSession(await authService.register(name, email, username, passkey, apiUrl));
     } catch (error) {
-      console.error(getErrorMessage(error, "Erreur lors de l'inscription."));
+      triggerToast(getErrorMessage(error, "Erreur lors de l'inscription."));
       throw error;
     }
   };
@@ -94,6 +144,15 @@ function useBreezyAppState() {
     profile.setUser(authService.getCurrentUser());
     setIsLoggedIn(false);
   };
+
+  // Déconnexion automatique si un appel API reçoit un 401 (JWT expiré/invalide)
+  useEffect(() => {
+    const onUnauthorized = () => handleLogout();
+    window.addEventListener("breezy:unauthorized", onUnauthorized);
+    return () => window.removeEventListener("breezy:unauthorized", onUnauthorized);
+  // handleLogout est stable, pas besoin de le mettre en dépendance
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     isLoggedIn,
@@ -116,6 +175,11 @@ function useBreezyAppState() {
     handleLogin,
     handleRegister,
     handleLogout,
+    toasts,
+    setToasts,
+    deleteConfirm,
+    setDeleteConfirm,
+    confirmDelete,
   };
 }
 

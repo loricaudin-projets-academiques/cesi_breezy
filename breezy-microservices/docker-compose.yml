@@ -1,0 +1,258 @@
+services:
+  frontend:
+    container_name: breezy-front
+    build:
+      context: ../breezy-front
+      dockerfile: dockerfile
+    command: npm run dev -- --hostname 0.0.0.0
+    restart: unless-stopped
+    volumes:
+      - ../breezy-front:/app
+      - front_node_modules:/app/node_modules
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost/api
+      NEXT_TELEMETRY_DISABLED: 1
+      WATCHPACK_POLLING: "true"
+    networks:
+      - backend
+
+  api:
+    container_name: breezy-back-api
+    build:
+      context: ./api-service
+      dockerfile: dockerfile
+    ports:
+      - "3000"
+    command: npm run dev
+    restart: unless-stopped
+    volumes:
+      - ./api-service:/api
+      - api_node_modules:/api/node_modules
+    depends_on:
+      db_sql:
+        condition: service_healthy
+      db_mongo:
+        condition: service_healthy
+      media:
+        condition: service_started
+    environment:
+      POSTGRES_HOST: db-sql
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      MONGO_HOST: db-mongo
+      MONGO_PORT: 27017
+      MONGO_USER: ${MONGO_USER}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_DB: ${MONGO_DB}
+      MEDIA_SERVICE_URL: http://media:3000
+    networks:
+      - backend
+
+  auth:
+    container_name: breezy-back-auth
+    build:
+      context: ./auth-service
+      dockerfile: dockerfile
+    ports:
+      - "3001:3000"
+    command: npm run dev
+    restart: unless-stopped
+    volumes:
+      - ./auth-service:/auth
+      - auth_node_modules:/auth/node_modules
+    depends_on:
+      db_sql:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: db-sql
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+    networks:
+      - backend
+
+  user:
+    container_name: breezy-back-user
+    build:
+      context: ./user-service
+      dockerfile: dockerfile
+    ports:
+      - "3002:3000"
+    command: npm run dev
+    restart: unless-stopped
+    volumes:
+      - ./user-service:/user
+      - user_node_modules:/user/node_modules
+    depends_on:
+      db_sql:
+        condition: service_healthy
+      media:
+        condition: service_started
+    environment:
+      POSTGRES_HOST: db-sql
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      MEDIA_SERVICE_URL: http://media:3000
+    networks:
+      - backend
+
+  media:
+    container_name: breezy-back-media
+    build:
+      context: ./media-service
+      dockerfile: dockerfile
+    ports:
+      - "3003:3000"
+    command: npm run dev
+    restart: unless-stopped
+    volumes:
+      - ./media-service:/media
+      - media_node_modules:/media/node_modules
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-breezy}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-breezy_password}
+      MINIO_BUCKET: ${MINIO_BUCKET:-breezy-media}
+    networks:
+      - backend
+
+  minio:
+    image: minio/minio:latest
+    container_name: breezy-minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-breezy}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-breezy_password}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - backend
+
+  api_gateway:
+    image: nginx:latest
+    container_name: api_gateway
+    ports:
+      - "80:80"
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+      - auth
+      - user
+      - media
+    networks:
+      - backend
+
+  db_sql:
+    image: postgres:16
+    container_name: db-sql
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    command: >
+      postgres -c log_statement=none -c logging_collector=off
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - backend
+  
+  db_sql_admin:
+    image: dpage/pgadmin4
+    container_name: db-sql-admin
+    depends_on:
+      - db_sql
+    ports:
+      - "8082:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@breezy.com
+      PGADMIN_DEFAULT_PASSWORD: root
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+      - ./pgadmin/servers.json:/pgadmin4/servers.json
+    networks:
+      - backend
+
+  db_mongo:
+    image: mongo:7
+    container_name: db-mongo
+    ports:
+      - "${MONGO_PORT}:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')", "--quiet"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      - backend
+  db_mongo_admin:
+    image: mongo-express:latest
+    container_name: mongo-express
+    depends_on:
+      - db_mongo
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@db_mongo:27017/
+
+      ME_CONFIG_BASICAUTH_USERNAME: admin@breezy.com
+      ME_CONFIG_BASICAUTH_PASSWORD: root
+    networks:
+      - backend
+
+volumes:
+  front_node_modules:
+  api_node_modules:
+  auth_node_modules:
+  user_node_modules:
+  media_node_modules:
+  postgres_data:
+  mongo_data:
+  minio_data:
+  pgadmin-data:
+
+networks:
+  backend:

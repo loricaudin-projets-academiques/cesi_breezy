@@ -14,6 +14,7 @@ export default function SearchPage() {
       searchedPosts={searchedPosts}
       triggerToast={triggerToast}
       onCurrentUserChanged={profile.refreshCurrentUser}
+      language={profile.user.language || "fr"}
     />
   );
 }

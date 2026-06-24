@@ -8,7 +8,7 @@ export function forceNavigate(path: string) {
   }
 
   if (currentPath() === path) {
-    window.location.reload();
+    window.dispatchEvent(new CustomEvent("breezy:refresh-current-tab"));
     return;
   }
 

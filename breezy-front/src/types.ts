@@ -35,18 +35,24 @@ export interface Post {
   pinned?: boolean;
   canArchive?: boolean;
   canManage?: boolean;
+  tags?: string[];
 }
 
 // Un commentaire publié sous un post
 export interface Comment {
+  id?: string;
   author: string;
   username: string;
   text: string;
   time: string;
+  repliesCount?: number;
 }
 
 // Tous les commentaires de l'app, rangés par identifiant de post
 export type CommentsByPost = Record<string, Comment[]>;
+
+// Réponses à un commentaire, rangées par identifiant de commentaire
+export type RepliesByComment = Record<string, Comment[]>;
 
 export interface PaginatedComments {
   comments: Comment[];
@@ -56,11 +62,18 @@ export interface PaginatedComments {
   hasMore: boolean;
 }
 
+export interface PaginatedPosts {
+  posts: Post[];
+  page: number;
+  hasMore: boolean;
+}
+
 // Un message échangé dans une conversation privée
 export interface MessageItem {
   id: string;
   sender: 'me' | 'them'; // "me" = nous, "them" = notre interlocuteur
   text: string;
+  media?: string[];
   time: string;
 }
 
@@ -77,18 +90,10 @@ export interface Conversation {
   messages: MessageItem[];
 }
 
-// Ce qu'on affiche dans le widget musical du profil
-export interface MusicState {
-  title: string;
-  artist: string;
-  cover: string;
-  isPlaying: boolean;
-  progressPercent: number; // Position dans la chanson, de 0 à 100
-}
-
 // Le profil complet de l'utilisateur connecté
 export interface UserProfile {
   name: string;
+  email?: string;
   username: string;
   bio: string;
   followers: number;
@@ -96,12 +101,10 @@ export interface UserProfile {
   friends: number;
   avatar: string;
   note: string;   // La petite phrase d'humeur visible sur le profil
-  isPrivate: boolean;
   language: 'fr' | 'en';
   theme: 'dark' | 'light';
   ambientGlow: boolean;
   notificationsEnabled: boolean;
-  music: MusicState; // La musique qu'il écoute en ce moment
 }
 
 // Une personne dans les listes abonnés / abonnements / amis
@@ -112,7 +115,6 @@ export interface Follower {
   followsMe: boolean;
   followedByMe: boolean;
   isFriend: boolean;
-  canViewPrivate?: boolean;
 }
 
 export interface AccountNotification {

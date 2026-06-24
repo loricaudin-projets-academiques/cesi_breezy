@@ -7,30 +7,46 @@ import { useState, useEffect } from 'react';
 import { Conversation } from '../types';
 import { conversationService } from '../services/ServiceContainer';
 
-export function useConversations(enabled = true) {
+export function useConversations() {
   const [conversations, setConversations] = useState<Conversation[]>(() => {
     return conversationService.getConversations();
   });
 
   useEffect(() => {
-    if (!enabled) return;
-
     let cancelled = false;
 
-    conversationService.fetchConversations()
-      .then((nextConversations) => {
-        if (!cancelled) {
-          setConversations(nextConversations);
-        }
-      })
-      .catch(() => {
-        // Keep the local cache usable if the API is unavailable.
-      });
+    const refresh = () => {
+      conversationService.fetchConversations()
+        .then((nextConversations) => {
+          if (!cancelled) {
+            setConversations((prev) =>
+              nextConversations.map((newConv) => {
+                const existing = prev.find((c) => c.id === newConv.id);
+                if (!existing) return newConv;
+
+                // Compter les nouveaux messages de l'autre personne arrivés depuis le dernier poll
+                const newMessages = newConv.messages.slice(existing.messages.length);
+                const newUnread = newMessages.filter((m) => m.sender === 'them').length;
+
+                return {
+                  ...newConv,
+                  unreadCount: existing.unreadCount + newUnread,
+                };
+              })
+            );
+          }
+        })
+        .catch(() => {});
+    };
+
+    refresh();
+    const interval = setInterval(refresh, 30_000);
 
     return () => {
       cancelled = true;
+      clearInterval(interval);
     };
-  }, [enabled]);
+  }, []);
 
   useEffect(() => {
     conversationService.saveConversations(conversations);

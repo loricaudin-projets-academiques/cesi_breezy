@@ -8,6 +8,7 @@ import { motion } from 'motion/react';
 import { Play, Pause, Music, Settings, X } from 'lucide-react';
 import { MusicState } from '../types';
 import { playTick, playChime } from '../audio';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface SpotifyWidgetProps {
   music: MusicState;
@@ -17,6 +18,7 @@ interface SpotifyWidgetProps {
 
 // Widget qui simule un lecteur de musique sur le profil
 export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: SpotifyWidgetProps) {
+  const { t } = useTranslation();
   // Champs du formulaire de configuration
   const [localProgress, setLocalProgress] = useState(music.progressPercent);
   const [showConfig, setShowConfig] = useState(false);
@@ -60,7 +62,7 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
   const handlePlayToggle = () => {
     playTick();
     onChangeMusic({ isPlaying: !music.isPlaying });
-    triggerToast(music.isPlaying ? "Musique en pause" : `En écoute : ${music.title}`);
+    triggerToast(music.isPlaying ? t('music.toast_paused') : t('music.toast_playing', { title: music.title || '' }));
   };
 
   // Enregistre la nouvelle chanson et remet la progression à zéro
@@ -75,7 +77,20 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
       progressPercent: 0
     });
     setShowConfig(false);
-    triggerToast("Musique mise à jour !");
+    triggerToast(t('music.toast_updated'));
+  };
+
+  const handleClearMusic = () => {
+    playChime();
+    onChangeMusic({
+      title: '',
+      artist: '',
+      cover: '',
+      isPlaying: false,
+      progressPercent: 0
+    });
+    setShowConfig(false);
+    triggerToast(t('music.toast_removed'));
   };
 
   // VUE 1 : Formulaire pour configurer la chanson
@@ -84,7 +99,7 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
       <div className="glassmorphic rounded-2xl p-4 border border-white/5 relative overflow-hidden font-sans">
         <div className="flex justify-between items-center mb-3">
           <span className="text-[10px] font-mono text-breezy-neon uppercase tracking-wider font-bold">
-            Configurer la musique
+            {t('music.config_title')}
           </span>
           <button
             type="button"
@@ -101,7 +116,7 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
               required
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="Titre de la chanson"
+              placeholder={t('music.song_placeholder')}
               className="w-full text-xs rounded-xl bg-white/[0.03] p-2.5 px-3 text-breezy-icy placeholder-white/20 border border-white/5 focus:outline-none focus:border-breezy-border-active transition"
             />
           </div>
@@ -111,7 +126,7 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
               required
               value={newArtist}
               onChange={(e) => setNewArtist(e.target.value)}
-              placeholder="Nom de l'artiste"
+              placeholder={t('music.artist_placeholder')}
               className="w-full text-xs rounded-xl bg-white/[0.03] p-2.5 px-3 text-breezy-icy placeholder-white/20 border border-white/5 focus:outline-none focus:border-breezy-border-active transition"
             />
           </div>
@@ -120,16 +135,27 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
               type="text"
               value={newCover}
               onChange={(e) => setNewCover(e.target.value)}
-              placeholder="URL de la pochette (optionnel)"
+              placeholder={t('music.cover_placeholder')}
               className="w-full text-xs rounded-xl bg-white/[0.03] p-2.5 px-3 text-breezy-icy placeholder-white/20 border border-white/5 focus:outline-none focus:border-breezy-border-active transition"
             />
           </div>
-          <button
-            type="submit"
-            className="w-full py-2.5 rounded-xl bg-breezy-icy hover:bg-breezy-neon text-slate-950 font-sans font-bold text-xs uppercase tracking-wider transition cursor-pointer"
-          >
-            Appliquer
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              className="flex-1 py-2.5 rounded-xl bg-breezy-icy hover:bg-breezy-neon text-slate-950 font-sans font-bold text-xs uppercase tracking-wider transition cursor-pointer"
+            >
+              {t('music.apply')}
+            </button>
+            {music.title && (
+              <button
+                type="button"
+                onClick={handleClearMusic}
+                className="px-3.5 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 hover:border-rose-500/40 text-rose-300 font-sans font-bold text-xs uppercase tracking-wider transition cursor-pointer"
+              >
+                {t('action.delete')}
+              </button>
+            )}
+          </div>
         </form>
       </div>
     );
@@ -146,15 +172,15 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
               <Music className="w-5 h-5 text-breezy-neon/60" />
             </div>
             <div className="text-left">
-              <h4 className="text-[12px] font-sans font-semibold text-breezy-icy/70 tracking-tight">Aucune musique</h4>
-              <p className="text-[10px] font-sans text-white/30 -mt-0.5">Dis ce que tu écoutes !</p>
+              <h4 className="text-[12px] font-sans font-semibold text-breezy-icy/70 tracking-tight">{t('music.none')}</h4>
+              <p className="text-[10px] font-sans text-white/30 -mt-0.5">{t('music.desc')}</p>
             </div>
           </div>
           <button
             onClick={() => { playTick(); setShowConfig(true); }}
             className="py-1.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-[9.5px] font-bold font-mono text-[#AEEBFF] hover:border-[#AEEBFF]/30 transition active:scale-95 cursor-pointer"
           >
-            CONFIGURER
+            {t('music.setup')}
           </button>
         </div>
       </div>
@@ -194,7 +220,7 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
             <Music className="w-3 h-3 text-breezy-neon" />
-            <p className="text-[11px] font-mono tracking-wider text-white/40 uppercase">EN ÉCOUTE</p>
+            <p className="text-[11px] font-mono tracking-wider text-white/40 uppercase">{t('music.now_playing')}</p>
           </div>
           <h4 className="text-[12px] font-sans font-semibold text-breezy-icy truncate tracking-tight">{music.title}</h4>
           <p className="text-[10px] font-sans text-white/50 truncate -mt-0.5">{music.artist}</p>
@@ -205,7 +231,7 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
           <button
             onClick={handlePlayToggle}
             className="w-7 h-7 rounded-lg glassmorphism-light hover:bg-white/10 flex items-center justify-center text-white/90 hover:text-breezy-neon active:scale-95 transition cursor-pointer"
-            title={music.isPlaying ? "Pause" : "Lecture"}
+            title={music.isPlaying ? t('music.pause_btn') : t('music.play_btn')}
           >
             {music.isPlaying ? (
               <Pause className="w-3.5 h-3.5" />
@@ -217,7 +243,7 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
           <button
             onClick={() => { playTick(); setShowConfig(true); }}
             className="w-7 h-7 rounded-lg glassmorphism-light hover:bg-white/10 flex items-center justify-center text-white/40 hover:text-white/80 active:scale-95 transition cursor-pointer"
-            title="Changer de musique"
+            title={t('music.change')}
           >
             <Settings className="w-3.5 h-3.5" />
           </button>

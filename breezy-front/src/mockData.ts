@@ -15,18 +15,10 @@ export const INITIAL_USER: UserProfile = {
   friends: 0,
   avatar: "",
   note: "",
-  isPrivate: false,
   language: "fr",
   theme: "dark",
   ambientGlow: true,
   notificationsEnabled: true,
-  music: {
-    title: "",
-    artist: "",
-    cover: "",
-    isPlaying: false,
-    progressPercent: 0
-  }
 };
 
 // Aucun post au démarrage — l'utilisateur crée les siens

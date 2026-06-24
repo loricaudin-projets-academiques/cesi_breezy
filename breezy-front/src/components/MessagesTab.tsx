@@ -5,14 +5,16 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MessageSquare, Send, ArrowLeft, MoreVertical, Search, X } from 'lucide-react';
+import { MessageSquare, Send, ArrowLeft, MoreVertical, Search, X, ImagePlus } from 'lucide-react';
 import { Conversation, Follower, MessageItem } from '../types';
 import { playTick, playMessageSound, playChime } from '../audio';
 import { conversationService } from '../services/ServiceContainer';
 import { normalizeUsername } from '../utils/username';
 import { getErrorMessage } from '../utils/errors';
 import Avatar from './Avatar';
+import { useTranslation } from '../hooks/useTranslation';
 import { api } from '../services/api';
+import { getMediaUrl } from '../utils/mediaUrl';
 
 // Heure courante au format HH:MM — affichée sous chaque bulle de message
 // Applique une transformation à une seule conversation de la liste
@@ -28,14 +30,20 @@ interface MessagesTabProps {
   conversations: Conversation[];
   onUpdateConversations: React.Dispatch<React.SetStateAction<Conversation[]>>;
   triggerToast: (msg: string) => void;
+  initialActiveUsername?: string;
 }
 
 // Écran de messagerie : liste des conversations à gauche, chat à droite
-export default function MessagesTab({ conversations, onUpdateConversations, triggerToast }: MessagesTabProps) {
+export default function MessagesTab({ conversations, onUpdateConversations, triggerToast, initialActiveUsername }: MessagesTabProps) {
+  const { t, lang } = useTranslation();
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [inputText, setInputText] = useState('');
+  const [pendingImages, setPendingImages] = useState<string[]>([]);
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const [isSelectContactOpen, setIsSelectContactOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(20);
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
   
   // Champs du formulaire de création de nouveau contact
   const [contactName, setContactName] = useState('');
@@ -45,6 +53,16 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
   
   // Référence pour faire défiler jusqu'au dernier message automatiquement
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (initialActiveUsername) {
+      const cleanUsername = normalizeUsername(initialActiveUsername);
+      const matched = conversations.find((c) => c.username === cleanUsername);
+      if (matched) {
+        setActiveConvId(matched.id);
+      }
+    }
+  }, [initialActiveUsername, conversations]);
 
   const selectedConv = conversations.find(c => c.id === activeConvId);
 
@@ -91,9 +109,9 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
       });
       onUpdateConversations((prev) => [newConv, ...prev.filter((conv) => conv.id !== newConv.id)]);
       setActiveConvId(newConv.id);
-      triggerToast(`Chat ouvert avec ${newConv.name}`);
+      triggerToast(t('messages.toast_opened', { name: newConv.name }));
     } catch (error) {
-      triggerToast(getErrorMessage(error, "Impossible d'ouvrir ce chat."));
+      triggerToast(getErrorMessage(error, t('messages.error_open')));
     }
   };
 
@@ -125,25 +143,94 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
       setContactName('');
       setContactUsername('');
       setContactAvatar('');
-      triggerToast(`Chat ouvert avec ${newConv.name}`);
+      triggerToast(t('messages.toast_opened', { name: newConv.name }));
     } catch (error) {
-      triggerToast(getErrorMessage(error, "Impossible d'ouvrir ce chat. Verifie que l'utilisateur existe."));
+      triggerToast(getErrorMessage(error, t('messages.error_open_user')));
     }
   };
 
-  // Scroll automatique vers le bas quand un nouveau message arrive
+  // Polling des nouveaux messages dans la conversation active (toutes les 10s)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [selectedConv?.messages, isTyping, activeConvId]);
+    if (!activeConvId) return;
+    let cancelled = false;
+
+    const poll = () => {
+      conversationService.fetchMessages(activeConvId)
+        .then((freshMessages) => {
+          if (cancelled) return;
+          onUpdateConversations((prev) =>
+            updateConversation(prev, activeConvId, (c) => {
+              if (freshMessages.length <= c.messages.length) return c;
+              return { ...c, messages: freshMessages, unreadCount: 0 };
+            })
+          );
+        })
+        .catch(() => {});
+    };
+
+    const interval = setInterval(poll, 10_000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [activeConvId, onUpdateConversations]);
+
+  // Reset du compteur à l'ouverture d'une conversation (le scroll se fait dans onAnimationComplete)
+  useEffect(() => {
+    if (!activeConvId) return;
+    setVisibleCount(20);
+  }, [activeConvId]);
+
+  const scrollToBottom = () => {
+    const container = messagesContainerRef.current;
+    if (container) container.scrollTop = container.scrollHeight;
+  };
+
+  // Scroll vers le bas quand un nouveau message arrive ou qu'on est en train d'écrire
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (container) container.scrollTop = container.scrollHeight;
+  }, [selectedConv?.messages.length, isTyping]);
+
+  const handleLoadMore = () => {
+    const container = messagesContainerRef.current;
+    const prevHeight = container?.scrollHeight ?? 0;
+    const prevTop = container?.scrollTop ?? 0;
+    setVisibleCount((n) => n + 20);
+    requestAnimationFrame(() => {
+      if (container) {
+        container.scrollTop = prevTop + (container.scrollHeight - prevHeight);
+      }
+    });
+  };
+
+  const visibleMessages = selectedConv ? selectedConv.messages.slice(-visibleCount) : [];
+  const hasMoreMessages = (selectedConv?.messages.length ?? 0) > visibleCount;
 
   // Ouvre une conversation et marque tous les messages comme lus
   const handleOpenConv = (id: string) => {
     playTick();
     setActiveConvId(id);
-
     onUpdateConversations((prev) =>
       updateConversation(prev, id, (c) => ({ ...c, unreadCount: 0 }))
     );
+    void conversationService.markAsRead(id);
+  };
+
+  const handleImageFiles = async (files: FileList | null) => {
+    if (!files) return;
+    const slots = 5 - pendingImages.length;
+    if (slots <= 0) return;
+    const selected = Array.from(files).filter(f => f.type.startsWith('image/')).slice(0, slots);
+    const dataUrls = await Promise.all(
+      selected.map(f => new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = reject;
+        reader.readAsDataURL(f);
+      }))
+    );
+    setPendingImages(prev => [...prev, ...dataUrls].slice(0, 5));
   };
 
   // Ajoute un message à la conversation active (le nôtre ou celui du contact)
@@ -152,7 +239,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
       updateConversation(prev, convId, (c) => ({
         ...c,
         messages: [...c.messages, message],
-        lastMessage: message.text,
+        lastMessage: message.text || (message.media?.length ? "📷 Image" : ""),
         time: "À l'instant"
       }))
     );
@@ -161,35 +248,37 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
   // Envoie notre message et attend la réponse (API ou bot local — c'est le service qui gère)
   const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!inputText.trim() || !activeConvId || !selectedConv) return;
+    if (!inputText.trim() && pendingImages.length === 0) return;
+    if (!activeConvId || !selectedConv) return;
 
     const userMessage = inputText.trim();
+    const imagesToSend = [...pendingImages];
     const convId = activeConvId;
     setInputText('');
-    // On affiche les trois points "en train d'écrire..."
+    setPendingImages([]);
     setIsTyping(true);
 
-    // On attend 1.5 secondes pour simuler un délai de frappe humain
     try {
-      const savedMessage = await conversationService.sendMessage(convId, userMessage);
+      const savedMessage = await conversationService.sendMessage(convId, userMessage, imagesToSend);
       appendMessage(convId, savedMessage);
       setIsTyping(false);
       playMessageSound(true);
     } catch (error) {
       setInputText(userMessage);
+      setPendingImages(imagesToSend);
       setIsTyping(false);
-      triggerToast(getErrorMessage(error, "Message non envoye."));
+      triggerToast(getErrorMessage(error, t('messages.error_send')));
     }
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full relative overflow-hidden">
+    <div className="flex-1 flex flex-col h-full min-h-0 relative overflow-hidden">
       <AnimatePresence mode="wait">
         {!activeConvId ? (
           /* VUE 1 : Boîte de réception */
           <motion.div
             key="list"
-            className="flex-1 overflow-y-auto no-scrollbar py-2 px-4 flex flex-col gap-3"
+            className="flex-1 overflow-y-auto no-scrollbar py-1.5 px-3 flex flex-col gap-2"
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -10 }}
@@ -197,8 +286,8 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
           >
             <div className="mt-2 mb-1 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <h2 className="text-xl font-display font-medium text-breezy-icy flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5 text-breezy-lavender active-nav-glow" />
+                <h2 className="text-sm font-display font-medium text-breezy-icy flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-breezy-lavender active-nav-glow" />
                   Messages
                 </h2>
                 <button
@@ -209,7 +298,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                   <Search className="w-4 h-4" />
                 </button>
               </div>
-              <span className="text-[10px] font-mono text-white/40 tracking-wider">MESSAGERIE</span>
+              <span className="text-[10px] font-mono text-white/40 tracking-wider">{t('messages.title').toUpperCase()}</span>
             </div>
 
             <AnimatePresence>
@@ -229,7 +318,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                       setContactUsername(e.target.value);
                       setContactName(e.target.value.replace(/^@/, ''));
                     }}
-                  placeholder="Rechercher un utilisateur..."
+                  placeholder={t('messages.search_contact')}
                     className="flex-1 text-xs font-sans rounded-xl bg-white/[0.04] p-3 text-breezy-icy placeholder-white/35 border border-white/5 focus:outline-none focus:border-breezy-border-active transition"
                     autoFocus
                   />
@@ -238,7 +327,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                     disabled={!contactUsername.trim()}
                     className="px-4 py-2.5 rounded-xl bg-breezy-icy hover:bg-breezy-neon text-slate-950 font-sans font-bold text-xs transition disabled:opacity-50"
                   >
-                    Ouvrir
+                    {lang === 'en' ? 'Open' : 'Ouvrir'}
                   </button>
                   <button
                     type="button"
@@ -270,14 +359,14 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
             <div className="flex flex-col gap-2.5 mt-1">
               {conversations.length === 0 ? (
                 <div className="py-20 text-center text-white/30 text-xs bg-[#0d0d12]/20 rounded-2xl border border-white/5">
-                  Aucune conversation ouverte.
+                  {t('messages.no_conversations')}
                 </div>
               ) : (
                 conversations.map((conv) => (
                   <button
                     key={conv.id}
                     onClick={() => handleOpenConv(conv.id)}
-                    className="w-full text-left glassmorphic rounded-2xl p-3.5 flex items-center gap-3.5 border border-white/5 hover:border-white/15 hover:bg-white/[0.02] active:scale-[0.99] transition-all duration-300 relative group"
+                    className="w-full text-left glassmorphic rounded-2xl p-2.5 flex items-center gap-2.5 border border-white/5 hover:border-white/15 hover:bg-white/[0.02] active:scale-[0.99] transition-all duration-300 relative group"
                   >
                     {/* Pastille verte sur les messages non lus */}
                     {conv.unreadCount > 0 && (
@@ -288,13 +377,18 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
 
                     {/* Avatar avec indicateur de présence */}
                     <div className="relative shrink-0">
-                      <Avatar name={conv.name} username={conv.username} url={conv.avatar} className="w-12 h-12" />
+                      <Avatar name={conv.name} username={conv.username} url={conv.avatar} className="w-9 h-9" />
+                      {conv.online && (
+                        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-breezy-bg flex items-center justify-center">
+                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                        </div>
+                      )}
                     </div>
 
                     {/* Aperçu du dernier message */}
                     <div className="flex-1 min-w-0 pr-8">
                       <div className="flex justify-between items-baseline mb-0.5">
-                        <h4 className="text-sm font-sans font-medium text-breezy-icy group-hover:text-breezy-neon transition-colors">
+                        <h4 className="text-xs font-sans font-medium text-breezy-icy group-hover:text-breezy-neon transition-colors">
                           {conv.name}
                         </h4>
                         <span className="text-[10px] font-mono text-white/30 truncate select-none">
@@ -314,14 +408,15 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
           /* VUE 2 : La discussion en cours */
           <motion.div
             key="chat"
-            className="breezy-chat-surface flex-1 flex flex-col h-full z-10"
+            className="breezy-chat-surface flex-1 flex flex-col h-full min-h-0 z-10"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
             transition={{ type: "spring", damping: 28, stiffness: 350 }}
+            onAnimationStart={scrollToBottom}
           >
             {/* En-tête de la discussion */}
-            <div className="shrink-0 p-4 border-b border-white/5 flex items-center justify-between glassmorphic">
+            <div className="shrink-0 p-2.5 border-b border-white/5 flex items-center justify-between glassmorphic">
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => { playTick(); setActiveConvId(null); }}
@@ -346,12 +441,21 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
             </div>
 
             {/* Bulles de messages */}
-            <div className="flex-1 overflow-y-auto no-scrollbar p-4 flex flex-col gap-3">
+            <div ref={messagesContainerRef} className="flex-1 min-h-0 overflow-y-auto no-scrollbar p-3 flex flex-col gap-2">
+              {hasMoreMessages && (
+                <button
+                  onClick={handleLoadMore}
+                  className="self-center px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.03] text-[10px] font-semibold text-white/65 hover:text-breezy-neon hover:border-breezy-border-active transition"
+                >
+                  {lang === 'en' ? 'Load more' : 'Charger plus'}
+                </button>
+              )}
+
               <div className="mx-auto my-3 text-[10px] font-mono text-white/30 tracking-wider text-center select-none uppercase">
-                Conversation chiffrée
+                {lang === 'en' ? 'Encrypted Conversation' : 'Conversation chiffrée'}
               </div>
 
-              {selectedConv?.messages.map((msg) => {
+              {visibleMessages.map((msg) => {
                 const isMe = msg.sender === 'me';
                 return (
                   // Nos messages à droite, ceux du contact à gauche
@@ -362,13 +466,25 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                     className={`flex flex-col max-w-[78%] ${isMe ? 'self-end items-end' : 'self-start items-start'}`}
                   >
                     <div
-                      className={`p-3 rounded-2xl text-[12.5px] leading-relaxed relative ${
+                      className={`rounded-2xl text-[12px] leading-relaxed relative overflow-hidden ${
                         isMe
                           ? 'bg-gradient-to-br from-breezy-lavender to-breezy-purple text-slate-950 font-medium rounded-tr-xs'
                           : 'glassmorphic text-breezy-icy rounded-tl-xs border border-white/5 shadow-sm'
                       }`}
                     >
-                      {msg.text}
+                      {msg.media && msg.media.length > 0 && (
+                        <div className={`grid gap-0.5 ${msg.media.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                          {msg.media.map((src, i) => (
+                            <img
+                              key={i}
+                              src={getMediaUrl(src)}
+                              alt=""
+                              className="w-full object-cover max-h-48"
+                            />
+                          ))}
+                        </div>
+                      )}
+                      {msg.text && <p className="px-2.5 py-1.5">{msg.text}</p>}
                     </div>
                     <span className="text-[9px] font-mono text-white/40 mt-1 px-1">
                       {msg.time}
@@ -387,7 +503,7 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
                     className="self-start flex flex-col items-start max-w-[70%]"
                   >
                     <div className="glassmorphic p-3 rounded-2xl rounded-tl-xs border border-white/5 flex items-center gap-1.5">
-                      <span className="text-[10px] font-mono text-breezy-neon mr-1">En train d'écrire</span>
+                      <span className="text-[10px] font-mono text-breezy-neon mr-1">{lang === 'en' ? 'Typing' : "En train d'écrire"}</span>
                       <div className="flex gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-breezy-neon/80 animate-bounce" style={{ animationDelay: '0ms' }} />
                         <span className="w-1.5 h-1.5 rounded-full bg-breezy-lavender/80 animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -401,26 +517,61 @@ export default function MessagesTab({ conversations, onUpdateConversations, trig
             </div>
 
             {/* Barre de saisie du message */}
-            <form
-              onSubmit={handleSendMessage}
-              className="p-3 shrink-0 border-t border-white/5 glassmorphic flex items-center gap-2"
-            >
-              <input
-                type="text"
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                maxLength={5000}
-                placeholder="Écrire un message..."
-                className="flex-1 text-xs rounded-xl glassmorphism-light py-3 px-4 text-breezy-icy placeholder-white/30 focus:outline-none focus:border-breezy-border-active transition"
-              />
-              <button
-                type="submit"
-                disabled={!inputText.trim()}
-                className="w-10 h-10 rounded-xl bg-breezy-icy text-slate-950 hover:bg-breezy-neon disabled:opacity-40 disabled:hover:bg-breezy-icy flex items-center justify-center active:scale-95 transition shrink-0"
+            <div className="shrink-0 border-t border-white/5 glassmorphic">
+              {pendingImages.length > 0 && (
+                <div className="flex gap-1.5 px-3 pt-2.5 flex-wrap">
+                  {pendingImages.map((src, i) => (
+                    <div key={i} className="relative w-14 h-14 rounded-xl overflow-hidden border border-white/10 bg-black/20 shrink-0">
+                      <img src={src} alt="" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setPendingImages(prev => prev.filter((_, idx) => idx !== i))}
+                        className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-black/70 flex items-center justify-center text-white/80 hover:bg-black"
+                      >
+                        <X className="w-2.5 h-2.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <form
+                onSubmit={handleSendMessage}
+                className="p-2 flex items-center gap-2"
               >
-                <Send className="w-4 h-4" />
-              </button>
-            </form>
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => { void handleImageFiles(e.target.files); e.currentTarget.value = ''; }}
+                />
+                <button
+                  type="button"
+                  onClick={() => imageInputRef.current?.click()}
+                  disabled={pendingImages.length >= 5}
+                  className="w-7 h-7 rounded-xl bg-white/5 hover:bg-white/10 text-white/55 hover:text-breezy-lavender flex items-center justify-center transition disabled:opacity-30 shrink-0"
+                  title={lang === 'en' ? "Attach image" : "Joindre une image"}
+                >
+                  <ImagePlus className="w-4 h-4" />
+                </button>
+                <input
+                  type="text"
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void handleSendMessage(); } }}
+                  placeholder={t('messages.input_placeholder')}
+                  className="flex-1 text-xs rounded-xl glassmorphism-light py-2 px-3 text-breezy-icy placeholder-white/30 focus:outline-none focus:border-breezy-border-active transition"
+                />
+                <button
+                  type="submit"
+                  disabled={!inputText.trim() && pendingImages.length === 0}
+                  className="w-8 h-8 rounded-xl bg-breezy-icy text-slate-950 hover:bg-breezy-neon disabled:opacity-40 disabled:hover:bg-breezy-icy flex items-center justify-center active:scale-95 transition shrink-0"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </form>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

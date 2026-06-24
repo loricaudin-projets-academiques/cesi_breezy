@@ -11,6 +11,7 @@ import { Post, UserProfile } from '../types';
 import { getAvatarUrl } from './Avatar';
 import { playTick, playChime, isSoundEnabled, setSoundEnabled } from '../audio';
 import { forceNavigate } from '../utils/navigation';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface HamburgerPanelProps {
   isOpen: boolean;
@@ -18,14 +19,13 @@ interface HamburgerPanelProps {
   onClose: () => void;
   posts: Post[];
   onToggleLike: (postId: string) => void;
+  onToggleStar: (postId: string) => void;
   ambientGlow: boolean;
   onToggleAmbientGlow: () => void;
   isLightTheme: boolean;
   onToggleLightTheme: () => void;
   language: UserProfile['language'];
   onToggleLanguage: () => void;
-  isPrivate: boolean;
-  onTogglePrivate: () => void;
   onLoadArchive: () => Promise<Post[]>;
   onToggleArchive: (postId: string) => void;
   onDeletePost: (postId: string, title?: string) => boolean | Promise<boolean>;
@@ -54,14 +54,13 @@ export default function HamburgerPanel({
   onClose,
   posts,
   onToggleLike,
+  onToggleStar,
   ambientGlow,
   onToggleAmbientGlow,
   isLightTheme,
   onToggleLightTheme,
   language,
   onToggleLanguage,
-  isPrivate,
-  onTogglePrivate,
   onLoadArchive,
   onToggleArchive,
   onDeletePost,
@@ -69,6 +68,7 @@ export default function HamburgerPanel({
   onLogout
 }: HamburgerPanelProps) {
   const [activeView, setActiveView] = useState<PanelView>('menu');
+  const { t } = useTranslation();
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [archivedPosts, setArchivedPosts] = useState<Post[]>([]);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
@@ -77,9 +77,9 @@ export default function HamburgerPanel({
   const likedPosts = posts.filter((post) => post.likedByUser);
   const savedPosts = posts.filter((post) => post.starredByUser);
   const labels = {
-    settings: isEnglish ? 'Settings' : 'Parametres',
-    liked: isEnglish ? 'Liked posts' : 'Posts likes',
-    saved: isEnglish ? 'Saved posts' : 'Posts sauvegardes',
+    settings: isEnglish ? 'Settings' : 'Paramètres',
+    liked: isEnglish ? 'Liked posts' : 'Posts likés',
+    saved: isEnglish ? 'Saved posts' : 'Posts sauvegardés',
     archive: isEnglish ? 'Archive' : 'Archive',
     back: isEnglish ? 'Back to menu' : 'Retour au menu',
   };
@@ -106,13 +106,19 @@ export default function HamburgerPanel({
     setSoundOn(newVal);
     setSoundEnabled(newVal);
     playTick();
-    triggerToast(newVal ? 'Sons actives' : 'Sons desactives');
+    triggerToast(newVal ? t('settings.sounds_on') : t('settings.sounds_off'));
   };
 
   const handleUnlikeFromList = (id: string, name: string) => {
     onToggleLike(id);
     playChime();
-    triggerToast(`Like retire pour le post de ${name}`);
+    triggerToast(t('settings.toast_like_removed', { name }));
+  };
+
+  const handleUnstarFromList = (id: string, name: string) => {
+    onToggleStar(id);
+    playChime();
+    triggerToast(t('settings.toast_saved_removed', { name }));
   };
 
   const title = activeView === 'menu' ? 'Menu' : labels[activeView];
@@ -156,7 +162,7 @@ export default function HamburgerPanel({
                       </div>
                       <div>
                         <h4 className="text-[15px] leading-5 font-bold">{labels.settings}</h4>
-                        <p className="text-[13px] leading-4 text-white/45">{isEnglish ? 'Visual mode, privacy and sounds' : 'Theme, confidentialite et sons'}</p>
+                        <p className="text-[13px] leading-4 text-white/45">{isEnglish ? 'Visual mode, privacy and sounds' : 'Thème, confidentialité et sons'}</p>
                       </div>
                     </button>
 
@@ -166,7 +172,7 @@ export default function HamburgerPanel({
                       </div>
                       <div>
                         <h4 className="text-[15px] leading-5 font-bold">{labels.archive}</h4>
-                        <p className="text-[13px] leading-4 text-white/45">{isEnglish ? 'Your archived posts' : 'Tes posts archives'}</p>
+                        <p className="text-[13px] leading-4 text-white/45">{isEnglish ? 'Your archived posts' : 'Tes posts archivés'}</p>
                       </div>
                     </button>
 
@@ -202,7 +208,7 @@ export default function HamburgerPanel({
                         <ShieldAlert className="w-4.5 h-4.5" />
                       </div>
                       <div>
-                        <h4 className="text-[15px] leading-5 font-bold text-rose-300">{isEnglish ? 'Log out' : 'Se deconnecter'}</h4>
+                        <h4 className="text-[15px] leading-5 font-bold text-rose-300">{isEnglish ? 'Log out' : 'Se déconnecter'}</h4>
                         <p className="text-[13px] leading-4 text-rose-400/60">{isEnglish ? 'Close local session' : 'Fermer la session locale'}</p>
                       </div>
                     </button>
@@ -216,25 +222,21 @@ export default function HamburgerPanel({
                       &larr; {labels.back}
                     </button>
 
-                    <SettingCard title={isEnglish ? 'Light theme' : 'Theme clair'} description={isEnglish ? 'White interface, less transparency and simpler contrast.' : 'Interface blanche, moins transparente, plus simple.'}>
+                    <SettingCard title={isEnglish ? 'Light theme' : 'Thème clair'} description={isEnglish ? 'White interface, less transparency and simpler contrast.' : 'Interface blanche, moins transparente, plus simple.'}>
                       <Toggle enabled={isLightTheme} onClick={() => { playTick(); onToggleLightTheme(); }} />
                     </SettingCard>
 
-                    <SettingCard title={isEnglish ? 'Language' : 'Langue'} description={isEnglish ? 'Switch interface labels between English and French.' : "Bascule l'interface entre francais et anglais."}>
+                    <SettingCard title={isEnglish ? 'Language' : 'Langue'} description={isEnglish ? 'Switch interface labels between English and French.' : "Bascule l'interface entre français et anglais."}>
                       <button onClick={() => { playTick(); onToggleLanguage(); }} className="px-3 py-1.5 rounded-full bg-white/10 border border-white/10 text-[13px] leading-4 font-bold">
                         {isEnglish ? 'EN' : 'FR'}
                       </button>
                     </SettingCard>
 
-                    <SettingCard title={isEnglish ? 'Private account' : 'Compte prive'} description={isEnglish ? 'Only friends see your posts, music and note.' : 'Seuls tes amis voient tes posts, ta musique et ta note.'}>
-                      <Toggle enabled={isPrivate} onClick={() => { playTick(); onTogglePrivate(); }} accent="bg-breezy-purple" />
-                    </SettingCard>
-
-                    <SettingCard title={isEnglish ? 'Ambient halo' : 'Halo ambiant'} description={isEnglish ? 'Shows color halos behind the interface.' : "Active les halos de couleur derriere l'interface."}>
+                    <SettingCard title={isEnglish ? 'Ambient halo' : 'Halo ambiant'} description={isEnglish ? 'Shows color halos behind the interface.' : "Active les halos de couleur derrière l'interface."}>
                       <Toggle enabled={ambientGlow} onClick={() => { playTick(); onToggleAmbientGlow(); }} />
                     </SettingCard>
 
-                    <SettingCard title={isEnglish ? 'Interface sounds' : "Sons de l'interface"} description={isEnglish ? 'Small sounds on interactions.' : 'Petits sons a chaque interaction.'}>
+                    <SettingCard title={isEnglish ? 'Interface sounds' : "Sons de l'interface"} description={isEnglish ? 'Small sounds on interactions.' : 'Petits sons à chaque interaction.'}>
                       <Toggle enabled={soundOn} onClick={handleSoundToggle} accent="bg-breezy-purple" />
                     </SettingCard>
                   </motion.div>
@@ -259,19 +261,23 @@ export default function HamburgerPanel({
                 {activeView === 'saved' && (
                   <PostMiniList
                     emptyIcon={<Bookmark className="w-8 h-8 opacity-40" />}
-                    emptyText={isEnglish ? 'No saved posts yet.' : "Aucun post sauvegarde pour l'instant."}
+                    emptyText={isEnglish ? 'No saved posts yet.' : "Aucun post sauvegardé pour l'instant."}
                     posts={savedPosts}
                     backLabel={labels.back}
                     onBack={() => transitionTo('menu')}
                     onPostOpen={setSelectedPost}
-                    action={() => <div className="p-1 rounded bg-breezy-lavender/10 text-breezy-lavender shrink-0"><Check className="w-3 h-3" /></div>}
+                    action={(post) => (
+                      <button onClick={() => handleUnstarFromList(post.id, post.authorName)} className="w-6 h-6 rounded-md hover:bg-rose-500/10 text-rose-400 flex items-center justify-center transition shrink-0">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   />
                 )}
 
                 {activeView === 'archive' && (
                   <PostMiniList
                     emptyIcon={<Archive className="w-8 h-8 opacity-40" />}
-                    emptyText={isEnglish ? 'No archived posts yet.' : "Aucun post archive pour l'instant."}
+                    emptyText={isEnglish ? 'No archived posts yet.' : "Aucun post archivé pour l'instant."}
                     posts={archivedPosts}
                     backLabel={labels.back}
                     onBack={() => transitionTo('menu')}
@@ -402,16 +408,16 @@ function PostMiniList({
       ) : (
         <div className="flex flex-col gap-2">
           {posts.map((post) => (
-            <button key={post.id} onClick={() => onPostOpen(post)} className="w-full p-3 rounded-lg bg-white/[0.02] border border-white/5 flex items-center justify-between gap-2 text-left hover:border-breezy-border-active/40">
-              <div className="flex items-center gap-2 min-w-0">
+            <div key={post.id} className="w-full p-3 rounded-lg bg-white/[0.02] border border-white/5 flex items-center justify-between gap-2 text-left hover:border-breezy-border-active/40">
+              <button onClick={() => onPostOpen(post)} className="flex items-center gap-2 min-w-0 flex-1 text-left focus:outline-none cursor-pointer">
                 <img src={getAvatarUrl(post.avatar, post.authorUsername, post.authorName)} className="w-6 h-6 rounded-full object-cover border border-white/10" alt="" />
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="text-[13px] leading-4 font-bold text-breezy-icy truncate">{post.title || post.authorName}</p>
                   <p className="text-[13px] leading-4 text-white/45 truncate">{post.content}</p>
                 </div>
-              </div>
-              <span onClick={(event) => event.stopPropagation()}>{action(post)}</span>
-            </button>
+              </button>
+              <div className="shrink-0">{action(post)}</div>
+            </div>
           ))}
         </div>
       )}

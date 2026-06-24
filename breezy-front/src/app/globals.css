@@ -48,8 +48,8 @@ h6 {
 
 @media (min-width: 768px) {
   body {
-    font-size: 22px;
-    line-height: 31px;
+    font-size: 14px;
+    line-height: 20px;
   }
 
   main p,
@@ -58,8 +58,8 @@ h6 {
   main input,
   main textarea,
   main label {
-    font-size: 21px !important;
-    line-height: 29px !important;
+    font-size: 13px !important;
+    line-height: 18px !important;
   }
 
   main [class*="text-[7"],
@@ -68,8 +68,8 @@ h6 {
   main [class*="text-[10"],
   main [class*="text-[11"],
   main .text-xs {
-    font-size: 18px !important;
-    line-height: 24px !important;
+    font-size: 11px !important;
+    line-height: 16px !important;
   }
 
   main h1,
@@ -78,8 +78,8 @@ h6 {
   main h4,
   main h5,
   main h6 {
-    font-size: 28px !important;
-    line-height: 36px !important;
+    font-size: 17px !important;
+    line-height: 22px !important;
   }
 }
 
@@ -90,13 +90,53 @@ h6 {
 }
 
 .breezy-nav-shell span {
-  font-size: 14px !important;
-  line-height: 18px !important;
+  font-size: 11px !important;
+  line-height: 16px !important;
 }
 
 .breezy-nav-shell .lucide {
-  width: 28px;
-  height: 28px;
+  width: 20px;
+  height: 20px;
+}
+
+/* Thème sombre : barre blanche, icônes sombres */
+.breezy-nav-shell {
+  background: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+.breezy-nav-shell button {
+  color: rgba(0, 0, 0, 0.3) !important;
+}
+
+.breezy-nav-shell button.text-white {
+  color: #0a0a12 !important;
+}
+
+.breezy-nav-shell span {
+  color: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Thème clair : barre noire, icônes blanches */
+.theme-light .breezy-nav-shell {
+  background: #0a0a12 !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7) !important;
+}
+
+.theme-light .breezy-nav-shell button {
+  color: rgba(255, 255, 255, 0.35) !important;
+}
+
+.theme-light .breezy-nav-shell button.text-white {
+  color: #ffffff !important;
+}
+
+.theme-light .breezy-nav-shell span {
+  color: rgba(255, 255, 255, 0.5) !important;
 }
 
 .breezy-chat-surface {
@@ -336,4 +376,25 @@ h6 {
 .theme-light .glow-white {
   filter: none !important;
   box-shadow: none !important;
+}
+
+
+/* === Toast light mode === */
+.theme-light [class*="bg-slate-950"] {
+  background-color: #ffffff !important;
+}
+
+/* === Notifications light mode === */
+.theme-light .notif-card {
+  color: #090022 !important;
+}
+
+.theme-light .notif-read {
+  background-color: #f1f5f9 !important;
+  border-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+.theme-light .notif-unread {
+  background-color: rgba(190, 18, 60, 0.06) !important;
+  border-color: rgba(190, 18, 60, 0.2) !important;
 }

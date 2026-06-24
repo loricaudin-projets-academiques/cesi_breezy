@@ -4,13 +4,14 @@
  */
 
 import { useCallback, useState, useEffect } from 'react';
-import { Follower, MusicState, ProfileStatType, UserProfile } from '../types';
+import { Follower, ProfileStatType, UserProfile } from '../types';
 import { playChime, playTick } from '../audio';
 import { authService } from '../services/ServiceContainer';
 import { api } from '../services/api';
 import { getErrorMessage } from '../utils/errors';
 import { PROFILE_BIO_MAX_LENGTH, PROFILE_NAME_MAX_LENGTH, PROFILE_NOTE_MAX_LENGTH } from '../profileLimits';
 import { INITIAL_USER } from '../mockData';
+import { getT } from './useTranslation';
 
 const limitProfileText = (value: string, maxLength: number) => value.trim().slice(0, maxLength);
 const emptySocialLists: Record<ProfileStatType, Follower[]> = {
@@ -21,8 +22,8 @@ const emptySocialLists: Record<ProfileStatType, Follower[]> = {
 
 // Gère tout ce qui concerne le profil utilisateur : édition, musique, modals d'édition
 export function useProfile(triggerToast: (msg: string) => void) {
-  // Les données du profil, rechargées depuis le stockage au démarrage
   const [user, setUser] = useState<UserProfile>(INITIAL_USER);
+  const t = getT(user.language || 'fr');
 
   // Contrôle l'ouverture et la fermeture de chaque modal d'édition
   const [showNoteEditor, setShowNoteEditor] = useState(false);
@@ -64,6 +65,12 @@ export function useProfile(triggerToast: (msg: string) => void) {
     refreshCurrentUser().catch(() => {
       // Keep the cached profile usable if the API is temporarily unavailable.
     });
+
+    const interval = setInterval(() => {
+      refreshCurrentUser().catch(() => {});
+    }, 30_000);
+
+    return () => clearInterval(interval);
   }, [refreshCurrentUser]);
 
   const loadSocialList = useCallback(async (type: ProfileStatType) => {
@@ -78,7 +85,7 @@ export function useProfile(triggerToast: (msg: string) => void) {
       setSocialLists((prev) => ({ ...prev, [type]: data }));
       return data;
     } catch (error) {
-      triggerToast(getErrorMessage(error, 'Liste indisponible.'));
+      triggerToast(getErrorMessage(error, t('profile.error_list')));
       return [];
     } finally {
       setIsSocialListLoading(false);
@@ -93,7 +100,7 @@ export function useProfile(triggerToast: (msg: string) => void) {
       setUser(data);
       return data;
     } catch (error) {
-      triggerToast(getErrorMessage(error, 'Impossible de sauvegarder le profil.'));
+      triggerToast(getErrorMessage(error, t('profile.error_save')));
       throw error;
     }
   }, [triggerToast]);
@@ -104,7 +111,7 @@ export function useProfile(triggerToast: (msg: string) => void) {
     const nextNote = limitProfileText(newNote, PROFILE_NOTE_MAX_LENGTH);
     void updateCurrentUser({ note: nextNote || 'En mode Breezy...' });
     setShowNoteEditor(false);
-    triggerToast('Ta note a bien été mise à jour !');
+    triggerToast(t('profile.toast_note'));
   };
 
   // Enregistre la biographie
@@ -114,7 +121,7 @@ export function useProfile(triggerToast: (msg: string) => void) {
     const nextBio = limitProfileText(newBio, PROFILE_BIO_MAX_LENGTH);
     void updateCurrentUser({ name: nextName || user.name, bio: nextBio || 'Membre Breezy.' });
     setShowBioEditor(false);
-    triggerToast('Ta bio a été mise à jour !');
+    triggerToast(t('profile.toast_bio'));
   };
 
   // Change l'avatar et répercute la modification sur les posts existants si besoin
@@ -124,7 +131,7 @@ export function useProfile(triggerToast: (msg: string) => void) {
       onAvatarChangeCallback?.(savedUser.avatar);
     });
     setShowAvatarSelector(false);
-    triggerToast('Nouvel avatar enregistré !');
+    triggerToast(t('profile.toast_avatar'));
   };
 
   // Ouvre la liste des abonnés, abonnements ou amis
@@ -135,25 +142,36 @@ export function useProfile(triggerToast: (msg: string) => void) {
     void loadSocialList(type);
   };
 
-  // Met la musique en pause ou la relance
-  const toggleMusicPlaying = () => {
+  const handleToggleFollow = useCallback(async (member: Follower) => {
     playTick();
-    setUser((prev) => {
-      const nextPlaying = !prev.music.isPlaying;
-      void updateCurrentUser({ music: { ...prev.music, isPlaying: nextPlaying } });
-      triggerToast(nextPlaying ? 'Lecture en cours 🎵' : 'Musique en pause');
-      return {
-        ...prev,
-        music: { ...prev.music, isPlaying: nextPlaying }
-      };
-    });
-  };
+    try {
+      const { data } = member.followedByMe
+        ? await api.delete<{ followedByMe: boolean; isFriend: boolean }>(`/users/${member.username}/follow`)
+        : await api.post<{ followedByMe: boolean; isFriend: boolean }>(`/users/${member.username}/follow`);
 
-  // Met à jour les infos de la chanson en cours (titre, artiste, pochette...)
-  const handleMusicChange = useCallback((updates: Partial<MusicState>) => {
-    const nextMusic = { ...user.music, ...updates };
-    void updateCurrentUser({ music: nextMusic });
-  }, [updateCurrentUser, user.music]);
+      setSocialLists((prev) => {
+        const updated = { ...prev } as Record<ProfileStatType, Follower[]>;
+        for (const key of Object.keys(updated) as ProfileStatType[]) {
+          updated[key] = updated[key].map((m) =>
+            m.username === member.username
+              ? { ...m, followedByMe: data.followedByMe, isFriend: data.isFriend }
+              : m
+          );
+        }
+        return updated;
+      });
+
+      triggerToast(
+        data.isFriend
+          ? t('profile.toast_now_friend', { name: member.name })
+          : data.followedByMe
+          ? t('profile.toast_followed', { name: member.name })
+          : t('profile.toast_unfollowed', { name: member.name })
+      );
+    } catch (error) {
+      triggerToast(getErrorMessage(error, t('action.error')));
+    }
+  }, [triggerToast]);
 
   return {
     user,
@@ -176,7 +194,6 @@ export function useProfile(triggerToast: (msg: string) => void) {
     handleSaveBio,
     handleSelectAvatar,
     handleOpenStatsModal,
-    toggleMusicPlaying,
-    handleMusicChange
+    handleToggleFollow,
   };
 }
