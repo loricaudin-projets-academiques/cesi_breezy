@@ -162,10 +162,10 @@ export default function NotificationsPage() {
       ) : (
         <div className="flex flex-col gap-2">
           {notifications.map((notification) => (
-            <button
+            <div
               key={notification.id}
               onClick={() => openNotification(notification)}
-              className={`notif-card w-full text-left rounded-2xl border p-3 flex gap-3 transition ${
+              className={`notif-card w-full text-left rounded-2xl border p-3 flex gap-3 transition cursor-pointer ${
                 notification.isRead
                   ? "notif-read border-white/5 bg-white/[0.02] text-white/70"
                   : "notif-unread border-rose-400/25 bg-rose-500/10 text-white"
@@ -208,7 +208,7 @@ export default function NotificationsPage() {
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
-            </button>
+            </div>
           ))}
         </div>
       )}
