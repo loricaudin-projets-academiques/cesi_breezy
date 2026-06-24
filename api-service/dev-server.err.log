@@ -1,0 +1,45 @@
+Erreur de connexion à la base de données PostgreSQL :  ConnectionRefusedError [SequelizeConnectionRefusedError]
+    at Client._connectionCallback (C:\Users\yyuli\Desktop\DevOPS\cesi_breezy\breezy-back\api-service\node_modules\sequelize\lib\dialects\postgres\connection-manager.js:133:24)
+    at Client._handleErrorWhileConnecting (C:\Users\yyuli\Desktop\DevOPS\cesi_breezy\breezy-back\api-service\node_modules\pg\lib\client.js:397:19)
+    at Client._handleErrorEvent (C:\Users\yyuli\Desktop\DevOPS\cesi_breezy\breezy-back\api-service\node_modules\pg\lib\client.js:407:19)
+    at Connection.emit (node:events:509:20)
+    at Socket.reportStreamError (C:\Users\yyuli\Desktop\DevOPS\cesi_breezy\breezy-back\api-service\node_modules\pg\lib\connection.js:56:12)
+    at Socket.emit (node:events:509:20)
+    at emitErrorNT (node:internal/streams/destroy:170:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:129:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  parent: AggregateError [ECONNREFUSED]: 
+      at internalConnectMultiple (node:net:1193:18)
+      at afterConnectMultiple (node:net:1783:7) {
+    code: 'ECONNREFUSED',
+    [errors]: [ [Error], [Error] ]
+  },
+  original: AggregateError [ECONNREFUSED]: 
+      at internalConnectMultiple (node:net:1193:18)
+      at afterConnectMultiple (node:net:1783:7) {
+    code: 'ECONNREFUSED',
+    [errors]: [ [Error], [Error] ]
+  }
+}
+Erreur de connexion à la base de données MongoDB :  MongoRuntimeError: Unable to parse undefined:undefined with URL
+    at new HostAddress (C:\Users\yyuli\Desktop\DevOPS\cesi_breezy\breezy-back\api-service\node_modules\mongodb\lib\utils.js:711:34)
+    at fromString (C:\Users\yyuli\Desktop\DevOPS\cesi_breezy\breezy-back\api-service\node_modules\mongodb\lib\utils.js:753:16)
+    ... 6 lines matching cause stack trace ...
+    at connectMongoDB (C:\Users\yyuli\Desktop\DevOPS\cesi_breezy\breezy-back\api-service\src\databases\mongodb\index.js:4:20)
+    at start (C:\Users\yyuli\Desktop\DevOPS\cesi_breezy\breezy-back\api-service\src\index.js:30:11) {
+  errorLabelSet: Set(0) {},
+  cause: TypeError: Invalid URL
+      at new URL (node:internal/url:840:25)
+      at new HostAddress (C:\Users\yyuli\Desktop\DevOPS\cesi_breezy\breezy-back\api-service\node_modules\mongodb\lib\utils.js:708:19)
+      at fromString (C:\Users\yyuli\Desktop\DevOPS\cesi_breezy\breezy-back\api-service\node_modules\mongodb\lib\utils.js:753:16)
+      at Array.map (<anonymous>)
+      at parseOptions (C:\Users\yyuli\Desktop\DevOPS\cesi_breezy\breezy-back\api-service\node_modules\mongodb\lib\connection_string.js:205:45)
+      at new MongoClient (C:\Users\yyuli\Desktop\DevOPS\cesi_breezy\breezy-back\api-service\node_modules\mongodb\lib\mongo_client.js:67:61)
+      at NativeConnection.createClient (C:\Users\yyuli\Desktop\DevOPS\cesi_breezy\breezy-back\api-service\node_modules\mongoose\lib\drivers\node-mongodb-native\connection.js:338:14)
+      at NativeConnection.openUri (C:\Users\yyuli\Desktop\DevOPS\cesi_breezy\breezy-back\api-service\node_modules\mongoose\lib\connection.js:1086:34)
+      at Mongoose.connect (C:\Users\yyuli\Desktop\DevOPS\cesi_breezy\breezy-back\api-service\node_modules\mongoose\lib\mongoose.js:475:15)
+      at connectMongoDB (C:\Users\yyuli\Desktop\DevOPS\cesi_breezy\breezy-back\api-service\src\databases\mongodb\index.js:4:20) {
+    code: 'ERR_INVALID_URL',
+    input: 'iLoveJS://undefined:undefined'
+  }
+}
