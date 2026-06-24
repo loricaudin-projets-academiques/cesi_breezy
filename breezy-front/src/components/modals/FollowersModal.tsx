@@ -1,9 +1,9 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { UserCheck, UserPlus } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { Follower, ProfileStatType } from '../../types';
 import { playTick } from '../../audio';
 import { getAvatarUrl } from '../Avatar';
+import { forceNavigate } from '../../utils/navigation';
 
 interface FollowersModalProps {
   isOpen: boolean;
@@ -15,12 +15,10 @@ interface FollowersModalProps {
 }
 
 export default function FollowersModal({ isOpen, onClose, type, members, isLoading, triggerToast }: FollowersModalProps) {
-  const router = useRouter();
-
   const openProfile = (username: string) => {
     playTick();
     onClose();
-    router.push(`/profile/${encodeURIComponent(username)}`);
+    forceNavigate(`/profile/${encodeURIComponent(username)}`);
   };
 
   return (
@@ -94,7 +92,7 @@ export default function FollowersModal({ isOpen, onClose, type, members, isLoadi
                     >
                       {member.followedByMe ? (
                         <span className="text-[#AEEBFF] flex items-center gap-0.5">
-                          <UserCheck className="w-2.5 h-2.5" /> suivi
+                          <UserCheck className="w-2.5 h-2.5" /> {member.isFriend ? 'ami' : 'suivi'}
                         </span>
                       ) : (
                         <span className="text-white/65 flex items-center gap-0.5">

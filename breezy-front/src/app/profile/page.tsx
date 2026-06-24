@@ -22,7 +22,7 @@ export default function ProfilePage() {
     <ProfileScreen
       key="profile"
       user={profile.user}
-      posts={feed.posts}
+      posts={feed.userPosts}
       onOpenHamburger={() => {
         playTick();
         setIsHamburgerOpen(true);

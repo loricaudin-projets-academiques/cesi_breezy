@@ -48,6 +48,14 @@ export interface Comment {
 // Tous les commentaires de l'app, rangés par identifiant de post
 export type CommentsByPost = Record<string, Comment[]>;
 
+export interface PaginatedComments {
+  comments: Comment[];
+  page: number;
+  limit: number;
+  total: number;
+  hasMore: boolean;
+}
+
 // Un message échangé dans une conversation privée
 export interface MessageItem {
   id: string;
@@ -90,6 +98,8 @@ export interface UserProfile {
   note: string;   // La petite phrase d'humeur visible sur le profil
   isPrivate: boolean;
   language: 'fr' | 'en';
+  theme: 'dark' | 'light';
+  ambientGlow: boolean;
   notificationsEnabled: boolean;
   music: MusicState; // La musique qu'il écoute en ce moment
 }
@@ -103,6 +113,26 @@ export interface Follower {
   followedByMe: boolean;
   isFriend: boolean;
   canViewPrivate?: boolean;
+}
+
+export interface AccountNotification {
+  id: string;
+  type: 'follow' | 'like' | 'comment' | 'reply' | 'mention';
+  targetType: 'profile' | 'post' | 'comment';
+  targetId?: string;
+  isRead: boolean;
+  createdAt: string;
+  text: string;
+  metadata?: {
+    excerpt?: string;
+    postTitle?: string;
+  };
+  actor: {
+    id: string;
+    name: string;
+    username: string;
+    avatar: string;
+  };
 }
 
 // Les trois types de statistiques sociales du profil

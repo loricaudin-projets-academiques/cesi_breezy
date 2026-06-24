@@ -7,7 +7,7 @@ import { useBreezyApp } from "../BreezyAppProvider";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { handleLogin, handleRegister, triggerToast } = useBreezyApp();
+  const { handleLogin, handleRegister, triggerToast, isLightTheme, setIsLightTheme } = useBreezyApp();
 
   return (
     <LoginScreen
@@ -20,6 +20,8 @@ export default function LoginPage() {
         router.replace("/feed");
       }}
       triggerToast={triggerToast}
+      isLightTheme={isLightTheme}
+      onToggleTheme={() => setIsLightTheme(!isLightTheme)}
     />
   );
 }

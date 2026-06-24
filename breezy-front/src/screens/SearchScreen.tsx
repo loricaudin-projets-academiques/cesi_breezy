@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { Search, UserCheck, UserPlus } from 'lucide-react';
 import { Follower, Post } from '../types';
@@ -7,6 +6,7 @@ import { playTick } from '../audio';
 import { api } from '../services/api';
 import { getErrorMessage } from '../utils/errors';
 import { getAvatarUrl } from '../components/Avatar';
+import { forceNavigate } from '../utils/navigation';
 
 interface SearchScreenProps {
   searchQuery: string;
@@ -23,7 +23,6 @@ export default function SearchScreen({
   triggerToast,
   onCurrentUserChanged
 }: SearchScreenProps) {
-  const router = useRouter();
   const [searchedUsers, setSearchedUsers] = useState<Follower[]>([]);
   const [isSearchingUsers, setIsSearchingUsers] = useState(false);
 
@@ -76,7 +75,7 @@ export default function SearchScreen({
 
   const openUserProfile = (username: string) => {
     playTick();
-    router.push(`/profile/${encodeURIComponent(username)}`);
+    forceNavigate(`/profile/${encodeURIComponent(username)}`);
   };
 
   const hasQuery = searchQuery.trim() !== '';
@@ -167,7 +166,7 @@ export default function SearchScreen({
                       className="py-1.5 px-2.5 text-[8px] font-bold font-mono rounded bg-white/5 hover:bg-white/10 border border-white/5 transition shrink-0 active:scale-95"
                     >
                       {user.followedByMe ? (
-                        <span className="text-[#AEEBFF] flex items-center gap-1"><UserCheck className="w-3 h-3" /> suivi</span>
+                        <span className="text-[#AEEBFF] flex items-center gap-1"><UserCheck className="w-3 h-3" /> {user.isFriend ? 'ami' : 'suivi'}</span>
                       ) : (
                         <span className="text-white/75 flex items-center gap-1"><UserPlus className="w-3 h-3" /> suivre</span>
                       )}

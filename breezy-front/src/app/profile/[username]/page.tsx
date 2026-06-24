@@ -10,6 +10,7 @@ import PostCard from "../../../components/PostCard";
 import { conversationService, feedService } from "../../../services/ServiceContainer";
 import { api } from "../../../services/api";
 import { getErrorMessage } from "../../../utils/errors";
+import { forceNavigate } from "../../../utils/navigation";
 import { Follower, Post, UserProfile } from "../../../types";
 import { useBreezyApp } from "../../BreezyAppProvider";
 
@@ -110,7 +111,7 @@ export default function PublicProfilePage() {
         ...prev.filter((item) => item.id !== conversation.id),
       ]);
       triggerToast(`Chat ouvert avec ${publicUser.name}.`);
-      router.push("/messages");
+      forceNavigate("/messages");
     } catch (error) {
       triggerToast(getErrorMessage(error, "Impossible d'ouvrir le chat."));
     }
@@ -129,7 +130,7 @@ export default function PublicProfilePage() {
       <div className="p-4 min-h-[420px] flex flex-col items-center justify-center gap-3 text-center">
         <p className="text-sm text-breezy-icy">Profil introuvable.</p>
         <button
-          onClick={() => router.push("/search")}
+          onClick={() => forceNavigate("/search")}
           className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-mono text-white/65"
         >
           Retour recherche
@@ -146,7 +147,7 @@ export default function PublicProfilePage() {
         <button
           onClick={() => {
             playTick();
-            router.back();
+            forceNavigate("/search");
           }}
           className="w-9 h-9 rounded-xl glassmorphism-light hover:bg-white/10 flex items-center justify-center text-white/85 transition"
           title="Retour"
@@ -197,7 +198,7 @@ export default function PublicProfilePage() {
           >
             {publicUser.followedByMe ? (
               <>
-                <UserCheck className="w-3.5 h-3.5 text-[#AEEBFF]" /> Suivi
+                <UserCheck className="w-3.5 h-3.5 text-[#AEEBFF]" /> {publicUser.isFriend ? 'Ami' : 'Suivi'}
               </>
             ) : (
               <>
@@ -249,6 +250,8 @@ export default function PublicProfilePage() {
               comments={postInteractions.postComments[post.id]}
               commentDraft={postInteractions.commentDrafts[post.id]}
               showComments={postInteractions.showCommentsForPost[post.id]}
+              hasMoreComments={postInteractions.commentHasMore[post.id]}
+              isLoadingComments={postInteractions.loadingComments[post.id]}
               {...postInteractions}
             />
           ))

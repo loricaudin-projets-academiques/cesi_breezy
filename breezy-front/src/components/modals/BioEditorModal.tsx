@@ -6,17 +6,19 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { playTick } from '../../audio';
-import { PROFILE_BIO_MAX_LENGTH } from '../../profileLimits';
+import { PROFILE_BIO_MAX_LENGTH, PROFILE_NAME_MAX_LENGTH } from '../../profileLimits';
 
 interface BioEditorModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialName: string;
   initialValue: string;
-  onSave: (bio: string) => void;
+  onSave: (name: string, bio: string) => void;
 }
 
 // Fenêtre pour modifier la biographie du profil
-export default function BioEditorModal({ isOpen, onClose, initialValue, onSave }: BioEditorModalProps) {
+export default function BioEditorModal({ isOpen, onClose, initialName, initialValue, onSave }: BioEditorModalProps) {
+  const [nameValue, setNameValue] = useState(initialName);
   const [inputValue, setInputValue] = useState(initialValue);
   const remainingCharacters = PROFILE_BIO_MAX_LENGTH - inputValue.length;
 
@@ -24,13 +26,14 @@ export default function BioEditorModal({ isOpen, onClose, initialValue, onSave }
   // (évite d'afficher une ancienne version non sauvegardée)
   useEffect(() => {
     if (isOpen) {
+      setNameValue(initialName.slice(0, PROFILE_NAME_MAX_LENGTH));
       setInputValue(initialValue.slice(0, PROFILE_BIO_MAX_LENGTH));
     }
-  }, [isOpen, initialValue]);
+  }, [isOpen, initialName, initialValue]);
 
   // Sauvegarde et ferme la modal
   const handleSave = () => {
-    onSave(inputValue.slice(0, PROFILE_BIO_MAX_LENGTH));
+    onSave(nameValue.trim().slice(0, PROFILE_NAME_MAX_LENGTH), inputValue.slice(0, PROFILE_BIO_MAX_LENGTH));
   };
 
   return (
@@ -60,6 +63,14 @@ export default function BioEditorModal({ isOpen, onClose, initialValue, onSave }
               Modifier ta bio
             </h4>
             {/* Zone de texte limitée à 120 caractères */}
+            <input
+              type="text"
+              value={nameValue}
+              onChange={(e) => setNameValue(e.target.value.slice(0, PROFILE_NAME_MAX_LENGTH))}
+              maxLength={PROFILE_NAME_MAX_LENGTH}
+              placeholder="Nom affiche"
+              className="w-full mb-3 rounded-xl border border-white/5 bg-white/[0.04] p-2.5 text-xs text-breezy-icy outline-none transition focus:border-breezy-border-active"
+            />
             <textarea
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value.slice(0, PROFILE_BIO_MAX_LENGTH))}

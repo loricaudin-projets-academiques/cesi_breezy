@@ -9,7 +9,7 @@ import { playChime, playTick } from '../audio';
 import { authService } from '../services/ServiceContainer';
 import { api } from '../services/api';
 import { getErrorMessage } from '../utils/errors';
-import { PROFILE_BIO_MAX_LENGTH, PROFILE_NOTE_MAX_LENGTH } from '../profileLimits';
+import { PROFILE_BIO_MAX_LENGTH, PROFILE_NAME_MAX_LENGTH, PROFILE_NOTE_MAX_LENGTH } from '../profileLimits';
 import { INITIAL_USER } from '../mockData';
 
 const limitProfileText = (value: string, maxLength: number) => value.trim().slice(0, maxLength);
@@ -108,10 +108,11 @@ export function useProfile(triggerToast: (msg: string) => void) {
   };
 
   // Enregistre la biographie
-  const handleSaveBio = (newBio: string) => {
+  const handleSaveBio = (newName: string, newBio: string) => {
     playChime();
+    const nextName = limitProfileText(newName, PROFILE_NAME_MAX_LENGTH);
     const nextBio = limitProfileText(newBio, PROFILE_BIO_MAX_LENGTH);
-    void updateCurrentUser({ bio: nextBio || 'Membre Breezy.' });
+    void updateCurrentUser({ name: nextName || user.name, bio: nextBio || 'Membre Breezy.' });
     setShowBioEditor(false);
     triggerToast('Ta bio a été mise à jour !');
   };
