@@ -32,17 +32,21 @@ Le système de privilèges comporte trois rôles distincts définis en base de d
 
 ### Prérequis
 *   Docker Desktop installé et actif.
-*   Node.js (version 20 ou supérieure) installé localement.
 
-### 1. Démarrage du Backend (Docker)
+### 1. Démarrage de l'Application Complète (Docker - Recommandé)
+Le fichier Docker Compose orchestre l'ensemble de l'application (frontend Next.js, Gateway Nginx, microservices, et bases de données). 
+
 Se positionner dans le répertoire des microservices et exécuter :
 ```bash
 cd breezy-microservices
 docker compose up -d
 ```
 
-### 2. Démarrage du Frontend (Local)
-Dans un terminal distinct, installer les dépendances et lancer le serveur Next.js :
+### 2. Démarrage Alternatif du Frontend (Local / Dev)
+Si vous préférez exécuter uniquement le frontend en local hors Docker (par exemple pour du développement intensif avec installation rapide de dépendances) :
+1. Assurez-vous d'avoir Node.js (version 20+) installé localement.
+2. Commentez ou arrêtez le service `frontend` dans `docker-compose.yml` (ou ignorez-le).
+3. Ouvrez un terminal dans `breezy-front/` et exécutez :
 ```bash
 cd breezy-front
 npm install
@@ -50,8 +54,8 @@ npm run dev
 ```
 
 ### 3. Accès à l'Application
-Une fois les serveurs actifs, ouvrir le navigateur à l'adresse suivante :
-**`http://localhost/`** (port 80 de la Gateway Nginx, qui redirige automatiquement les appels vers les services correspondants).
+Dans les deux cas (tout Docker ou frontend en local), ouvrez votre navigateur à l'adresse suivante :
+**`http://localhost/`** (port 80 de la Gateway Nginx, qui redirige automatiquement le trafic vers le conteneur frontend ou votre instance locale).
 
 ---
 
