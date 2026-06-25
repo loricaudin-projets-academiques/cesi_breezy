@@ -63,7 +63,7 @@ export default function FeedScreen({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="p-3 flex flex-col gap-3"
+      className="p-3 lg:p-4 flex flex-col gap-3 lg:gap-4"
     >
       {/* Onglets de catégorie : Pour toi, Abonnements, Amis, Favoris */}
       <div className="glassmorphic rounded-2xl p-1 flex gap-1 border border-white/5 select-none shrink-0">
@@ -74,7 +74,7 @@ export default function FeedScreen({
             <button
               key={key}
               onClick={() => onCategoryChange(key)}
-              className={`flex-1 py-1.5 text-[10.5px] font-medium font-sans rounded-xl transition-all duration-300 relative ${
+              className={`flex-1 py-1.5 lg:py-2 text-[10.5px] lg:text-[13px] font-medium font-sans rounded-xl transition-all duration-300 relative ${
                 isActive
                   ? 'text-[#050505] font-semibold bg-white scale-[1.01] shadow-md'
                   : 'text-white/45 hover:text-white/80'
@@ -99,7 +99,7 @@ export default function FeedScreen({
         </div>
       ) : (
         // La liste des posts filtrés
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col gap-2.5 lg:gap-3.5">
           {filteredPosts.map((post) => (
             <PostCard
               key={post.id}
