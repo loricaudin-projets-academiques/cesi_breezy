@@ -1,12 +1,955 @@
 [
-    {
-        "_id": "6a358d5402772ccec7d2871f",
-        "author_id": "",
-        "content": "Bon week-end !",
-        "tags": [],
-        "media": [],
-        "mentions": [],
-        "visibility": "public",
-        "status": "published"
-    }
+  {
+    "_id": "660000000000000000000001",
+    "author_username": "@lea_en_vrac",
+    "title": "Le café qui juge",
+    "content": "J'ai voulu dessiner mon café avant de le boire. Il a refroidi et maintenant le portrait ressemble à quelqu'un qui m'en veut.",
+    "category": "for-you",
+    "tags": ["illustration", "cafe"],
+    "media": ["https://picsum.photos/seed/breezy-001-1/1200/900"],
+    "created_at": "2026-04-02T07:42:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000002",
+    "author_username": "@lea_en_vrac",
+    "content": "Une dame dans le métro a reconnu le petit renard sur mon tote bag parce qu'elle suit mes dessins. J'ai souri pendant huit stations.",
+    "category": "for-you",
+    "tags": ["petitejoie", "dessin"],
+    "media": [],
+    "created_at": "2026-05-09T16:18:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000003",
+    "author_username": "@lea_en_vrac",
+    "title": "Pages du dimanche",
+    "content": "Pas très productive aujourd'hui, mais j'ai rempli trois pages de couleurs juste pour moi. Ça compte aussi.",
+    "category": "for-you",
+    "tags": ["carnet", "dimanche"],
+    "media": ["https://picsum.photos/seed/breezy-003-1/1200/900", "https://picsum.photos/seed/breezy-003-2/1200/900", "https://picsum.photos/seed/breezy-003-3/1200/900"],
+    "created_at": "2026-06-14T18:07:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000004",
+    "author_username": "@tom_tomate",
+    "title": "Incident diplomatique",
+    "content": "J'ai mis du sel au lieu du sucre dans le crumble. Mes amis ont dit « intéressant », ce qui est la façon polie de demander une pizza.",
+    "category": "for-you",
+    "tags": ["cuisine", "fail"],
+    "media": ["https://picsum.photos/seed/breezy-004-1/1200/900", "https://picsum.photos/seed/breezy-004-2/1200/900"],
+    "created_at": "2026-04-05T19:31:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000005",
+    "author_username": "@tom_tomate",
+    "content": "Quatre heures sur un bug. La cause : un espace invisible. J'aimerais déposer une plainte contre l'alphabet.",
+    "category": "for-you",
+    "tags": ["dev", "bug"],
+    "media": [],
+    "created_at": "2026-05-18T15:46:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000006",
+    "author_username": "@tom_tomate",
+    "title": "Victoire minuscule",
+    "content": "Mon premier pain ressemble vraiment à un pain et pas à une pierre médiévale. Je progresse dangereusement.",
+    "category": "for-you",
+    "tags": ["faitmaison", "pain"],
+    "media": ["https://picsum.photos/seed/breezy-006-1/1200/900"],
+    "created_at": "2026-06-20T09:12:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000007",
+    "author_username": "@inesperee",
+    "title": "Fenêtres allumées",
+    "content": "J'aime rentrer tard et imaginer les vies derrière chaque fenêtre. Une ville, c'est un immense livre qu'on ne finira jamais.",
+    "category": "for-you",
+    "tags": ["architecture", "ville"],
+    "media": ["https://picsum.photos/seed/breezy-007-1/1200/900", "https://picsum.photos/seed/breezy-007-2/1200/900", "https://picsum.photos/seed/breezy-007-3/1200/900", "https://picsum.photos/seed/breezy-007-4/1200/900"],
+    "created_at": "2026-04-11T21:24:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000008",
+    "author_username": "@inesperee",
+    "content": "Présentation terminée. Mes mains tremblaient, ma voix aussi, mais je suis allée jusqu'au bout. Très fière de la version paniquée de moi.",
+    "category": "for-you",
+    "tags": ["etudes", "fierte"],
+    "media": [],
+    "created_at": "2026-05-22T13:05:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000009",
+    "author_username": "@inesperee",
+    "title": "Abri improvisé",
+    "content": "La pluie m'a coincée sous un porche avec un inconnu et son vieux chien. On a parlé vingt minutes. Je ne connais pas son prénom, mais le chien s'appelle Marcel.",
+    "category": "for-you",
+    "tags": ["pluie", "rencontre"],
+    "media": ["https://picsum.photos/seed/breezy-009-1/1200/900"],
+    "created_at": "2026-06-23T17:38:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000010",
+    "author_username": "@hugo_bolide",
+    "title": "Détour de 32 km",
+    "content": "J'avais prévu une petite boucle à vélo. Une route fermée, un mauvais virage et me voilà devant un lac que je ne connaissais pas. Aucun regret, sauf pour mes jambes.",
+    "category": "for-you",
+    "tags": ["velo", "aventure"],
+    "media": ["https://picsum.photos/seed/breezy-010-1/1200/900", "https://picsum.photos/seed/breezy-010-2/1200/900", "https://picsum.photos/seed/breezy-010-3/1200/900", "https://picsum.photos/seed/breezy-010-4/1200/900", "https://picsum.photos/seed/breezy-010-5/1200/900"],
+    "created_at": "2026-04-16T15:20:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000011",
+    "author_username": "@hugo_bolide",
+    "content": "J'ai réparé le vieux vélo de mon père. Au premier tour de roue, il avait exactement le sourire de mes photos d'enfance.",
+    "category": "for-you",
+    "tags": ["famille", "mecanique"],
+    "media": ["https://picsum.photos/seed/breezy-011-1/1200/900"],
+    "created_at": "2026-05-25T10:44:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000012",
+    "author_username": "@hugo_bolide",
+    "title": "Note à moi-même",
+    "content": "Les gants ne servent à rien quand ils restent sagement dans l'entrée. Mes doigts confirment.",
+    "category": "for-you",
+    "tags": ["velo", "conseil"],
+    "media": [],
+    "created_at": "2026-06-18T06:56:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000013",
+    "author_username": "@camomille_cosmique",
+    "title": "Le client du jour",
+    "content": "Un petit garçon m'a demandé « un livre où personne ne meurt et où il y a beaucoup de dragons ». Honnêtement, excellente ligne éditoriale.",
+    "category": "for-you",
+    "tags": ["librairie", "livres"],
+    "media": [],
+    "created_at": "2026-04-21T14:09:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000014",
+    "author_username": "@camomille_cosmique",
+    "content": "Ma plante la plus capricieuse vient de faire une nouvelle feuille le jour où j'avais besoin d'un signe. Je prends.",
+    "category": "for-you",
+    "tags": ["plantes", "espoir"],
+    "media": ["https://picsum.photos/seed/breezy-014-1/1200/900", "https://picsum.photos/seed/breezy-014-2/1200/900"],
+    "created_at": "2026-05-30T08:33:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000015",
+    "author_username": "@camomille_cosmique",
+    "title": "Livre refermé",
+    "content": "J'ai fini le roman que ma grand-mère m'avait offert. Il y avait encore son ticket de caisse en marque-page. Petit coup au cœur inattendu.",
+    "category": "for-you",
+    "tags": ["lecture", "souvenir"],
+    "media": ["https://picsum.photos/seed/breezy-015-1/1200/900"],
+    "created_at": "2026-06-22T22:14:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000016",
+    "author_username": "@mehdi_matin",
+    "title": "6 h 12",
+    "content": "Je râle toujours quand le réveil sonne, puis le ciel fait ça et je lui pardonne tout.",
+    "category": "for-you",
+    "tags": ["photo", "matin"],
+    "media": ["https://picsum.photos/seed/breezy-016-1/1200/900", "https://picsum.photos/seed/breezy-016-2/1200/900", "https://picsum.photos/seed/breezy-016-3/1200/900"],
+    "created_at": "2026-04-25T04:12:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000017",
+    "author_username": "@mehdi_matin",
+    "content": "J'ai raté la photo parfaite parce que j'étais trop occupé à vivre le moment. Pour une fois, ça me va très bien.",
+    "category": "for-you",
+    "tags": ["instant", "photo"],
+    "media": [],
+    "created_at": "2026-05-16T19:52:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000018",
+    "author_username": "@mehdi_matin",
+    "title": "Portrait de quartier",
+    "content": "Monsieur Alain, 78 ans, nourrit les moineaux chaque matin et prétend ne pas les reconnaître. Eux le reconnaissent très bien.",
+    "category": "for-you",
+    "tags": ["quartier", "portrait"],
+    "media": ["https://picsum.photos/seed/breezy-018-1/1200/900"],
+    "created_at": "2026-06-24T07:01:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000019",
+    "author_username": "@sarah_sans_filtre",
+    "content": "Garde difficile. Une patiente m'a serré la main avant de partir et m'a dit « merci d'être restée ». Je crois que je vais garder cette phrase longtemps.",
+    "category": "for-you",
+    "tags": ["travail", "emotion"],
+    "media": [],
+    "created_at": "2026-04-28T23:40:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000020",
+    "author_username": "@sarah_sans_filtre",
+    "title": "Thérapie du salon",
+    "content": "J'ai dansé seule dans mon salon sur une chanson honteusement joyeuse. Le moral a remonté de 37 %, étude très sérieuse.",
+    "category": "for-you",
+    "tags": ["musique", "bonne humeur"],
+    "media": ["https://picsum.photos/seed/breezy-020-1/1200/900", "https://picsum.photos/seed/breezy-020-2/1200/900"],
+    "created_at": "2026-05-27T20:03:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000021",
+    "author_username": "@sarah_sans_filtre",
+    "content": "Rappel doux : on peut être solide et avoir besoin de repos. Ce n'est pas contradictoire, c'est humain.",
+    "category": "for-you",
+    "tags": ["repos", "douceur"],
+    "media": ["https://picsum.photos/seed/breezy-021-1/1200/900"],
+    "created_at": "2026-06-19T18:29:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000022",
+    "author_username": "@lucas_decalage",
+    "title": "Concert privé",
+    "content": "J'ai joué mon nouveau morceau à mon chat. Il est parti au deuxième accord. La critique musicale est devenue brutale.",
+    "category": "for-you",
+    "tags": ["musique", "chat"],
+    "media": [],
+    "created_at": "2026-04-07T17:17:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000023",
+    "author_username": "@lucas_decalage",
+    "content": "Premier petit concert depuis des mois. J'avais peur d'avoir oublié comment respirer devant des gens. Puis quelqu'un a fermé les yeux en écoutant.",
+    "category": "for-you",
+    "tags": ["concert", "fierte"],
+    "media": ["https://picsum.photos/seed/breezy-023-1/1200/900", "https://picsum.photos/seed/breezy-023-2/1200/900", "https://picsum.photos/seed/breezy-023-3/1200/900", "https://picsum.photos/seed/breezy-023-4/1200/900"],
+    "created_at": "2026-05-14T21:36:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000024",
+    "author_username": "@lucas_decalage",
+    "title": "Trois notes",
+    "content": "Parfois une mélodie arrive entière. Parfois je passe deux heures à déplacer trois notes. Aujourd'hui, équipe trois notes.",
+    "category": "for-you",
+    "tags": ["composition", "patience"],
+    "media": ["https://picsum.photos/seed/breezy-024-1/1200/900"],
+    "created_at": "2026-06-21T11:48:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000025",
+    "author_username": "@chloe_papote",
+    "title": "Macarons 1 — Chloé 0",
+    "content": "Ils ont tous une forme différente. Je préfère dire que c'est une collection artisanale en édition limitée.",
+    "category": "for-you",
+    "tags": ["patisserie", "fail"],
+    "media": ["https://picsum.photos/seed/breezy-025-1/1200/900", "https://picsum.photos/seed/breezy-025-2/1200/900", "https://picsum.photos/seed/breezy-025-3/1200/900"],
+    "created_at": "2026-04-13T12:25:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000026",
+    "author_username": "@chloe_papote",
+    "content": "Ma voisine m'a rendu mon moule avec une part de son gâteau dedans. Voici le type d'économie circulaire que je soutiens.",
+    "category": "for-you",
+    "tags": ["voisins", "gateau"],
+    "media": ["https://picsum.photos/seed/breezy-026-1/1200/900"],
+    "created_at": "2026-05-20T15:11:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000027",
+    "author_username": "@chloe_papote",
+    "title": "Ça y est",
+    "content": "Après six essais, la tarte tient debout, brille un peu et sent le dimanche. J'en suis absurdement fière.",
+    "category": "for-you",
+    "tags": ["victoire", "tarte"],
+    "media": ["https://picsum.photos/seed/breezy-027-1/1200/900", "https://picsum.photos/seed/breezy-027-2/1200/900"],
+    "created_at": "2026-06-24T14:52:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000028",
+    "author_username": "@nath_en_roue_libre",
+    "content": "Un élève m'a demandé si j'avais « connu le Moyen Âge en vrai ». J'ai 31 ans. Je vais m'allonger cinq minutes.",
+    "category": "for-you",
+    "tags": ["prof", "histoire"],
+    "media": [],
+    "created_at": "2026-04-18T10:32:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000029",
+    "author_username": "@nath_en_roue_libre",
+    "title": "Sommet très relatif",
+    "content": "Nous avons marché quatre heures pour manger un sandwich écrasé avec une vue incroyable. Le meilleur restaurant du mois.",
+    "category": "for-you",
+    "tags": ["randonnee", "montagne"],
+    "media": ["https://picsum.photos/seed/breezy-029-1/1200/900", "https://picsum.photos/seed/breezy-029-2/1200/900", "https://picsum.photos/seed/breezy-029-3/1200/900", "https://picsum.photos/seed/breezy-029-4/1200/900", "https://picsum.photos/seed/breezy-029-5/1200/900"],
+    "created_at": "2026-05-31T13:28:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000030",
+    "author_username": "@nath_en_roue_libre",
+    "content": "J'ai retrouvé une carte postale écrite par mon grand-père en 1964. Trois lignes, une écriture penchée, et soudain il était dans la pièce.",
+    "category": "for-you",
+    "tags": ["memoire", "famille"],
+    "media": ["https://picsum.photos/seed/breezy-030-1/1200/900"],
+    "created_at": "2026-06-16T19:07:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000031",
+    "author_username": "@manon_sur_mars",
+    "title": "Nuit blanche utile",
+    "content": "Pas dormi, mais j'ai enfin compris un calcul qui me résistait depuis deux semaines. Mon cerveau fête ça avec un léger bourdonnement.",
+    "category": "for-you",
+    "tags": ["science", "recherche"],
+    "media": [],
+    "created_at": "2026-04-23T05:58:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000032",
+    "author_username": "@manon_sur_mars",
+    "content": "Le ciel était parfaitement clair. On a montré Saturne à une petite fille qui a chuchoté « elle est vraie ? ». Oui. Et c'est toujours fou.",
+    "category": "for-you",
+    "tags": ["astronomie", "saturne"],
+    "media": ["https://picsum.photos/seed/breezy-032-1/1200/900", "https://picsum.photos/seed/breezy-032-2/1200/900"],
+    "created_at": "2026-05-29T22:41:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000033",
+    "author_username": "@manon_sur_mars",
+    "title": "Point après point",
+    "content": "J'ai brodé une constellation qui n'existe pas. Elle s'appelle « la personne qui répondra à ses mails demain ».",
+    "category": "for-you",
+    "tags": ["broderie", "espace"],
+    "media": ["https://picsum.photos/seed/breezy-033-1/1200/900", "https://picsum.photos/seed/breezy-033-2/1200/900", "https://picsum.photos/seed/breezy-033-3/1200/900"],
+    "created_at": "2026-06-20T20:16:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000034",
+    "author_username": "@enzolument",
+    "content": "Un client m'a dit « faites-moi le café dont j'ai besoin, pas celui que je demande ». J'ai servi un déca et un verre d'eau. Il a ri, heureusement.",
+    "category": "for-you",
+    "tags": ["barista", "cafe"],
+    "media": ["https://picsum.photos/seed/breezy-034-1/1200/900"],
+    "created_at": "2026-04-30T08:26:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000035",
+    "author_username": "@enzolument",
+    "title": "Presque une figure",
+    "content": "J'ai réussi le trick. Personne ne regardait. Une mouette était là, mais elle refuse de témoigner.",
+    "category": "for-you",
+    "tags": ["skate", "victoire"],
+    "media": ["https://picsum.photos/seed/breezy-035-1/1200/900", "https://picsum.photos/seed/breezy-035-2/1200/900", "https://picsum.photos/seed/breezy-035-3/1200/900", "https://picsum.photos/seed/breezy-035-4/1200/900"],
+    "created_at": "2026-05-23T18:04:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000036",
+    "author_username": "@enzolument",
+    "content": "Journée moyenne, coucher de soleil excellent. On prend les points où ils sont.",
+    "category": "for-you",
+    "tags": ["soir", "simple"],
+    "media": ["https://picsum.photos/seed/breezy-036-1/1200/900"],
+    "created_at": "2026-06-24T19:47:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000037",
+    "author_username": "@julie_jardine",
+    "title": "Première fraise",
+    "content": "Elle est petite, un peu tordue, et probablement la meilleure fraise de l'histoire parce que je l'ai attendue trois mois.",
+    "category": "for-you",
+    "tags": ["jardin", "fraises"],
+    "media": ["https://picsum.photos/seed/breezy-037-1/1200/900", "https://picsum.photos/seed/breezy-037-2/1200/900"],
+    "created_at": "2026-04-19T09:14:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000038",
+    "author_username": "@julie_jardine",
+    "content": "J'ai déplacé vingt pots pour « optimiser la lumière ». Maintenant je ne peux plus ouvrir la fenêtre. Le jardinage est une science exigeante.",
+    "category": "for-you",
+    "tags": ["plantes", "maison"],
+    "media": [],
+    "created_at": "2026-05-12T17:39:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000039",
+    "author_username": "@julie_jardine",
+    "content": "Orage cette nuit. Deux branches cassées, des pétales partout. C'est triste, mais le jardin sent incroyablement bon après la pluie.",
+    "category": "for-you",
+    "tags": ["orage", "jardin"],
+    "media": ["https://picsum.photos/seed/breezy-039-1/1200/900", "https://picsum.photos/seed/breezy-039-2/1200/900", "https://picsum.photos/seed/breezy-039-3/1200/900"],
+    "created_at": "2026-06-17T06:43:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000040",
+    "author_username": "@adam_a_dit",
+    "title": "Avis impopulaire",
+    "content": "Le meilleur moment au cinéma, c'est juste avant le film, quand la salle s'éteint et que tout le monde se tait enfin.",
+    "category": "for-you",
+    "tags": ["cinema", "opinion"],
+    "media": [],
+    "created_at": "2026-04-09T20:55:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000041",
+    "author_username": "@adam_a_dit",
+    "content": "J'ai enregistré une heure de podcast avec le mauvais micro sélectionné. Le radiateur a désormais une excellente émission culturelle.",
+    "category": "for-you",
+    "tags": ["podcast", "fail"],
+    "media": ["https://picsum.photos/seed/breezy-041-1/1200/900"],
+    "created_at": "2026-05-19T11:22:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000042",
+    "author_username": "@adam_a_dit",
+    "title": "Film de papa",
+    "content": "J'ai revu son film préféré sans lui pour la première fois. J'ai ri aux mêmes endroits et pleuré à un nouveau.",
+    "category": "for-you",
+    "tags": ["cinema", "souvenir"],
+    "media": ["https://picsum.photos/seed/breezy-042-1/1200/900", "https://picsum.photos/seed/breezy-042-2/1200/900"],
+    "created_at": "2026-06-12T22:32:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000043",
+    "author_username": "@anais_au_calme",
+    "title": "Bol numéro 14",
+    "content": "Il penche légèrement à gauche, comme moi avant le premier café. Je crois que je vais le garder.",
+    "category": "for-you",
+    "tags": ["ceramique", "atelier"],
+    "media": ["https://picsum.photos/seed/breezy-043-1/1200/900", "https://picsum.photos/seed/breezy-043-2/1200/900", "https://picsum.photos/seed/breezy-043-3/1200/900"],
+    "created_at": "2026-04-14T16:48:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000044",
+    "author_username": "@anais_au_calme",
+    "content": "Une pièce s'est fissurée à la cuisson après dix heures de travail. J'ai eu envie de tout arrêter. Puis j'ai aimé la fissure.",
+    "category": "for-you",
+    "tags": ["creation", "patience"],
+    "media": ["https://picsum.photos/seed/breezy-044-1/1200/900"],
+    "created_at": "2026-05-26T18:13:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000045",
+    "author_username": "@anais_au_calme",
+    "content": "Atelier rangé, mains propres, pluie dehors. Ce silence-là vaut de l'or.",
+    "category": "for-you",
+    "tags": ["calme", "atelier"],
+    "media": [],
+    "created_at": "2026-06-23T19:21:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000046",
+    "author_username": "@romain_des_bois",
+    "title": "Table pour deux",
+    "content": "Terminée. Le bois venait de l'ancienne grange de mes grands-parents. Elle a des défauts, des traces, et toute une histoire sous le vernis.",
+    "category": "for-you",
+    "tags": ["bois", "famille"],
+    "media": ["https://picsum.photos/seed/breezy-046-1/1200/900", "https://picsum.photos/seed/breezy-046-2/1200/900", "https://picsum.photos/seed/breezy-046-3/1200/900", "https://picsum.photos/seed/breezy-046-4/1200/900"],
+    "created_at": "2026-04-27T17:08:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000047",
+    "author_username": "@romain_des_bois",
+    "content": "Camping sous la pluie : 20 % aventure, 30 % philosophie, 50 % chercher où j'ai mis les chaussettes sèches.",
+    "category": "for-you",
+    "tags": ["camping", "pluie"],
+    "media": ["https://picsum.photos/seed/breezy-047-1/1200/900", "https://picsum.photos/seed/breezy-047-2/1200/900"],
+    "created_at": "2026-05-17T07:35:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000048",
+    "author_username": "@romain_des_bois",
+    "content": "J'ai appris à mon neveu à planter un clou. Il a surtout appris de nouveaux mots quand je me suis tapé sur le pouce.",
+    "category": "for-you",
+    "tags": ["bricolage", "famille"],
+    "media": [],
+    "created_at": "2026-06-15T12:49:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000049",
+    "author_username": "@zoe_zoom",
+    "title": "La une du quartier",
+    "content": "J'ai interviewé la dame qui tient le kiosque depuis 42 ans. Elle connaît les habitudes de tout le monde et ne trahit aucun secret.",
+    "category": "for-you",
+    "tags": ["journalisme", "quartier"],
+    "media": ["https://picsum.photos/seed/breezy-049-1/1200/900"],
+    "created_at": "2026-04-03T11:06:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000050",
+    "author_username": "@zoe_zoom",
+    "content": "Mon article a été publié avec mon nom mal orthographié. Une belle étape dans ma carrière de Zoé Mulet.",
+    "category": "for-you",
+    "tags": ["travail", "oupas"],
+    "media": [],
+    "created_at": "2026-05-08T09:27:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000051",
+    "author_username": "@zoe_zoom",
+    "title": "Bonne nouvelle locale",
+    "content": "La petite épicerie menacée de fermeture a trouvé un repreneur : l'ancienne apprentie. Parfois, une histoire finit exactement comme on l'espérait.",
+    "category": "for-you",
+    "tags": ["bonne_nouvelle", "local"],
+    "media": ["https://picsum.photos/seed/breezy-051-1/1200/900", "https://picsum.photos/seed/breezy-051-2/1200/900", "https://picsum.photos/seed/breezy-051-3/1200/900"],
+    "created_at": "2026-06-24T10:18:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000052",
+    "author_username": "@noah_nuage",
+    "content": "Prévisions personnelles : nuageux ce matin, éclaircies après un appel à ma sœur, risque élevé de pâtes au pesto ce soir.",
+    "category": "for-you",
+    "tags": ["meteo", "humeur"],
+    "media": [],
+    "created_at": "2026-04-08T07:51:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000053",
+    "author_username": "@noah_nuage",
+    "title": "Morceau sans nom",
+    "content": "J'ai enregistré le bruit de la pluie contre la fenêtre et construit une nappe de synthé autour. C'est triste, mais d'une tristesse qui tient chaud.",
+    "category": "for-you",
+    "tags": ["musique", "pluie"],
+    "media": ["https://picsum.photos/seed/breezy-053-1/1200/900", "https://picsum.photos/seed/breezy-053-2/1200/900"],
+    "created_at": "2026-05-21T22:08:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000054",
+    "author_username": "@noah_nuage",
+    "content": "Je suis parti marcher pour réfléchir. Je n'ai rien résolu, mais j'ai vu deux lapins et un très beau nuage. Bilan positif.",
+    "category": "for-you",
+    "tags": ["marche", "nature"],
+    "media": ["https://picsum.photos/seed/breezy-054-1/1200/900", "https://picsum.photos/seed/breezy-054-2/1200/900", "https://picsum.photos/seed/breezy-054-3/1200/900", "https://picsum.photos/seed/breezy-054-4/1200/900", "https://picsum.photos/seed/breezy-054-5/1200/900"],
+    "created_at": "2026-06-13T16:39:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000055",
+    "author_username": "@eva_bavarde",
+    "title": "Bienvenue, Pixel",
+    "content": "Trois pattes, une oreille froissée et zéro notion d'espace personnel. Il reste chez moi « juste pour la nuit », bien sûr.",
+    "category": "for-you",
+    "tags": ["chat", "adoption"],
+    "media": ["https://picsum.photos/seed/breezy-055-1/1200/900", "https://picsum.photos/seed/breezy-055-2/1200/900", "https://picsum.photos/seed/breezy-055-3/1200/900"],
+    "created_at": "2026-04-12T18:24:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000056",
+    "author_username": "@eva_bavarde",
+    "content": "Un vieux labrador que je soigne depuis des années est venu poser sa tête sur mes genoux. Il va mieux. Moi aussi, maintenant.",
+    "category": "for-you",
+    "tags": ["animaux", "tendresse"],
+    "media": ["https://picsum.photos/seed/breezy-056-1/1200/900"],
+    "created_at": "2026-05-24T12:02:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000057",
+    "author_username": "@eva_bavarde",
+    "content": "Pixel a découvert son reflet. Après une négociation tendue, les deux chats ont décidé de s'ignorer.",
+    "category": "for-you",
+    "tags": ["chat", "drole"],
+    "media": ["https://picsum.photos/seed/breezy-057-1/1200/900", "https://picsum.photos/seed/breezy-057-2/1200/900"],
+    "created_at": "2026-06-21T08:45:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000058",
+    "author_username": "@yanis_mais_pas_trop",
+    "title": "Retour client",
+    "content": "« On adore, mais est-ce qu'on peut le rendre plus minimaliste et ajouter plein de choses ? » Mon ficus et moi cherchons la réponse.",
+    "category": "for-you",
+    "tags": ["design", "freelance"],
+    "media": [],
+    "created_at": "2026-04-17T13:36:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000059",
+    "author_username": "@yanis_mais_pas_trop",
+    "content": "J'ai supprimé par erreur le bon fichier et gardé douze mauvaises versions. La corbeille est parfois une meilleure collègue que moi.",
+    "category": "for-you",
+    "tags": ["graphisme", "fail"],
+    "media": ["https://picsum.photos/seed/breezy-059-1/1200/900"],
+    "created_at": "2026-05-28T16:54:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000060",
+    "author_username": "@yanis_mais_pas_trop",
+    "title": "Congé pour Fernand",
+    "content": "Mon ficus fait une nouvelle feuille. Toute réunion non essentielle est annulée afin de respecter cet événement majeur.",
+    "category": "for-you",
+    "tags": ["ficus", "priorites"],
+    "media": ["https://picsum.photos/seed/breezy-060-1/1200/900", "https://picsum.photos/seed/breezy-060-2/1200/900"],
+    "created_at": "2026-06-24T08:14:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000061",
+    "author_username": "@bast_en_cuisine",
+    "title": "Avant le service",
+    "content": "La cuisine est encore silencieuse, les couteaux sont rangés, le bouillon frémit. C'est mon moment préféré de la journée.",
+    "category": "for-you",
+    "tags": ["cuisine", "bistrot"],
+    "media": ["https://picsum.photos/seed/breezy-061-1/1200/900", "https://picsum.photos/seed/breezy-061-2/1200/900", "https://picsum.photos/seed/breezy-061-3/1200/900"],
+    "created_at": "2026-04-04T08:03:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000062",
+    "author_username": "@bast_en_cuisine",
+    "content": "J'ai goûté la sauce trente fois. À la trente et unième, elle était parfaite ou je n'avais simplement plus de palais.",
+    "category": "for-you",
+    "tags": ["chef", "sauce"],
+    "media": [],
+    "created_at": "2026-04-29T17:28:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000063",
+    "author_username": "@bast_en_cuisine",
+    "title": "Plat du personnel",
+    "content": "Les plus beaux plats ne sortent pas toujours en salle. Ce midi : restes, pain grillé, six cuisiniers debout et beaucoup de rires.",
+    "category": "for-you",
+    "tags": ["equipe", "repas"],
+    "media": ["https://picsum.photos/seed/breezy-063-1/1200/900"],
+    "created_at": "2026-05-13T12:47:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000064",
+    "author_username": "@bast_en_cuisine",
+    "content": "Un client a demandé à voir le chef pour dire merci. Je m'étais préparé à un problème. J'ai bafouillé comme si je n'avais jamais parlé français.",
+    "category": "for-you",
+    "tags": ["merci", "travail"],
+    "media": [],
+    "created_at": "2026-05-30T21:42:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000065",
+    "author_username": "@bast_en_cuisine",
+    "title": "Marché du matin",
+    "content": "Tomates cabossées, herbes qui sentent à trois mètres et le producteur qui glisse toujours deux abricots en plus. Le luxe.",
+    "category": "for-you",
+    "tags": ["marche", "produits"],
+    "media": ["https://picsum.photos/seed/breezy-065-1/1200/900", "https://picsum.photos/seed/breezy-065-2/1200/900", "https://picsum.photos/seed/breezy-065-3/1200/900", "https://picsum.photos/seed/breezy-065-4/1200/900", "https://picsum.photos/seed/breezy-065-5/1200/900"],
+    "created_at": "2026-06-11T06:29:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000066",
+    "author_username": "@bast_en_cuisine",
+    "content": "Repos. J'ai commandé des nouilles et mangé directement dans la boîte. Les cordonniers, les chaussures, tout ça.",
+    "category": "for-you",
+    "tags": ["repos", "vraievie"],
+    "media": ["https://picsum.photos/seed/breezy-066-1/1200/900"],
+    "created_at": "2026-06-23T19:02:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000067",
+    "author_username": "@amelie_melo",
+    "title": "Tempo accompagne",
+    "content": "Mon corgi hurle exactement sur le fa dièse. Ce n'est pas juste, mais c'est remarquablement constant.",
+    "category": "for-you",
+    "tags": ["corgi", "musique"],
+    "media": ["https://picsum.photos/seed/breezy-067-1/1200/900", "https://picsum.photos/seed/breezy-067-2/1200/900"],
+    "created_at": "2026-04-06T15:19:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000068",
+    "author_username": "@amelie_melo",
+    "content": "Une élève a joué son morceau sans s'arrêter pour la première fois. Elle s'est retournée avec des yeux immenses. J'adore ce métier.",
+    "category": "for-you",
+    "tags": ["enseignement", "fierte"],
+    "media": [],
+    "created_at": "2026-04-24T17:33:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000069",
+    "author_username": "@amelie_melo",
+    "title": "Piano désaccordé",
+    "content": "Chez ma tante, le vieux piano sonne faux et deux touches restent coincées. Pourtant, aucune salle de concert ne me rend aussi heureuse.",
+    "category": "for-you",
+    "tags": ["piano", "famille"],
+    "media": ["https://picsum.photos/seed/breezy-069-1/1200/900", "https://picsum.photos/seed/breezy-069-2/1200/900", "https://picsum.photos/seed/breezy-069-3/1200/900"],
+    "created_at": "2026-05-10T14:56:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000070",
+    "author_username": "@amelie_melo",
+    "content": "Journée sans musique. Même mes chansons préférées étaient trop bruyantes. J'ai marché avec Tempo et ça a suffi.",
+    "category": "for-you",
+    "tags": ["silence", "humeur"],
+    "media": ["https://picsum.photos/seed/breezy-070-1/1200/900"],
+    "created_at": "2026-05-27T18:17:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000071",
+    "author_username": "@amelie_melo",
+    "title": "Petit récital",
+    "content": "Ils avaient peur, ils ont raté des notes, ils ont recommencé. Les parents ont applaudi trop fort. C'était parfait.",
+    "category": "for-you",
+    "tags": ["concert", "eleves"],
+    "media": ["https://picsum.photos/seed/breezy-071-1/1200/900", "https://picsum.photos/seed/breezy-071-2/1200/900", "https://picsum.photos/seed/breezy-071-3/1200/900", "https://picsum.photos/seed/breezy-071-4/1200/900"],
+    "created_at": "2026-06-08T19:44:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000072",
+    "author_username": "@amelie_melo",
+    "content": "Tempo s'est endormi sous le piano pendant que je travaillais. J'ai joué plus doucement pour ne pas réveiller mon seul public fidèle.",
+    "category": "for-you",
+    "tags": ["douceur", "corgi"],
+    "media": ["https://picsum.photos/seed/breezy-072-1/1200/900", "https://picsum.photos/seed/breezy-072-2/1200/900"],
+    "created_at": "2026-06-24T20:06:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000073",
+    "author_username": "@sacha_sait_pas",
+    "content": "J'étudie les océans depuis une ville où la plus grande étendue d'eau est la fontaine devant la gare. Cohérence impeccable.",
+    "category": "for-you",
+    "tags": ["biologie", "etudes"],
+    "media": [],
+    "created_at": "2026-04-10T09:38:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000074",
+    "author_username": "@sacha_sait_pas",
+    "title": "Sous la loupe",
+    "content": "Cette petite chose transparente est un organisme magnifique. Mes colocataires persistent à l'appeler « ton truc gluant ».",
+    "category": "for-you",
+    "tags": ["science", "microcosme"],
+    "media": ["https://picsum.photos/seed/breezy-074-1/1200/900", "https://picsum.photos/seed/breezy-074-2/1200/900", "https://picsum.photos/seed/breezy-074-3/1200/900"],
+    "created_at": "2026-04-26T13:22:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000075",
+    "author_username": "@sacha_sait_pas",
+    "content": "Dossier refusé. Je savais que c'était possible, mais ça pique quand même. Ce soir je suis déçu, demain je chercherai une autre porte.",
+    "category": "for-you",
+    "tags": ["deception", "courage"],
+    "media": [],
+    "created_at": "2026-05-11T16:51:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000076",
+    "author_username": "@sacha_sait_pas",
+    "title": "Enfin la mer",
+    "content": "Trois heures de train, puis cette odeur avant même de la voir. J'avais oublié à quel point elle remet les idées à leur place.",
+    "category": "for-you",
+    "tags": ["ocean", "voyage"],
+    "media": ["https://picsum.photos/seed/breezy-076-1/1200/900", "https://picsum.photos/seed/breezy-076-2/1200/900", "https://picsum.photos/seed/breezy-076-3/1200/900", "https://picsum.photos/seed/breezy-076-4/1200/900", "https://picsum.photos/seed/breezy-076-5/1200/900"],
+    "created_at": "2026-05-24T10:13:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000077",
+    "author_username": "@sacha_sait_pas",
+    "content": "J'ai expliqué mon sujet de mémoire à ma mère. Elle a tout résumé par « donc tu regardes des crevettes stressées ? ». Techniquement oui.",
+    "category": "for-you",
+    "tags": ["memoire", "famille"],
+    "media": ["https://picsum.photos/seed/breezy-077-1/1200/900"],
+    "created_at": "2026-06-09T18:26:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000078",
+    "author_username": "@sacha_sait_pas",
+    "title": "Bonne nouvelle",
+    "content": "Stage trouvé dans un centre côtier. Dans deux mois, mon bureau aura enfin plus de marées que de tramways.",
+    "category": "for-you",
+    "tags": ["stage", "joie"],
+    "media": ["https://picsum.photos/seed/breezy-078-1/1200/900", "https://picsum.photos/seed/breezy-078-2/1200/900"],
+    "created_at": "2026-06-22T12:34:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000079",
+    "author_username": "@maya_culpa",
+    "title": "Premier tatouage de la journée",
+    "content": "Une minuscule fleur dessinée par sa fille. Les traits n'étaient pas droits, et c'est exactement pour ça qu'ils étaient précieux.",
+    "category": "for-you",
+    "tags": ["tatouage", "histoire"],
+    "media": ["https://picsum.photos/seed/breezy-079-1/1200/900", "https://picsum.photos/seed/breezy-079-2/1200/900"],
+    "created_at": "2026-04-01T10:15:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000080",
+    "author_username": "@maya_culpa",
+    "content": "Client : « je veux quelque chose d'unique ». Aussi le client : me montre le premier résultat Pinterest. On va discuter.",
+    "category": "for-you",
+    "tags": ["tattoo", "travail"],
+    "media": [],
+    "created_at": "2026-04-22T14:31:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000081",
+    "author_username": "@maya_culpa",
+    "title": "Encre et tremblements",
+    "content": "Aujourd'hui, c'était moi la cliente. J'avais oublié que ça fait vraiment mal. Mes excuses officielles à tous ceux à qui je dis « respire, ça va aller ».",
+    "category": "for-you",
+    "tags": ["tatouage", "humour"],
+    "media": ["https://picsum.photos/seed/breezy-081-1/1200/900"],
+    "created_at": "2026-05-06T17:46:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000082",
+    "author_username": "@maya_culpa",
+    "content": "J'ai fermé l'atelier plus tôt. Pas malade, pas paresseuse, juste vidée. Apprendre à respecter ça est mon nouveau projet difficile.",
+    "category": "for-you",
+    "tags": ["fatigue", "prendre soin"],
+    "media": [],
+    "created_at": "2026-05-22T15:59:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000083",
+    "author_username": "@maya_culpa",
+    "title": "Mur de flashs",
+    "content": "Une semaine de petits dessins, de musique trop forte et de cafés froids. Voilà la nouvelle planche.",
+    "category": "for-you",
+    "tags": ["dessin", "atelier"],
+    "media": ["https://picsum.photos/seed/breezy-083-1/1200/900", "https://picsum.photos/seed/breezy-083-2/1200/900", "https://picsum.photos/seed/breezy-083-3/1200/900", "https://picsum.photos/seed/breezy-083-4/1200/900"],
+    "created_at": "2026-06-07T20:11:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000084",
+    "author_username": "@maya_culpa",
+    "content": "Ma mauvaise blague du jour a fait rire une cliente qui était très stressée. L'art soigne, mais le jeu de mots nul aide aussi.",
+    "category": "for-you",
+    "tags": ["rire", "petitejoie"],
+    "media": ["https://picsum.photos/seed/breezy-084-1/1200/900", "https://picsum.photos/seed/breezy-084-2/1200/900"],
+    "created_at": "2026-06-24T16:27:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000085",
+    "author_username": "@antoine_en_tongs",
+    "title": "Train raté numéro 8",
+    "content": "J'ai couru, le contrôleur m'a vu, le train est parti. Nous avons partagé un regard très cinématographique et pas du tout utile.",
+    "category": "for-you",
+    "tags": ["train", "voyage"],
+    "media": [],
+    "created_at": "2026-04-15T06:57:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000086",
+    "author_username": "@antoine_en_tongs",
+    "content": "La chambre n'avait pas la vue promise, mais le toit était accessible. J'ai mangé des olives sous les étoiles avec deux inconnus devenus des copains.",
+    "category": "for-you",
+    "tags": ["rencontre", "voyage"],
+    "media": ["https://picsum.photos/seed/breezy-086-1/1200/900", "https://picsum.photos/seed/breezy-086-2/1200/900", "https://picsum.photos/seed/breezy-086-3/1200/900"],
+    "created_at": "2026-05-03T21:48:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000087",
+    "author_username": "@antoine_en_tongs",
+    "title": "Carte postale mentale",
+    "content": "Un village blanc, des volets bleus, une dame qui balaie devant chez elle et me corrige gentiment quand je prononce le nom de la rue.",
+    "category": "for-you",
+    "tags": ["ailleurs", "souvenir"],
+    "media": ["https://picsum.photos/seed/breezy-087-1/1200/900", "https://picsum.photos/seed/breezy-087-2/1200/900", "https://picsum.photos/seed/breezy-087-3/1200/900", "https://picsum.photos/seed/breezy-087-4/1200/900", "https://picsum.photos/seed/breezy-087-5/1200/900"],
+    "created_at": "2026-05-18T12:07:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000088",
+    "author_username": "@antoine_en_tongs",
+    "content": "Voyager seul, c'est choisir exactement où aller puis appeler sa mère parce qu'on ne sait pas utiliser la machine à laver.",
+    "category": "for-you",
+    "tags": ["vraievie", "voyage"],
+    "media": ["https://picsum.photos/seed/breezy-088-1/1200/900"],
+    "created_at": "2026-05-29T09:42:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000089",
+    "author_username": "@antoine_en_tongs",
+    "title": "Retour",
+    "content": "Retrouver son lit, sa tasse et le bruit familier de la rue. Partir fait du bien. Revenir aussi.",
+    "category": "for-you",
+    "tags": ["maison", "retour"],
+    "media": ["https://picsum.photos/seed/breezy-089-1/1200/900", "https://picsum.photos/seed/breezy-089-2/1200/900"],
+    "created_at": "2026-06-12T18:36:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000090",
+    "author_username": "@antoine_en_tongs",
+    "content": "J'ai enfin développé les photos. La moitié est floue, mais ce sont celles où tout le monde rit. Je garde la moitié floue.",
+    "category": "for-you",
+    "tags": ["photo", "amis"],
+    "media": ["https://picsum.photos/seed/breezy-090-1/1200/900", "https://picsum.photos/seed/breezy-090-2/1200/900", "https://picsum.photos/seed/breezy-090-3/1200/900", "https://picsum.photos/seed/breezy-090-4/1200/900"],
+    "created_at": "2026-06-24T17:53:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000091",
+    "author_username": "@salome_salade",
+    "title": "Équilibre scientifique",
+    "content": "Grande salade colorée à midi, frites piquées dans l'assiette de mon frère le soir. Les deux étaient excellentes et personne n'a besoin d'un procès.",
+    "category": "for-you",
+    "tags": ["equilibre", "manger"],
+    "media": ["https://picsum.photos/seed/breezy-091-1/1200/900", "https://picsum.photos/seed/breezy-091-2/1200/900"],
+    "created_at": "2026-06-05T19:23:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000092",
+    "author_username": "@kyky_pas_kiwi",
+    "content": "Premier meuble terminé à l'atelier. Le tiroir coince un peu, mais il existe, il tient debout et je l'ai fait avec mes mains.",
+    "category": "for-you",
+    "tags": ["ebenisterie", "fierte"],
+    "media": ["https://picsum.photos/seed/breezy-092-1/1200/900", "https://picsum.photos/seed/breezy-092-2/1200/900", "https://picsum.photos/seed/breezy-092-3/1200/900"],
+    "created_at": "2026-06-07T16:18:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000093",
+    "author_username": "@margot_dodo",
+    "title": "Heure du conte",
+    "content": "Vingt enfants, un dragon, trois voix différentes et un éternuement au moment le plus dramatique. Standing ovation quand même.",
+    "category": "for-you",
+    "tags": ["bibliotheque", "enfants"],
+    "media": [],
+    "created_at": "2026-06-10T14:37:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000094",
+    "author_username": "@ibra_cadabra",
+    "content": "J'ai réussi un tour devant toute l'équipe comptable. Gérard pense toujours qu'il a compris. Gérard n'a pas compris.",
+    "category": "for-you",
+    "tags": ["magie", "bureau"],
+    "media": ["https://picsum.photos/seed/breezy-094-1/1200/900"],
+    "created_at": "2026-06-12T11:54:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000095",
+    "author_username": "@lolalune",
+    "title": "Photo numéro 24",
+    "content": "La pellicule est revenue. Cette photo était accidentelle : ma mère rit hors cadre et mon père ferme les yeux. C'est ma préférée.",
+    "category": "for-you",
+    "tags": ["argentique", "famille"],
+    "media": ["https://picsum.photos/seed/breezy-095-1/1200/900", "https://picsum.photos/seed/breezy-095-2/1200/900"],
+    "created_at": "2026-06-14T20:29:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000096",
+    "author_username": "@max_imum",
+    "content": "Le groupe a demandé « un peu plus de voix dans le retour ». J'ai tourné le mauvais bouton et offert beaucoup plus de guitare à tout le quartier.",
+    "category": "for-you",
+    "tags": ["son", "concert"],
+    "media": ["https://picsum.photos/seed/breezy-096-1/1200/900", "https://picsum.photos/seed/breezy-096-2/1200/900", "https://picsum.photos/seed/breezy-096-3/1200/900", "https://picsum.photos/seed/breezy-096-4/1200/900"],
+    "created_at": "2026-06-17T22:03:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000097",
+    "author_username": "@oceane_pas_l_ocean",
+    "title": "Bouquet du lundi",
+    "content": "Une cliente m'a demandé des fleurs « comme un matin où tout ira bien ». J'ai choisi du jaune, du blanc et quelques branches indisciplinées.",
+    "category": "for-you",
+    "tags": ["fleurs", "douceur"],
+    "media": ["https://picsum.photos/seed/breezy-097-1/1200/900", "https://picsum.photos/seed/breezy-097-2/1200/900", "https://picsum.photos/seed/breezy-097-3/1200/900", "https://picsum.photos/seed/breezy-097-4/1200/900", "https://picsum.photos/seed/breezy-097-5/1200/900"],
+    "created_at": "2026-06-19T08:46:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000098",
+    "author_username": "@theo_rie",
+    "content": "La démonstration ne marche toujours pas, mais la brioche a levé magnifiquement. Je ne contrôle pas les théorèmes, seulement la levure.",
+    "category": "for-you",
+    "tags": ["maths", "brioche"],
+    "media": ["https://picsum.photos/seed/breezy-098-1/1200/900"],
+    "created_at": "2026-06-21T09:31:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000099",
+    "author_username": "@alicia_malicia",
+    "title": "Des poches !",
+    "content": "J'ai terminé la robe. Elle tourne bien, tombe juste et contient un téléphone entier de chaque côté. Le progrès social passe par là.",
+    "category": "for-you",
+    "tags": ["couture", "poches"],
+    "media": ["https://picsum.photos/seed/breezy-099-1/1200/900", "https://picsum.photos/seed/breezy-099-2/1200/900", "https://picsum.photos/seed/breezy-099-3/1200/900"],
+    "created_at": "2026-06-23T17:16:00.000Z"
+  },
+  {
+    "_id": "660000000000000000000100",
+    "author_username": "@paul_emploi",
+    "title": "Urbanisme tactique",
+    "content": "Quelqu'un a posé une chaise sous le seul arbre de la place. En dix minutes, trois personnes s'y sont relayées. Parfois une ville commence avec une chaise.",
+    "category": "for-you",
+    "tags": ["ville", "espacepublic"],
+    "media": ["https://picsum.photos/seed/breezy-100-1/1200/900", "https://picsum.photos/seed/breezy-100-2/1200/900"],
+    "created_at": "2026-06-24T12:08:00.000Z"
+  }
 ]
