@@ -1,0 +1,8 @@
+# Normalisation automatique des fins de ligne (LF dans le dépôt Git, CRLF sur Windows)
+* text=auto
+
+# Spécification explicite des fichiers texte devant toujours conserver des fins de ligne LF (pour Docker et Linux)
+*.sh text eol=lf
+dockerfile text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
