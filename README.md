@@ -76,9 +76,24 @@ Dans les deux cas (tout Docker ou frontend en local), ouvrez votre navigateur à
     ```bash
     docker compose up -d --build
     ```
+*   **Afficher le statut et les ports des conteneurs actifs** :
+    ```bash
+    docker compose ps
+    ```
 *   **Redémarrer un conteneur spécifique** :
     ```bash
     docker compose restart frontend
+    ```
+*   **Rafraîchir le cache DNS de la passerelle (Nginx)** :
+    *Si vous reconstruisez individuellement des microservices (`docker compose up -d --build api` par exemple), Nginx garde les anciennes IP en mémoire. Utilisez cette commande pour forcer Nginx à re-résoudre les adresses IP :*
+    ```bash
+    docker compose restart api_gateway
+    ```
+
+### Remplissage et Initialisation des Données
+*   **Lancer les seeds de test (remplir les bases Postgres et MongoDB avec des posts et profils de démo)** :
+    ```bash
+    docker compose exec api npm run seed
     ```
 
 ### Nettoyage et Compilation du Frontend
