@@ -65,6 +65,31 @@ export class HttpFeedService implements IFeedService {
     return data;
   }
 
+  async fetchAllPostsForSearch(): Promise<Post[]> {
+    const posts: Post[] = [];
+    const knownIds = new Set<string>();
+    let page = 1;
+    let hasMore = true;
+
+    while (hasMore) {
+      const { data } = await api.get<PaginatedPosts>("/feed/posts", {
+        params: { page, limit: 20 },
+      });
+
+      data.posts.forEach((post) => {
+        if (!knownIds.has(post.id)) {
+          knownIds.add(post.id);
+          posts.push(post);
+        }
+      });
+
+      hasMore = data.hasMore;
+      page += 1;
+    }
+
+    return posts;
+  }
+
   async fetchUserPosts(username: string): Promise<Post[]> {
     const { data } = await api.get<Post[]>(`/feed/users/${encodeURIComponent(username)}/posts`);
     return data;
