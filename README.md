@@ -84,6 +84,14 @@ Dans les deux cas (tout Docker ou frontend en local), ouvrez votre navigateur à
     ```bash
     docker compose restart frontend
     ```
+*   **Lancer ou reconstruire uniquement le frontend sous Docker** :
+    ```bash
+    # Lancer le conteneur
+    docker compose up -d frontend
+    
+    # Forcer le rebuild de l'image et relancer le conteneur
+    docker compose up -d --build frontend
+    ```
 *   **Rafraîchir le cache DNS de la passerelle (Nginx)** :
     *Si vous reconstruisez individuellement des microservices (`docker compose up -d --build api` par exemple), Nginx garde les anciennes IP en mémoire. Utilisez cette commande pour forcer Nginx à re-résoudre les adresses IP :*
     ```bash
