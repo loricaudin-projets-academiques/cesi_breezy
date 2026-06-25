@@ -13,6 +13,7 @@ export interface IFeedService {
   saveComments(comments: CommentsByPost): void;
   createPost(author: UserProfile, content: string, category: PostCategory, image?: string, images?: string[], title?: string): Post;
   fetchPosts(category?: PostCategory, page?: number): Promise<PaginatedPosts>;
+  fetchAllPostsForSearch(): Promise<Post[]>;
   fetchUserPosts(username: string): Promise<Post[]>;
   fetchArchivedPosts(): Promise<Post[]>;
   fetchComments(postId: string, page?: number, limit?: number): Promise<PaginatedComments>;

@@ -65,6 +65,10 @@ export class MockFeedService implements IFeedService {
     };
   }
 
+  async fetchAllPostsForSearch(): Promise<Post[]> {
+    return this.getPosts().filter((post) => !post.archived);
+  }
+
   async fetchUserPosts(username: string): Promise<Post[]> {
     return this.getPosts().filter((post) => post.authorUsername === username);
   }

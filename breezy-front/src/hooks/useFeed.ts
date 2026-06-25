@@ -429,9 +429,11 @@ export function useFeed(
     if (!lowered) return [];
     return posts.filter(
       (p) =>
+        (p.title || '').toLowerCase().includes(lowered) ||
         p.content.toLowerCase().includes(lowered) ||
         p.authorName.toLowerCase().includes(lowered) ||
-        p.authorUsername.toLowerCase().includes(lowered)
+        p.authorUsername.toLowerCase().includes(lowered) ||
+        (p.tags || []).some((tag) => tag.toLowerCase().includes(lowered))
     );
   }, [posts]);
 
