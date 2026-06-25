@@ -11,22 +11,31 @@ Ce dossier contient l'interface utilisateur web et mobile-first de Breezy, déve
 
 ---
 
-## Lancement du Frontend en Mode Dev
+## Lancement du Frontend
 
-### Prérequis
-*   Node.js (version 20 ou supérieure) installé localement.
+### Option A : Sous Docker (Recommandé)
+Le conteneur frontend est géré par l'orchestrateur Docker Compose global du projet. 
+Pour le démarrer ou le reconstruire individuellement depuis le répertoire `breezy-microservices/` :
+*   **Lancer le conteneur frontend** :
+    ```bash
+    docker compose up -d frontend
+    ```
+*   **Reconstruire l'image et relancer** :
+    ```bash
+    docker compose up -d --build frontend
+    ```
 
-### 1. Installation des dépendances
-```bash
-npm install
-```
-
-### 2. Démarrage du serveur
-Pour démarrer Next.js localement hors Docker (port `3000`) :
-```bash
-npm run dev
-```
-*Le serveur de développement démarrera sur `http://localhost:3000`.*
+### Option B : En Local (Dev)
+Pour démarrer Next.js localement hors conteneur (port `3000`) :
+1.  **Installation des dépendances** :
+    ```bash
+    npm install
+    ```
+2.  **Démarrage du serveur** :
+    ```bash
+    npm run dev
+    ```
+    *Le serveur local démarrera à l'adresse : `http://localhost:3000`.*
 
 > [!IMPORTANT]
 > En cas d'utilisation de l'infrastructure Docker complète avec la Gateway Nginx, il est recommandé d'accéder au projet via l'adresse **`http://localhost/`** (port 80) au lieu du port 3000, afin de laisser la gateway faire office de reverse-proxy pour toutes les requêtes (frontend et backend) et éviter les erreurs de CORS ou de cache.
