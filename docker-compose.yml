@@ -2,12 +2,12 @@ services:
   frontend:
     container_name: breezy-front
     build:
-      context: ../breezy-front
+      context: ./breezy-front
       dockerfile: dockerfile
     command: npm run dev -- --hostname 0.0.0.0
     restart: unless-stopped
     volumes:
-      - ../breezy-front:/app
+      - ./breezy-front:/app
       - front_node_modules:/app/node_modules
     environment:
       NEXT_PUBLIC_API_URL: http://localhost/api
@@ -19,14 +19,14 @@ services:
   api:
     container_name: breezy-back-api
     build:
-      context: ./api-service
+      context: ./breezy-microservices/api-service
       dockerfile: dockerfile
     ports:
       - "3000"
     command: npm run dev
     restart: unless-stopped
     volumes:
-      - ./api-service:/api
+      - ./breezy-microservices/api-service:/api
       - api_node_modules:/api/node_modules
     depends_on:
       db_sql:
@@ -55,14 +55,14 @@ services:
   auth:
     container_name: breezy-back-auth
     build:
-      context: ./auth-service
+      context: ./breezy-microservices/auth-service
       dockerfile: dockerfile
     ports:
       - "3001:3000"
     command: npm run dev
     restart: unless-stopped
     volumes:
-      - ./auth-service:/auth
+      - ./breezy-microservices/auth-service:/auth
       - auth_node_modules:/auth/node_modules
     depends_on:
       db_sql:
@@ -81,14 +81,14 @@ services:
   user:
     container_name: breezy-back-user
     build:
-      context: ./user-service
+      context: ./breezy-microservices/user-service
       dockerfile: dockerfile
     ports:
       - "3002:3000"
     command: npm run dev
     restart: unless-stopped
     volumes:
-      - ./user-service:/user
+      - ./breezy-microservices/user-service:/user
       - user_node_modules:/user/node_modules
     depends_on:
       db_sql:
@@ -110,14 +110,14 @@ services:
   media:
     container_name: breezy-back-media
     build:
-      context: ./media-service
+      context: ./breezy-microservices/media-service
       dockerfile: dockerfile
     ports:
       - "3003:3000"
     command: npm run dev
     restart: unless-stopped
     volumes:
-      - ./media-service:/media
+      - ./breezy-microservices/media-service:/media
       - media_node_modules:/media/node_modules
     depends_on:
       minio:
@@ -159,7 +159,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./breezy-microservices/gateway/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - api
       - auth
@@ -203,7 +203,7 @@ services:
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     volumes:
       - pgadmin-data:/var/lib/pgadmin
-      - ./pgadmin/servers.json:/pgadmin4/servers.json
+      - ./breezy-microservices/pgadmin/servers.json:/pgadmin4/servers.json
     networks:
       - backend
 
