@@ -53,10 +53,11 @@ export class HttpAuthService implements IAuthService {
     return data.user;
   }
 
-  async register(name: string, username: string, passkey: string, apiUrl: string): Promise<UserProfile> {
+  async register(name: string, email: string, username: string, passkey: string, apiUrl: string): Promise<UserProfile> {
     setAuthBaseUrl(apiUrl);
     const { data } = await authApi.post<AuthResponse>("/auth/register", {
       name,
+      email,
       username,
       password: passkey,
     });

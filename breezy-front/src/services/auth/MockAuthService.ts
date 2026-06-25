@@ -18,9 +18,10 @@ const KEYS = {
   accounts: 'breezy_registered_users',
 } as const;
 
-// Un compte enregistré = un profil + l'empreinte (hash) de son mot de passe.
+// Un compte enregistré = un profil + email + l'empreinte (hash) de son mot de passe.
 // Détail de persistance interne au service — il ne sort jamais d'ici.
 interface RegisteredAccount extends UserProfile {
+  email: string;
   passkeyHash: string;
 }
 
@@ -64,19 +65,18 @@ export class MockAuthService implements IAuthService {
     this.storage.set<UserProfile>(KEYS.currentUser, user);
   }
 
-  // Tente de connecter un utilisateur existant
+  // Tente de connecter un utilisateur existant (par username)
   async login(username: string, passkey: string, apiUrl: string): Promise<UserProfile> {
-    this.assertCredentials(username, passkey);
+    if (!username.trim()) throw new Error("Le nom d'utilisateur est requis.");
+    if (!passkey) throw new Error("Le mot de passe est requis.");
 
     const cleanUsername = normalizeUsername(username);
     const existing = this.findAccount(cleanUsername);
 
-    // Compte inconnu
     if (!existing) {
       throw new Error("Nom d'utilisateur inconnu. Créez un compte d'abord.");
     }
 
-    // Mauvais mot de passe — on compare les empreintes, jamais le mot de passe en clair
     const passkeyHash = await hashPasskey(passkey);
     if (existing.passkeyHash !== passkeyHash) {
       throw new Error("Mot de passe incorrect.");
@@ -88,15 +88,18 @@ export class MockAuthService implements IAuthService {
   }
 
   // Crée un nouveau compte et connecte directement l'utilisateur
-  async register(name: string, username: string, passkey: string, apiUrl: string): Promise<UserProfile> {
-    if (!name.trim()) {
-      throw new Error("Le nom complet est requis.");
-    }
-    this.assertCredentials(username, passkey);
+  async register(name: string, email: string, username: string, passkey: string, apiUrl: string): Promise<UserProfile> {
+    if (!name.trim()) throw new Error("Le nom complet est requis.");
+    if (!email.trim()) throw new Error("L'adresse courriel est requise.");
+    if (!username.trim()) throw new Error("Le nom d'utilisateur est requis.");
+    if (!passkey) throw new Error("Le mot de passe est requis.");
 
+    const normalizedEmail = email.trim().toLowerCase();
     const cleanUsername = normalizeUsername(username);
 
-    // On refuse si le pseudo est déjà utilisé
+    if (this.findAccountByEmail(normalizedEmail)) {
+      throw new Error("Cette adresse courriel est déjà utilisée.");
+    }
     if (this.findAccount(cleanUsername)) {
       throw new Error("Ce nom d'utilisateur est déjà pris.");
     }
@@ -104,11 +107,11 @@ export class MockAuthService implements IAuthService {
     const newAccount: RegisteredAccount = {
       ...INITIAL_USER,
       name: name.trim(),
+      email: normalizedEmail,
       username: cleanUsername,
       passkeyHash: await hashPasskey(passkey),
     };
 
-    // On ajoute le nouveau compte à la liste
     this.saveRegisteredAccounts([...this.getRegisteredAccounts(), newAccount]);
 
     const loggedUser = toProfile(newAccount);
@@ -124,20 +127,18 @@ export class MockAuthService implements IAuthService {
     this.storage.remove(KEYS.currentUser);
   }
 
-  // Validation commune à la connexion et à l'inscription
-  private assertCredentials(username: string, passkey: string): void {
-    if (!username.trim()) {
-      throw new Error("Le nom d'utilisateur est requis.");
-    }
-    if (!passkey) {
-      throw new Error("Le mot de passe est requis.");
-    }
-  }
 
   // Cherche un compte par pseudo, sans tenir compte de la casse
   private findAccount(cleanUsername: string): RegisteredAccount | undefined {
     return this.getRegisteredAccounts().find(
       (account) => account.username.toLowerCase() === cleanUsername.toLowerCase()
+    );
+  }
+
+  // Cherche un compte par email
+  private findAccountByEmail(email: string): RegisteredAccount | undefined {
+    return this.getRegisteredAccounts().find(
+      (account) => account.email?.toLowerCase() === email
     );
   }
 

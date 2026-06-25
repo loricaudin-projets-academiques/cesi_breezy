@@ -48,8 +48,8 @@ h6 {
 
 @media (min-width: 768px) {
   body {
-    font-size: 22px;
-    line-height: 31px;
+    font-size: 14px;
+    line-height: 20px;
   }
 
   main p,
@@ -58,8 +58,8 @@ h6 {
   main input,
   main textarea,
   main label {
-    font-size: 21px !important;
-    line-height: 29px !important;
+    font-size: 13px !important;
+    line-height: 18px !important;
   }
 
   main [class*="text-[7"],
@@ -68,8 +68,8 @@ h6 {
   main [class*="text-[10"],
   main [class*="text-[11"],
   main .text-xs {
-    font-size: 18px !important;
-    line-height: 24px !important;
+    font-size: 11px !important;
+    line-height: 16px !important;
   }
 
   main h1,
@@ -78,8 +78,8 @@ h6 {
   main h4,
   main h5,
   main h6 {
-    font-size: 28px !important;
-    line-height: 36px !important;
+    font-size: 17px !important;
+    line-height: 22px !important;
   }
 }
 
@@ -90,13 +90,62 @@ h6 {
 }
 
 .breezy-nav-shell span {
-  font-size: 14px !important;
-  line-height: 18px !important;
+  font-size: 11px !important;
+  line-height: 16px !important;
 }
 
 .breezy-nav-shell .lucide {
-  width: 28px;
-  height: 28px;
+  width: 20px;
+  height: 20px;
+}
+
+/* Thème sombre : barre blanche, icônes sombres */
+.breezy-nav-shell {
+  background: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+.breezy-nav-shell button {
+  color: rgba(0, 0, 0, 0.3) !important;
+}
+
+.breezy-nav-shell button.text-white {
+  color: #0a0a12 !important;
+}
+
+.breezy-nav-shell span {
+  color: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Thème clair : barre noire, icônes blanches */
+.theme-light .breezy-nav-shell {
+  background: #0a0a12 !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7) !important;
+}
+
+.theme-light .breezy-nav-shell,
+.theme-light .breezy-nav-shell * {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.theme-light .breezy-nav-shell button:hover,
+.theme-light .breezy-nav-shell button:hover * {
+  color: #AEEBFF !important;
+}
+
+.theme-light .breezy-nav-shell button.text-white,
+.theme-light .breezy-nav-shell button.text-white *,
+.theme-light .breezy-nav-shell .text-white,
+.theme-light .breezy-nav-shell .text-white * {
+  color: #ffffff !important;
+}
+
+.theme-light .breezy-nav-shell span {
+  color: rgba(255, 255, 255, 0.5) !important;
 }
 
 .breezy-chat-surface {
@@ -245,31 +294,39 @@ h6 {
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06) !important;
 }
 
-.theme-light [class*="bg-[#050505]"],
-.theme-light [class*="bg-[#050508]"],
-.theme-light [class*="bg-[#08080c]"],
-.theme-light [class*="bg-[#0d0d12]"],
-.theme-light [class*="bg-black"] {
+.theme-light [class^="bg-[#050505]"],
+.theme-light [class*=" bg-[#050505]"],
+.theme-light [class^="bg-[#050508]"],
+.theme-light [class*=" bg-[#050508]"],
+.theme-light [class^="bg-[#08080c]"],
+.theme-light [class*=" bg-[#08080c]"],
+.theme-light [class^="bg-[#0d0d12]"],
+.theme-light [class*=" bg-[#0d0d12]"],
+.theme-light [class^="bg-black"],
+.theme-light [class*=" bg-black"] {
   background-color: #ffffff !important;
 }
 
-.theme-light [class*="bg-white/"],
-.theme-light [class*="bg-white\\["] {
+.theme-light [class^="bg-white/"],
+.theme-light [class*=" bg-white/"],
+.theme-light [class^="bg-white\\["],
+.theme-light [class*=" bg-white\\["] {
   background-color: #f8fafc !important;
 }
 
-.theme-light [class*="text-white"],
+.theme-light [class^="text-white"],
+.theme-light [class*=" text-white"],
 .theme-light .text-icy,
 .theme-light .text-breezy-icy {
   color: #120034 !important;
 }
 
-.theme-light [class*="text-white/30"],
-.theme-light [class*="text-white/35"],
-.theme-light [class*="text-white/40"],
-.theme-light [class*="text-white/45"],
-.theme-light [class*="text-white/50"],
-.theme-light [class*="text-white/60"] {
+.theme-light [class^="text-white/30"], .theme-light [class*=" text-white/30"],
+.theme-light [class^="text-white/35"], .theme-light [class*=" text-white/35"],
+.theme-light [class^="text-white/40"], .theme-light [class*=" text-white/40"],
+.theme-light [class^="text-white/45"], .theme-light [class*=" text-white/45"],
+.theme-light [class^="text-white/50"], .theme-light [class*=" text-white/50"],
+.theme-light [class^="text-white/60"], .theme-light [class*=" text-white/60"] {
   color: #111827 !important;
 }
 
@@ -293,28 +350,36 @@ h6 {
 }
 
 .theme-light .text-breezy-neon,
-.theme-light [class*="text-[#AEEBFF]"] {
+.theme-light [class^="text-[#AEEBFF]"],
+.theme-light [class*=" text-[#AEEBFF]"] {
   color: #0052cc !important;
 }
 
 .theme-light .text-breezy-lavender,
 .theme-light .text-breezy-purple,
-.theme-light [class*="text-purple"],
-.theme-light [class*="text-[#C8B6FF]"],
-.theme-light [class*="text-[#E4B5FF]"] {
+.theme-light [class^="text-purple"],
+.theme-light [class*=" text-purple"],
+.theme-light [class^="text-[#C8B6FF]"],
+.theme-light [class*=" text-[#C8B6FF]"],
+.theme-light [class^="text-[#E4B5FF]"],
+.theme-light [class*=" text-[#E4B5FF]"] {
   color: #4c00b8 !important;
 }
 
-.theme-light [class*="text-rose"] {
+.theme-light [class^="text-rose"],
+.theme-light [class*=" text-rose"] {
   color: #be123c !important;
 }
 
-.theme-light [class*="text-pink"] {
+.theme-light [class^="text-pink"],
+.theme-light [class*=" text-pink"] {
   color: #db2777 !important;
 }
 
-.theme-light [class*="border-white/"],
-.theme-light [class*="border-white\\["] {
+.theme-light [class^="border-white/"],
+.theme-light [class*=" border-white/"],
+.theme-light [class^="border-white\\["],
+.theme-light [class*=" border-white\\["] {
   border-color: rgba(15, 23, 42, 0.12) !important;
 }
 
@@ -336,4 +401,26 @@ h6 {
 .theme-light .glow-white {
   filter: none !important;
   box-shadow: none !important;
+}
+
+
+/* === Toast light mode === */
+.theme-light [class^="bg-slate-950"],
+.theme-light [class*=" bg-slate-950"] {
+  background-color: #ffffff !important;
+}
+
+/* === Notifications light mode === */
+.theme-light .notif-card {
+  color: #090022 !important;
+}
+
+.theme-light .notif-read {
+  background-color: #f1f5f9 !important;
+  border-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+.theme-light .notif-unread {
+  background-color: rgba(190, 18, 60, 0.06) !important;
+  border-color: rgba(190, 18, 60, 0.2) !important;
 }

@@ -5,7 +5,6 @@ export const API_TOKEN_STORAGE_KEY = "breezy_jwt";
 
 export const api = axios.create({
   baseURL: DEFAULT_API_URL,
-  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -13,7 +12,6 @@ export const api = axios.create({
 
 export const authApi = axios.create({
   baseURL: DEFAULT_API_URL,
-  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -44,3 +42,19 @@ function attachAuthToken(config: InternalAxiosRequestConfig) {
 
 api.interceptors.request.use(attachAuthToken);
 authApi.interceptors.request.use(attachAuthToken);
+
+// Déconnexion automatique si le backend répond 401 (JWT expiré ou invalide) ou 403 (compte suspendu)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const isSuspendedError = error.response?.status === 403 && 
+      (error.response?.data?.message?.toLowerCase().includes("suspendu") || 
+       error.response?.data?.message?.toLowerCase().includes("suspension"));
+
+    if ((error.response?.status === 401 || isSuspendedError) && typeof window !== "undefined") {
+      window.localStorage.removeItem(API_TOKEN_STORAGE_KEY);
+      window.dispatchEvent(new Event("breezy:unauthorized"));
+    }
+    return Promise.reject(error);
+  }
+);

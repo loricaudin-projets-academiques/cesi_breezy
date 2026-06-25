@@ -32,9 +32,9 @@ export class MockConversationService implements IConversationService {
       name: name.trim(),
       username: normalizeUsername(username),
       avatar: avatar?.trim() || "",
-      lastMessage: "Conversation demarree",
+      lastMessage: "Conversation démarrée",
       unreadCount: 0,
-      time: "A l'instant",
+      time: "À l'instant",
       online: Math.random() > 0.5,
       messages: [],
     };
@@ -50,11 +50,12 @@ export class MockConversationService implements IConversationService {
     return conversation;
   }
 
-  async sendMessage(conversationId: string, text: string): Promise<MessageItem> {
+  async sendMessage(conversationId: string, text: string, images: string[] = []): Promise<MessageItem> {
     const message: MessageItem = {
       id: `me-${Date.now()}`,
       sender: 'me',
       text,
+      media: images,
       time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }),
     };
 
@@ -63,13 +64,18 @@ export class MockConversationService implements IConversationService {
         ? {
             ...conversation,
             messages: [...conversation.messages, message],
-            lastMessage: message.text,
+            lastMessage: message.text || (images.length ? "📷 Image" : ""),
             time: message.time,
           }
         : conversation
     )));
 
     return message;
+  }
+
+  async fetchMessages(conversationId: string): Promise<MessageItem[]> {
+    const conv = this.getConversations().find((c) => c.id === conversationId);
+    return conv?.messages ?? [];
   }
 
   async fetchReply(message: string, contact: Pick<Conversation, 'name' | 'username'>): Promise<string> {
@@ -80,9 +86,13 @@ export class MockConversationService implements IConversationService {
       return `Salut ${currentUser.name} ! Comment tu vas ?`;
     }
     if (lowercase.includes("pourquoi") || lowercase.includes("comment")) {
-      return `Bonne question sur "${message}". Laisse-moi reflechir...`;
+      return `Bonne question sur "${message}". Laisse-moi réfléchir...`;
     }
-    return `${contact.name} a recu : "${message}"`;
+    return `${contact.name} a reçu : "${message}"`;
+  }
+
+  async markAsRead(conversationId: string): Promise<void> {
+    // No-op for mock
   }
 
   clearData(): void {

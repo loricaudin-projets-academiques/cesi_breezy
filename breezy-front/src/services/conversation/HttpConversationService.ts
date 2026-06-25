@@ -23,9 +23,9 @@ export class HttpConversationService implements IConversationService {
       name: name.trim(),
       username: normalizeUsername(username),
       avatar: avatar?.trim() || "",
-      lastMessage: "Conversation demarree",
+      lastMessage: "Conversation démarrée",
       unreadCount: 0,
-      time: "A l'instant",
+      time: "À l'instant",
       online: true,
       messages: [],
     };
@@ -47,21 +47,29 @@ export class HttpConversationService implements IConversationService {
     return data;
   }
 
-  async sendMessage(conversationId: string, text: string): Promise<MessageItem> {
-    const { data } = await api.post<MessageItem>(`/conversations/${conversationId}/messages`, { text });
+  async sendMessage(conversationId: string, text: string, images: string[] = []): Promise<MessageItem> {
+    const { data } = await api.post<MessageItem>(`/conversations/${conversationId}/messages`, { text, images });
     this.saveConversations(this.getConversations().map((conversation) => {
       if (conversation.id !== conversationId) {
         return conversation;
       }
-
       return {
         ...conversation,
         messages: [...conversation.messages, data],
-        lastMessage: data.text,
+        lastMessage: data.text || (data.media?.length ? "📷 Image" : ""),
         time: data.time,
       };
     }));
     return data;
+  }
+
+  async fetchMessages(conversationId: string): Promise<MessageItem[]> {
+    const { data } = await api.get<MessageItem[]>(`/conversations/${conversationId}/messages`);
+    return data;
+  }
+
+  async markAsRead(conversationId: string): Promise<void> {
+    await api.post(`/conversations/${conversationId}/read`);
   }
 
   async fetchReply(

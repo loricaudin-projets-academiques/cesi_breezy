@@ -5,7 +5,7 @@
 
 import { IFeedService } from './IFeedService';
 import { IStorageProvider } from '../storage/IStorageProvider';
-import { Comment, CommentsByPost, PaginatedComments, Post, PostCategory, UserProfile } from '../../types';
+import { Comment, CommentsByPost, PaginatedComments, PaginatedPosts, Post, PostCategory, UserProfile } from '../../types';
 import { INITIAL_POSTS } from '../../mockData';
 
 const KEYS = {
@@ -40,7 +40,7 @@ export class MockFeedService implements IFeedService {
       avatar: author.avatar,
       title,
       content,
-      timestamp: "A l'instant",
+      timestamp: "À l'instant",
       likes: 0,
       comments: 0,
       shares: 0,
@@ -52,8 +52,17 @@ export class MockFeedService implements IFeedService {
     };
   }
 
-  async fetchPosts(): Promise<Post[]> {
-    return this.getPosts();
+  async fetchPosts(category?: PostCategory, page = 1): Promise<PaginatedPosts> {
+    const allPosts = this.getPosts().filter((p) =>
+      !category || category === "for-you" || p.category === category
+    );
+    const pageSize = 20;
+    const start = (page - 1) * pageSize;
+    return {
+      posts: allPosts.slice(start, start + pageSize),
+      page,
+      hasMore: start + pageSize < allPosts.length,
+    };
   }
 
   async fetchUserPosts(username: string): Promise<Post[]> {
@@ -80,7 +89,19 @@ export class MockFeedService implements IFeedService {
     };
   }
 
-  async createRemotePost(payload: { title?: string; content: string; category: PostCategory; image?: string; images?: string[] }): Promise<Post> {
+  async searchByTag(tag: string, page = 1): Promise<PaginatedPosts> {
+    const cleanTag = tag.replace(/^#+/, "").toLowerCase().trim();
+    const allPosts = this.getPosts().filter((p) => (p.tags || []).includes(cleanTag));
+    const pageSize = 20;
+    const start = (page - 1) * pageSize;
+    return {
+      posts: allPosts.slice(start, start + pageSize),
+      page,
+      hasMore: start + pageSize < allPosts.length,
+    };
+  }
+
+  async createRemotePost(payload: { title?: string; content: string; category: PostCategory; image?: string; images?: string[]; tags?: string[] }): Promise<Post> {
     const author: UserProfile = {
       name: "Breezy",
       username: "@breezy",
@@ -90,28 +111,45 @@ export class MockFeedService implements IFeedService {
       following: 0,
       friends: 0,
       note: "",
-      isPrivate: false,
       language: "fr",
       theme: "dark",
       ambientGlow: true,
       notificationsEnabled: true,
-      music: { title: "", artist: "", cover: "", isPlaying: false, progressPercent: 0 },
+      role: "user",
     };
     const post = this.createPost(author, payload.content, payload.category, payload.image, payload.images, payload.title);
-    this.savePosts([post, ...this.getPosts()]);
-    return post;
+    const postWithTags = { ...post, tags: payload.tags || [] };
+    this.savePosts([postWithTags, ...this.getPosts()]);
+    return postWithTags;
   }
 
   async addComment(postId: string, text: string): Promise<Comment> {
-    const comment = {
+    const comment: Comment = {
+      id: `comment-${Date.now()}`,
       author: "Breezy",
       username: "@breezy",
       text,
       time: "A l'instant",
+      repliesCount: 0,
     };
     const comments = this.getComments();
     this.saveComments({ ...comments, [postId]: [...(comments[postId] || []), comment] });
     return comment;
+  }
+
+  async fetchCommentReplies(_commentId: string): Promise<Comment[]> {
+    return [];
+  }
+
+  async addReply(_postId: string, _commentId: string, text: string): Promise<Comment> {
+    return {
+      id: `reply-${Date.now()}`,
+      author: "Breezy",
+      username: "@breezy",
+      text,
+      time: "A l'instant",
+      repliesCount: 0,
+    };
   }
 
   async toggleLike(postId: string): Promise<Post> {
@@ -149,6 +187,14 @@ export class MockFeedService implements IFeedService {
 
   async deletePost(postId: string): Promise<void> {
     this.savePosts(this.getPosts().filter((item) => item.id !== postId));
+  }
+
+  async updatePost(postId: string, title: string, content: string): Promise<Post> {
+    const post = this.getPosts().find((item) => item.id === postId);
+    if (!post) throw new Error("Post introuvable.");
+    const next = { ...post, title, content };
+    this.savePosts(this.getPosts().map((item) => (item.id === postId ? next : item)));
+    return next;
   }
 
   clearData(): void {

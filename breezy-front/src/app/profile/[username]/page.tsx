@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Lock, MessageCircle, UserCheck, UserPlus } from "lucide-react";
+import { ArrowLeft, MessageCircle, ShieldAlert, UserCheck, UserPlus } from "lucide-react";
 
 import { playTick } from "../../../audio";
 import Avatar from "../../../components/Avatar";
@@ -13,11 +13,11 @@ import { getErrorMessage } from "../../../utils/errors";
 import { forceNavigate } from "../../../utils/navigation";
 import { Follower, Post, UserProfile } from "../../../types";
 import { useBreezyApp } from "../../BreezyAppProvider";
+import { useTranslation } from "../../../hooks/useTranslation";
 
 type PublicUserProfile = UserProfile & Follower & {
   id?: string;
   isFriend?: boolean;
-  canViewPrivate?: boolean;
 };
 
 function getRouteUsername(value: string | string[] | undefined) {
@@ -30,9 +30,13 @@ export default function PublicProfilePage() {
   const router = useRouter();
   const username = getRouteUsername(params.username);
   const { conversations, postInteractions, triggerToast, profile } = useBreezyApp();
+  const { t, lang } = useTranslation();
   const [publicUser, setPublicUser] = useState<PublicUserProfile | null>(null);
   const [userPosts, setUserPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const isModeratorOrAdmin = profile?.user?.role === "moderator" || profile?.user?.role === "admin";
+  const canSuspend = publicUser ? (profile.user.role === "admin" || (profile.user.role === "moderator" && publicUser.role !== "admin" && publicUser.role !== "moderator")) : false;
 
   useEffect(() => {
     if (!username) return;
@@ -57,7 +61,7 @@ export default function PublicProfilePage() {
       })
       .catch((error) => {
         if (!cancelled) {
-          triggerToast(getErrorMessage(error, "Profil introuvable."));
+          triggerToast(getErrorMessage(error, t('profile.error_notfound')));
         }
       })
       .finally(() => {
@@ -83,9 +87,9 @@ export default function PublicProfilePage() {
 
       setPublicUser(data);
       void profile.refreshCurrentUser();
-      triggerToast(data.isFriend ? `${data.name} est maintenant ton ami.` : data.followedByMe ? `${data.name} suivi.` : `${data.name} retire des abonnements.`);
+      triggerToast(data.isFriend ? t('profile.toast_now_friend', { name: data.name }) : data.followedByMe ? t('profile.toast_followed', { name: data.name }) : t('profile.toast_unfollowed', { name: data.name }));
     } catch (error) {
-      triggerToast(getErrorMessage(error, "Action impossible."));
+      triggerToast(getErrorMessage(error, t('action.error')));
     }
   };
 
@@ -95,7 +99,7 @@ export default function PublicProfilePage() {
     playTick();
 
     if (!publicUser.isFriend) {
-      triggerToast("Vous devez vous suivre mutuellement pour discuter.");
+      triggerToast(t('profile.mutual_required'));
       return;
     }
 
@@ -110,17 +114,38 @@ export default function PublicProfilePage() {
         conversation,
         ...prev.filter((item) => item.id !== conversation.id),
       ]);
-      triggerToast(`Chat ouvert avec ${publicUser.name}.`);
-      forceNavigate("/messages");
+      triggerToast(t('messages.toast_opened', { name: publicUser.name }));
+      forceNavigate(`/messages?username=${encodeURIComponent(publicUser.username)}`);
     } catch (error) {
-      triggerToast(getErrorMessage(error, "Impossible d'ouvrir le chat."));
+      triggerToast(getErrorMessage(error, t('profile.error_chat')));
+    }
+  };
+
+  const handleToggleSuspension = async () => {
+    if (!publicUser) return;
+
+    playTick();
+
+    const action = publicUser.isSuspended ? "unsuspend" : "suspend";
+    try {
+      const { data } = await api.post<PublicUserProfile>(
+        `/users/profile/${encodeURIComponent(publicUser.username)}/${action}`
+      );
+      setPublicUser(data);
+      triggerToast(
+        data.isSuspended
+          ? (lang === "en" ? "Account suspended successfully!" : "Compte suspendu avec succès !")
+          : (lang === "en" ? "Account reactivated successfully!" : "Compte réactivé avec succès !")
+      );
+    } catch (error) {
+      triggerToast(getErrorMessage(error, t('action.error')));
     }
   };
 
   if (isLoading) {
     return (
       <div className="p-4 min-h-[420px] flex items-center justify-center text-xs text-white/35">
-        Chargement du profil...
+        {lang === 'en' ? "Loading profile..." : "Chargement du profil..."}
       </div>
     );
   }
@@ -128,21 +153,19 @@ export default function PublicProfilePage() {
   if (!publicUser) {
     return (
       <div className="p-4 min-h-[420px] flex flex-col items-center justify-center gap-3 text-center">
-        <p className="text-sm text-breezy-icy">Profil introuvable.</p>
+        <p className="text-sm text-breezy-icy">{lang === 'en' ? "Profile not found." : "Profil introuvable."}</p>
         <button
           onClick={() => forceNavigate("/search")}
           className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-mono text-white/65"
         >
-          Retour recherche
+          {t('profile.back_search')}
         </button>
       </div>
     );
   }
 
-  const isPrivateLocked = Boolean(publicUser.isPrivate && !publicUser.canViewPrivate);
-
   return (
-    <div className="p-4 flex flex-col gap-4 text-left">
+    <div className="p-3 flex flex-col gap-3 text-left">
       <div className="flex items-center justify-between">
         <button
           onClick={() => {
@@ -157,16 +180,16 @@ export default function PublicProfilePage() {
         <span />
       </div>
 
-      <section className="glassmorphic rounded-2xl border border-white/5 p-4 flex flex-col gap-4">
+      <section className="glassmorphic rounded-2xl border border-white/5 p-3 flex flex-col gap-3">
         <div className="flex items-start gap-3">
           <Avatar
             name={publicUser.name}
             username={publicUser.username}
             url={publicUser.avatar}
-            className="w-16 h-16"
+            className="w-12 h-12"
           />
           <div className="min-w-0 flex-1">
-            <h2 className="text-lg font-sans font-bold text-breezy-icy leading-tight">
+            <h2 className="text-sm font-sans font-bold text-breezy-icy leading-tight">
               {publicUser.name}
             </h2>
             <p className="text-xs font-mono text-purple-300 mt-1">{publicUser.username}</p>
@@ -179,15 +202,15 @@ export default function PublicProfilePage() {
         <div className="grid grid-cols-3 gap-2">
           <div className="glass rounded-xl p-2 text-center">
             <p className="text-xs font-bold text-[#AEEBFF]">{publicUser.followers}</p>
-            <p className="text-[8px] text-white/40 uppercase">Abonnes</p>
+            <p className="text-[8px] text-white/40 uppercase">{t('profile.followers')}</p>
           </div>
           <div className="glass rounded-xl p-2 text-center">
             <p className="text-xs font-bold text-[#C8B6FF]">{publicUser.following}</p>
-            <p className="text-[8px] text-white/40 uppercase">Suit</p>
+            <p className="text-[8px] text-white/40 uppercase">{t('profile.following')}</p>
           </div>
           <div className="glass rounded-xl p-2 text-center">
             <p className="text-xs font-bold text-[#E4B5FF]">{publicUser.friends}</p>
-            <p className="text-[8px] text-white/40 uppercase">Amis</p>
+            <p className="text-[8px] text-white/40 uppercase">{t('profile.friends')}</p>
           </div>
         </div>
 
@@ -198,49 +221,64 @@ export default function PublicProfilePage() {
           >
             {publicUser.followedByMe ? (
               <>
-                <UserCheck className="w-3.5 h-3.5 text-[#AEEBFF]" /> {publicUser.isFriend ? 'Ami' : 'Suivi'}
+                <UserCheck className="w-3.5 h-3.5 text-[#AEEBFF]" /> {publicUser.isFriend ? t('profile.friend') : t('profile.following_btn')}
               </>
             ) : (
               <>
-                <UserPlus className="w-3.5 h-3.5" /> Suivre
+                <UserPlus className="w-3.5 h-3.5" /> {t('profile.follow')}
               </>
             )}
           </button>
           <button
             onClick={handleMessage}
             disabled={!publicUser.isFriend}
-            title={publicUser.isFriend ? "Ouvrir le chat" : "Vous devez vous suivre mutuellement pour discuter"}
+            title={publicUser.isFriend ? (lang === 'en' ? "Open chat" : "Ouvrir le chat") : t('profile.chat_locked')}
             className="flex-1 py-2.5 rounded-xl bg-breezy-icy hover:bg-breezy-neon disabled:bg-white/10 disabled:text-white/35 disabled:border disabled:border-white/10 text-slate-950 text-[10px] font-bold font-mono flex items-center justify-center gap-1.5 transition"
           >
-            <MessageCircle className="w-3.5 h-3.5" /> Message
+            <MessageCircle className="w-3.5 h-3.5" /> {t('profile.message')}
           </button>
         </div>
         {!publicUser.isFriend && (
           <p className="text-[9px] font-mono text-white/35 text-center">
-            Le chat se debloque quand vous vous suivez mutuellement.
+            {t('profile.chat_locked')}
           </p>
+        )}
+        
+        {isModeratorOrAdmin && canSuspend && (
+          <button
+            onClick={handleToggleSuspension}
+            className={`w-full py-2.5 rounded-xl text-[10px] font-bold font-mono border transition flex items-center justify-center gap-1.5 cursor-pointer mt-1 ${
+              publicUser.isSuspended
+                ? "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-400"
+                : "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-400"
+            }`}
+          >
+            {publicUser.isSuspended ? (
+              <>
+                <UserCheck className="w-3.5 h-3.5" /> {lang === 'en' ? "REACTIVATE ACCOUNT" : "RÉACTIVER LE COMPTE"}
+              </>
+            ) : (
+              <>
+                <ShieldAlert className="w-3.5 h-3.5" /> {lang === 'en' ? "SUSPEND ACCOUNT" : "SUSPENDRE LE COMPTE"}
+              </>
+            )}
+          </button>
         )}
       </section>
 
       <section className="flex flex-col gap-3">
         <div className="flex items-baseline justify-between px-0.5">
           <h3 className="text-[10px] font-mono tracking-widest text-white/35 uppercase">
-            Publications
+            {t('feed.publications')}
           </h3>
           <span className="text-[9px] font-mono text-breezy-neon">
-            {userPosts.length} post(s)
+            {t('feed.posts_count', { count: userPosts.length })}
           </span>
         </div>
 
-        {isPrivateLocked ? (
-          <div className="py-12 text-center text-white/45 text-xs bg-[#0d0d12]/20 rounded-2xl border border-white/5 flex flex-col items-center gap-2">
-            <Lock className="w-7 h-7 text-breezy-lavender" />
-            <span className="font-bold text-breezy-icy">Compte privé</span>
-            <span>Ses posts, sa musique et sa note sont visibles uniquement par ses amis.</span>
-          </div>
-        ) : userPosts.length === 0 ? (
+        {userPosts.length === 0 ? (
           <div className="py-10 text-center text-white/30 text-xs bg-[#0d0d12]/20 rounded-2xl border border-white/5">
-            Aucun post visible pour l'instant.
+            {t('profile.no_posts')}
           </div>
         ) : (
           userPosts.map((post) => (
@@ -252,7 +290,21 @@ export default function PublicProfilePage() {
               showComments={postInteractions.showCommentsForPost[post.id]}
               hasMoreComments={postInteractions.commentHasMore[post.id]}
               isLoadingComments={postInteractions.loadingComments[post.id]}
-              {...postInteractions}
+              commentReplies={postInteractions.commentReplies}
+              showRepliesForComment={postInteractions.showRepliesForComment}
+              onToggleStar={postInteractions.onToggleStar}
+              onToggleLike={postInteractions.onToggleLike}
+              onToggleComments={postInteractions.onToggleComments}
+              onLoadMoreComments={postInteractions.onLoadMoreComments}
+              onCommentDraftChange={postInteractions.onCommentDraftChange}
+              onAddComment={postInteractions.onAddComment}
+              onToggleArchive={postInteractions.onToggleArchive}
+              onTogglePin={postInteractions.onTogglePin}
+              onDeletePost={postInteractions.onDeletePost}
+              onEditPost={postInteractions.onEditPost}
+              onToggleReplies={postInteractions.onToggleReplies}
+              onAddReply={postInteractions.onAddReply}
+              triggerToast={postInteractions.triggerToast}
             />
           ))
         )}

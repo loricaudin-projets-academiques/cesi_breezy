@@ -4,13 +4,17 @@
  */
 
 import { motion } from 'motion/react';
-import { useState } from 'react';
-import { Archive, Bookmark, Heart, MessageCircle, MoreHorizontal, Pin, Send, Share2, Trash2 } from 'lucide-react';
-import { Comment, CommentsByPost, Post } from '../types';
+import { useState, useEffect } from 'react';
+import { Archive, Bookmark, ChevronDown, ChevronUp, CornerDownRight, Edit3, Heart, MessageCircle, MoreHorizontal, Pin, Send, Share2, Trash2 } from 'lucide-react';
+import { Comment, CommentsByPost, Post, RepliesByComment } from '../types';
 import { playTick, playChime } from '../audio';
 import Avatar from './Avatar';
 import { getMediaUrl } from '../utils/mediaUrl';
 import { forceNavigate } from '../utils/navigation';
+import PostEditorModal from './modals/PostEditorModal';
+import { useTranslation } from '../hooks/useTranslation';
+import MentionInput from './MentionInput';
+import { renderWithMentions } from '../utils/mentionUtils';
 
 // Les actions possibles sur un post — définies une seule fois et réutilisées
 // par tous les écrans qui affichent des posts (feed, profil...)
@@ -24,6 +28,9 @@ export interface PostInteractionHandlers {
   onToggleArchive: (id: string) => void;
   onTogglePin: (id: string) => void;
   onDeletePost: (id: string, title?: string) => boolean | Promise<boolean>;
+  onEditPost: (id: string, title: string, content: string) => Promise<void> | void;
+  onToggleReplies: (commentId: string) => void;
+  onAddReply: (postId: string, commentId: string, text: string) => Promise<void>;
   triggerToast: (msg: string) => void;
 }
 
@@ -34,6 +41,8 @@ export interface PostListState {
   showCommentsForPost: Record<string, boolean>;
   commentHasMore: Record<string, boolean>;
   loadingComments: Record<string, boolean>;
+  commentReplies: RepliesByComment;
+  showRepliesForComment: Record<string, boolean>;
 }
 
 interface PostCardProps extends PostInteractionHandlers {
@@ -44,6 +53,9 @@ interface PostCardProps extends PostInteractionHandlers {
   hasMoreComments?: boolean;
   isLoadingComments?: boolean;
   canArchive?: boolean;
+  commentReplies?: RepliesByComment;
+  showRepliesForComment?: Record<string, boolean>;
+  isHighlighted?: boolean;
 }
 
 // Carte qui représente un post dans le fil d'actualité
@@ -55,6 +67,8 @@ export default function PostCard({
   hasMoreComments = false,
   isLoadingComments = false,
   canArchive = false,
+  commentReplies = {},
+  showRepliesForComment = {},
   onToggleStar,
   onToggleLike,
   onToggleComments,
@@ -64,12 +78,32 @@ export default function PostCard({
   onToggleArchive,
   onTogglePin,
   onDeletePost,
-  triggerToast
+  onEditPost,
+  onToggleReplies,
+  onAddReply,
+  triggerToast,
+  isHighlighted = false
 }: PostCardProps) {
+  const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [showReplyInputFor, setShowReplyInputFor] = useState<Record<string, boolean>>({});
+  const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const images = post.images?.length ? post.images : post.image ? [post.image] : [];
   const canManage = canArchive || post.canManage;
   const mediaImages = images.slice(0, 5);
+
+  useEffect(() => {
+    if (isHighlighted) {
+      const timer = setTimeout(() => {
+        const el = document.getElementById(`post-${post.id}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [isHighlighted, post.id]);
 
   const getImageTileClass = (count: number, index: number) => {
     if (count === 1) return 'col-span-6 row-span-6';
@@ -82,10 +116,15 @@ export default function PostCard({
   return (
     <motion.div
       layout
-      className="glassmorphic rounded-2xl p-4 border border-white/5 flex flex-col gap-3 hover:border-white/10 transition-all duration-300 relative group"
+      id={`post-${post.id}`}
+      className={`glassmorphic rounded-2xl p-4 border flex flex-col gap-3 hover:border-white/10 transition-all duration-300 relative group ${
+        isHighlighted
+          ? 'border-emerald-400/50 shadow-[0_0_15px_rgba(52,211,153,0.15)] bg-emerald-500/[0.03]'
+          : 'border-white/5'
+      }`}
     >
       {post.pinned && (
-        <div className="absolute right-4 top-4 text-breezy-lavender" title="Publication epinglee">
+        <div className="absolute right-4 top-4 text-breezy-lavender" title="Publication épinglée">
           <Pin className="w-4 h-4 fill-current" />
         </div>
       )}
@@ -115,7 +154,17 @@ export default function PostCard({
               </button>
 
               {isMenuOpen && (
-                <div className="absolute right-0 top-8 z-30 w-40 rounded-xl border border-white/10 bg-[#09090d] shadow-2xl p-1.5 flex flex-col gap-1">
+                <div className="absolute right-0 top-8 z-30 w-40 rounded-xl border border-white/10 bg-[#08080c] shadow-2xl p-1.5 flex flex-col gap-1">
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setIsEditModalOpen(true);
+                    }}
+                    className="w-full px-3 py-2 rounded-lg hover:bg-white/[0.07] text-left text-[13px] leading-4 text-breezy-icy flex items-center gap-2"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                    Modifier
+                  </button>
                   <button
                     onClick={() => {
                       setIsMenuOpen(false);
@@ -134,7 +183,7 @@ export default function PostCard({
                     className="w-full px-3 py-2 rounded-lg hover:bg-white/[0.07] text-left text-[13px] leading-4 text-breezy-icy flex items-center gap-2"
                   >
                     <Pin className="w-3.5 h-3.5" />
-                    {post.pinned ? 'Retirer pin' : 'Epingler'}
+                    {post.pinned ? 'Retirer pin' : 'Épingler'}
                   </button>
                   <button
                     onClick={() => {
@@ -164,15 +213,26 @@ export default function PostCard({
       </div>
 
       {post.title && (
-        <h3 className="text-[18px] md:text-[22px] leading-6 md:leading-7 font-bold text-breezy-icy break-words pl-0.5">
+        <h3 className="text-[15px] md:text-[17px] leading-5 md:leading-6 font-bold text-breezy-icy break-words pl-0.5">
           {post.title}
         </h3>
       )}
 
       {/* Le texte du post */}
       <p className="text-xs text-white/85 leading-relaxed tracking-tight break-words pl-0.5 font-sans">
-        {post.content}
+        {renderWithMentions(post.content)}
       </p>
+
+      {/* Tags du post */}
+      {post.tags && post.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 pl-0.5">
+          {post.tags.map((tag) => (
+            <span key={tag} className="text-[10px] font-mono text-breezy-lavender bg-breezy-lavender/10 px-2 py-0.5 rounded-full border border-breezy-lavender/20 cursor-default select-none">
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* Image optionnelle jointe au post */}
       {mediaImages.length > 0 && (
@@ -220,8 +280,8 @@ export default function PostCard({
         <button
           onClick={() => {
             playChime();
-            navigator.clipboard.writeText(`breezy.social/stream/${post.id}`);
-            triggerToast(`Lien copié !`);
+            navigator.clipboard.writeText(`${window.location.origin}/profile/${encodeURIComponent(post.authorUsername)}?post=${post.id}`);
+            triggerToast(t('post.link_copied'));
           }}
           className="flex items-center gap-1.5 text-xs text-white/45 hover:text-white/70 focus:outline-none"
           title="Copier le lien"
@@ -233,18 +293,102 @@ export default function PostCard({
       {/* Section commentaires dépliable */}
       {showComments && (
         <div className="flex flex-col gap-2.5 pt-3.5 border-t border-white/5 mt-1.5">
-          {/* Commentaires déjà publiés */}
-          {comments.map((cmt, idx) => (
-            <div key={idx} className="bg-white/[0.02] border border-white/[0.03] p-2.5 rounded-xl text-[11px] leading-relaxed relative text-left">
-              <span className="absolute right-2.5 top-2.5 text-[8.5px] font-mono text-white/30">{cmt.time}</span>
-              <p className="font-semibold text-breezy-icy">{cmt.author} <span className="text-[9px] font-mono text-white/40 ml-1">{cmt.username}</span></p>
-              <p className="text-white/80 mt-1">{cmt.text}</p>
-            </div>
-          ))}
-
           {isLoadingComments && comments.length === 0 && (
             <p className="text-[10px] text-white/35 text-center py-2">Chargement des commentaires...</p>
           )}
+
+          {/* Commentaires déjà publiés */}
+          {comments.map((cmt, idx) => {
+            const cid = cmt.id || `${idx}`;
+            const replies = commentReplies[cid] || [];
+            const repliesVisible = showRepliesForComment[cid] || false;
+            const replyInputVisible = showReplyInputFor[cid] || false;
+
+            return (
+              <div key={cid} className="flex flex-col gap-1.5">
+                {/* Commentaire principal */}
+                <div className="bg-white/[0.02] border border-white/[0.03] p-2.5 rounded-xl text-[11px] leading-relaxed relative text-left">
+                  <span className="absolute right-2.5 top-2.5 text-[8.5px] font-mono text-white/30">{cmt.time}</span>
+                  <p className="font-semibold text-breezy-icy pr-12">
+                    {cmt.author}
+                    <span className="text-[9px] font-mono text-white/40 ml-1">{cmt.username}</span>
+                  </p>
+                  <p className="text-white/80 mt-1">{renderWithMentions(cmt.text)}</p>
+
+                  {/* Actions du commentaire */}
+                  <div className="flex items-center gap-3 mt-2">
+                    <button
+                      onClick={() => setShowReplyInputFor((prev) => ({ ...prev, [cid]: !prev[cid] }))}
+                      className="flex items-center gap-1 text-[10px] text-white/40 hover:text-breezy-neon transition"
+                    >
+                      <CornerDownRight className="w-3 h-3" />
+                      Répondre
+                    </button>
+                    {(cmt.repliesCount || 0) > 0 && (
+                      <button
+                        onClick={() => onToggleReplies(cid)}
+                        className="flex items-center gap-1 text-[10px] text-white/40 hover:text-breezy-lavender transition"
+                      >
+                        {repliesVisible
+                          ? <><ChevronUp className="w-3 h-3" />Masquer</>
+                          : <><ChevronDown className="w-3 h-3" />{cmt.repliesCount} réponse{(cmt.repliesCount || 0) > 1 ? 's' : ''}</>
+                        }
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Champ de réponse inline */}
+                {replyInputVisible && (
+                  <div className="flex items-center gap-1.5 ml-5 pl-3 border-l border-white/10">
+                    <input
+                      type="text"
+                      placeholder={`Répondre à ${cmt.author}...`}
+                      value={replyDrafts[cid] || ''}
+                      onChange={(e) => setReplyDrafts((prev) => ({ ...prev, [cid]: e.target.value }))}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          void onAddReply(post.id, cid, replyDrafts[cid] || '').then(() => {
+                            setReplyDrafts((prev) => ({ ...prev, [cid]: '' }));
+                            setShowReplyInputFor((prev) => ({ ...prev, [cid]: false }));
+                          });
+                        }
+                      }}
+                      className="flex-1 bg-white/[0.03] text-xs p-2 rounded-xl text-breezy-icy placeholder-white/25 focus:outline-none border border-white/5 focus:border-breezy-border-active transition"
+                    />
+                    <button
+                      onClick={() => {
+                        void onAddReply(post.id, cid, replyDrafts[cid] || '').then(() => {
+                          setReplyDrafts((prev) => ({ ...prev, [cid]: '' }));
+                          setShowReplyInputFor((prev) => ({ ...prev, [cid]: false }));
+                        });
+                      }}
+                      className="w-8 h-8 rounded-xl bg-breezy-lavender/80 text-slate-950 flex items-center justify-center hover:bg-breezy-lavender active:scale-95 transition shrink-0"
+                    >
+                      <Send className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Liste des réponses */}
+                {repliesVisible && replies.length > 0 && (
+                  <div className="flex flex-col gap-1.5 ml-5 pl-3 border-l border-white/10">
+                    {replies.map((reply, rIdx) => (
+                      <div key={reply.id || rIdx} className="bg-white/[0.015] border border-white/[0.025] p-2 rounded-xl text-[11px] leading-relaxed relative text-left">
+                        <span className="absolute right-2 top-2 text-[8px] font-mono text-white/25">{reply.time}</span>
+                        <p className="font-semibold text-breezy-lavender pr-10">
+                          {reply.author}
+                          <span className="text-[9px] font-mono text-white/35 ml-1">{reply.username}</span>
+                        </p>
+                        <p className="text-white/70 mt-0.5">{renderWithMentions(reply.text)}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
 
           {hasMoreComments && (
             <button
@@ -259,22 +403,34 @@ export default function PostCard({
 
           {/* Champ pour écrire un nouveau commentaire */}
           <div className="flex items-center gap-1.5">
-            <input
-              type="text"
-              placeholder="Écrire un commentaire..."
+            <MentionInput
               value={commentDraft}
-              onChange={(e) => onCommentDraftChange(post.id, e.target.value)}
+              onChange={(v) => onCommentDraftChange(post.id, v)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  onAddComment(post.id);
+                }
+              }}
+              placeholder={t('messages.input_placeholder')}
               className="flex-1 bg-white/[0.03] text-xs p-2 rounded-xl text-breezy-icy placeholder-white/25 focus:outline-none border border-white/5 focus:border-breezy-border-active transition"
             />
             <button
               onClick={() => onAddComment(post.id)}
-              className="w-8.5 h-8.5 rounded-xl bg-breezy-icy text-slate-950 flex items-center justify-center hover:bg-breezy-neon active:scale-95 transition shrink-0"
+              className="w-8 h-8 rounded-xl bg-breezy-icy text-slate-950 flex items-center justify-center hover:bg-breezy-neon active:scale-95 transition shrink-0"
             >
               <Send className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
       )}
+      <PostEditorModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        initialTitle={post.title || ""}
+        initialContent={post.content}
+        onSave={(title, content) => onEditPost(post.id, title, content)}
+      />
     </motion.div>
   );
 }

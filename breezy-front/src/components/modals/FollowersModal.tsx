@@ -12,9 +12,10 @@ interface FollowersModalProps {
   members: Follower[];
   isLoading: boolean;
   triggerToast: (msg: string) => void;
+  onToggleFollow: (member: Follower) => void;
 }
 
-export default function FollowersModal({ isOpen, onClose, type, members, isLoading, triggerToast }: FollowersModalProps) {
+export default function FollowersModal({ isOpen, onClose, type, members, isLoading, triggerToast, onToggleFollow }: FollowersModalProps) {
   const openProfile = (username: string) => {
     playTick();
     onClose();
@@ -85,8 +86,7 @@ export default function FollowersModal({ isOpen, onClose, type, members, isLoadi
                     <button
                       onClick={(event) => {
                         event.stopPropagation();
-                        playTick();
-                        triggerToast(`Action effectuee pour ${member.name}`);
+                        void onToggleFollow(member);
                       }}
                       className="py-1 px-2 text-[8px] font-bold font-mono rounded bg-white/5 hover:bg-white/10 border border-white/5 transition shrink-0 active:scale-95"
                     >
