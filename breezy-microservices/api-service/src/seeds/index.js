@@ -1,6 +1,7 @@
 import connectMongoDB from "../databases/mongodb/index.js";
 import connectPostgreSQL from "../databases/postgresql/index.js";
 import runPostSeed from "./post/post.seed.js";
+import runUserSeed from "./user/user.seed.js";
 
 async function runSeed() {
     try {
@@ -21,6 +22,7 @@ async function runSeed() {
         }
 
 
+        await runUserSeed();
         await runPostSeed();
 
 
