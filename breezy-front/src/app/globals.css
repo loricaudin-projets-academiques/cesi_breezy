@@ -1,0 +1,426 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Roboto", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Roboto", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "Roboto", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  
+  --color-breezy-bg: #050508;
+  --color-breezy-card: rgba(13, 13, 18, 0.6);
+  --color-breezy-card-hover: rgba(22, 22, 33, 0.8);
+  --color-breezy-border: rgba(255, 255, 255, 0.08);
+  --color-breezy-border-active: rgba(174, 235, 255, 0.3);
+  --color-breezy-icy: #F5FAFF;
+  --color-breezy-neon: #AEEBFF;
+  --color-breezy-lavender: #C8B6FF;
+  --color-breezy-purple: #E4B5FF;
+}
+
+/* Base custom resets & aesthetic overrides */
+body {
+  background-color: #050505;
+  color: #F5FAFF;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 400;
+  overflow-x: hidden;
+  margin: 0;
+}
+
+button,
+input,
+textarea {
+  font-family: var(--font-sans);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 700;
+}
+
+@media (min-width: 768px) {
+  body {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  main p,
+  main span,
+  main button,
+  main input,
+  main textarea,
+  main label {
+    font-size: 13px !important;
+    line-height: 18px !important;
+  }
+
+  main [class*="text-[7"],
+  main [class*="text-[8"],
+  main [class*="text-[9"],
+  main [class*="text-[10"],
+  main [class*="text-[11"],
+  main .text-xs {
+    font-size: 11px !important;
+    line-height: 16px !important;
+  }
+
+  main h1,
+  main h2,
+  main h3,
+  main h4,
+  main h5,
+  main h6 {
+    font-size: 17px !important;
+    line-height: 22px !important;
+  }
+}
+
+.lucide {
+  width: 1.25em;
+  height: 1.25em;
+  min-width: 1.25em;
+}
+
+.breezy-nav-shell span {
+  font-size: 11px !important;
+  line-height: 16px !important;
+}
+
+.breezy-nav-shell .lucide {
+  width: 20px;
+  height: 20px;
+}
+
+/* Thème sombre : barre blanche, icônes sombres */
+.breezy-nav-shell {
+  background: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+.breezy-nav-shell button {
+  color: rgba(0, 0, 0, 0.3) !important;
+}
+
+.breezy-nav-shell button.text-white {
+  color: #0a0a12 !important;
+}
+
+.breezy-nav-shell span {
+  color: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Thème clair : barre noire, icônes blanches */
+.theme-light .breezy-nav-shell {
+  background: #0a0a12 !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7) !important;
+}
+
+.theme-light .breezy-nav-shell,
+.theme-light .breezy-nav-shell * {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.theme-light .breezy-nav-shell button:hover,
+.theme-light .breezy-nav-shell button:hover * {
+  color: #AEEBFF !important;
+}
+
+.theme-light .breezy-nav-shell button.text-white,
+.theme-light .breezy-nav-shell button.text-white *,
+.theme-light .breezy-nav-shell .text-white,
+.theme-light .breezy-nav-shell .text-white * {
+  color: #ffffff !important;
+}
+
+.theme-light .breezy-nav-shell span {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.breezy-chat-surface {
+  background: #050508;
+  color: #f5faff;
+}
+
+.theme-light .breezy-chat-surface {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+.theme-light .breezy-chat-surface .glassmorphism,
+.theme-light .breezy-chat-surface .glassmorphism-light {
+  background: #ffffff !important;
+}
+
+.font-medium,
+.font-semibold,
+.font-bold,
+.font-black {
+  font-weight: 700 !important;
+}
+
+/* Elegant Dark Gradient & Glass Definitions */
+.bg-gradient-custom {
+  background: radial-gradient(circle at 10% 20%, rgba(46,26,46,0.4) 0%, transparent 50%),
+              radial-gradient(circle at 90% 80%, rgba(26,26,46,0.4) 0%, transparent 50%);
+}
+
+.glass {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.glass-bright {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.neon-glow-blue {
+  box-shadow: 0 0 15px rgba(174,235,255,0.3);
+}
+
+.neon-glow-white {
+  box-shadow: 0 0 10px rgba(245,250,255,0.2);
+}
+
+.text-icy {
+  color: #F5FAFF;
+}
+
+.text-muted {
+  color: rgba(245,250,255,0.5);
+}
+
+/* Custom scrollbar hiding */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Premium glassmorphic background reflection effects */
+.ambient-glow-violet {
+  background: radial-gradient(circle at 50% 50%, rgba(228, 181, 255, 0.08) 0%, transparent 60%);
+  filter: blur(40px);
+}
+
+.ambient-glow-blue {
+  background: radial-gradient(circle at 50% 50%, rgba(174, 235, 255, 0.07) 0%, transparent 60%);
+  filter: blur(40px);
+}
+
+/* Glassmorphism utility */
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glassmorphism-light {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.glassmorphism-premium {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+}
+
+/* Micro glow classes */
+.glow-white {
+  box-shadow: 0 0 12px rgba(245, 250, 255, 0.2);
+}
+
+.glow-neon {
+  box-shadow: 0 0 16px rgba(174, 235, 255, 0.25);
+}
+
+.glow-lavender {
+  box-shadow: 0 0 16px rgba(200, 182, 255, 0.25);
+}
+
+/* Active bottom navigation glow styling */
+.active-nav-glow {
+  filter: drop-shadow(0 0 6px rgb(174, 235, 255)) drop-shadow(0 0 12px rgba(174, 235, 255, 0.5));
+}
+
+.theme-light {
+  background: #f7f9fc !important;
+  color: #120034 !important;
+}
+
+.theme-light .bg-gradient-custom {
+  background: #f7f9fc !important;
+}
+
+.theme-light main {
+  background: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.1) !important;
+  box-shadow: 0 16px 50px rgba(15, 23, 42, 0.08);
+}
+
+.theme-light .glass,
+.theme-light .glass-bright,
+.theme-light .glassmorphism,
+.theme-light .glassmorphism-light,
+.theme-light .glassmorphism-premium {
+  background: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: rgba(15, 23, 42, 0.1) !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06) !important;
+}
+
+.theme-light [class^="bg-[#050505]"],
+.theme-light [class*=" bg-[#050505]"],
+.theme-light [class^="bg-[#050508]"],
+.theme-light [class*=" bg-[#050508]"],
+.theme-light [class^="bg-[#08080c]"],
+.theme-light [class*=" bg-[#08080c]"],
+.theme-light [class^="bg-[#0d0d12]"],
+.theme-light [class*=" bg-[#0d0d12]"],
+.theme-light [class^="bg-black"],
+.theme-light [class*=" bg-black"] {
+  background-color: #ffffff !important;
+}
+
+.theme-light [class^="bg-white/"],
+.theme-light [class*=" bg-white/"],
+.theme-light [class^="bg-white\\["],
+.theme-light [class*=" bg-white\\["] {
+  background-color: #f8fafc !important;
+}
+
+.theme-light [class^="text-white"],
+.theme-light [class*=" text-white"],
+.theme-light .text-icy,
+.theme-light .text-breezy-icy {
+  color: #120034 !important;
+}
+
+.theme-light [class^="text-white/30"], .theme-light [class*=" text-white/30"],
+.theme-light [class^="text-white/35"], .theme-light [class*=" text-white/35"],
+.theme-light [class^="text-white/40"], .theme-light [class*=" text-white/40"],
+.theme-light [class^="text-white/45"], .theme-light [class*=" text-white/45"],
+.theme-light [class^="text-white/50"], .theme-light [class*=" text-white/50"],
+.theme-light [class^="text-white/60"], .theme-light [class*=" text-white/60"] {
+  color: #111827 !important;
+}
+
+.theme-light main,
+.theme-light main p,
+.theme-light main span,
+.theme-light main button,
+.theme-light main label,
+.theme-light main h1,
+.theme-light main h2,
+.theme-light main h3,
+.theme-light main h4,
+.theme-light main h5,
+.theme-light main h6 {
+  color: #090022 !important;
+}
+
+.theme-light main input,
+.theme-light main textarea {
+  color: #090022 !important;
+}
+
+.theme-light .text-breezy-neon,
+.theme-light [class^="text-[#AEEBFF]"],
+.theme-light [class*=" text-[#AEEBFF]"] {
+  color: #0052cc !important;
+}
+
+.theme-light .text-breezy-lavender,
+.theme-light .text-breezy-purple,
+.theme-light [class^="text-purple"],
+.theme-light [class*=" text-purple"],
+.theme-light [class^="text-[#C8B6FF]"],
+.theme-light [class*=" text-[#C8B6FF]"],
+.theme-light [class^="text-[#E4B5FF]"],
+.theme-light [class*=" text-[#E4B5FF]"] {
+  color: #4c00b8 !important;
+}
+
+.theme-light [class^="text-rose"],
+.theme-light [class*=" text-rose"] {
+  color: #be123c !important;
+}
+
+.theme-light [class^="text-pink"],
+.theme-light [class*=" text-pink"] {
+  color: #db2777 !important;
+}
+
+.theme-light [class^="border-white/"],
+.theme-light [class*=" border-white/"],
+.theme-light [class^="border-white\\["],
+.theme-light [class*=" border-white\\["] {
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+.theme-light input,
+.theme-light textarea {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: rgba(15, 23, 42, 0.14) !important;
+}
+
+.theme-light input::placeholder,
+.theme-light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+.theme-light .active-nav-glow,
+.theme-light .glow-neon,
+.theme-light .glow-lavender,
+.theme-light .glow-white {
+  filter: none !important;
+  box-shadow: none !important;
+}
+
+
+/* === Toast light mode === */
+.theme-light [class^="bg-slate-950"],
+.theme-light [class*=" bg-slate-950"] {
+  background-color: #ffffff !important;
+}
+
+/* === Notifications light mode === */
+.theme-light .notif-card {
+  color: #090022 !important;
+}
+
+.theme-light .notif-read {
+  background-color: #f1f5f9 !important;
+  border-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+.theme-light .notif-unread {
+  background-color: rgba(190, 18, 60, 0.06) !important;
+  border-color: rgba(190, 18, 60, 0.2) !important;
+}

@@ -1,0 +1,109 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { playTick } from '../../audio';
+import { PROFILE_BIO_MAX_LENGTH, PROFILE_NAME_MAX_LENGTH } from '../../profileLimits';
+
+interface BioEditorModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  initialName: string;
+  initialValue: string;
+  onSave: (name: string, bio: string) => void;
+}
+
+// Fenêtre pour modifier la biographie du profil
+export default function BioEditorModal({ isOpen, onClose, initialName, initialValue, onSave }: BioEditorModalProps) {
+  const [nameValue, setNameValue] = useState(initialName);
+  const [inputValue, setInputValue] = useState(initialValue);
+  const remainingCharacters = PROFILE_BIO_MAX_LENGTH - inputValue.length;
+
+  // Quand on rouvre la modal, on recharge la bio actuelle
+  // (évite d'afficher une ancienne version non sauvegardée)
+  useEffect(() => {
+    if (isOpen) {
+      setNameValue(initialName.slice(0, PROFILE_NAME_MAX_LENGTH));
+      setInputValue(initialValue.slice(0, PROFILE_BIO_MAX_LENGTH));
+    }
+  }, [isOpen, initialName, initialValue]);
+
+  // Sauvegarde et ferme la modal
+  const handleSave = () => {
+    onSave(nameValue.trim().slice(0, PROFILE_NAME_MAX_LENGTH), inputValue.slice(0, PROFILE_BIO_MAX_LENGTH));
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+          {/* Cliquer en dehors annule les modifications */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.5 }}
+            exit={{ opacity: 0 }}
+            onClick={() => {
+              playTick();
+              onClose();
+            }}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          />
+          
+          {/* Contenu de la modal */}
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            className="w-full max-w-xs glassmorphism-premium rounded-2xl p-4 border border-white/10 z-10"
+          >
+            <h4 className="text-xs font-mono text-breezy-purple uppercase tracking-wider mb-2.5 font-bold">
+              Modifier ta bio
+            </h4>
+            {/* Zone de texte limitée à 120 caractères */}
+            <input
+              type="text"
+              value={nameValue}
+              onChange={(e) => setNameValue(e.target.value.slice(0, PROFILE_NAME_MAX_LENGTH))}
+              maxLength={PROFILE_NAME_MAX_LENGTH}
+              placeholder="Nom affiche"
+              className="w-full mb-3 rounded-xl border border-white/5 bg-white/[0.04] p-2.5 text-xs text-breezy-icy outline-none transition focus:border-breezy-border-active"
+            />
+            <textarea
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value.slice(0, PROFILE_BIO_MAX_LENGTH))}
+              maxLength={PROFILE_BIO_MAX_LENGTH}
+              rows={4}
+              placeholder="Quelques mots sur toi..."
+              className="w-full resize-none rounded-xl border border-white/5 bg-white/[0.04] p-2.5 text-xs leading-relaxed text-breezy-icy outline-none transition focus:border-breezy-border-active whitespace-pre-wrap break-words [overflow-wrap:anywhere]"
+            />
+            <p className={`mt-1 text-right font-mono text-[8px] ${remainingCharacters <= 15 ? 'text-breezy-purple' : 'text-white/30'}`}>
+              {inputValue.length}/120 caractères
+            </p>
+            
+            {/* Boutons d'action */}
+            <div className="flex justify-end gap-2 mt-4 pt-2.5 border-t border-white/5">
+              <button
+                onClick={() => {
+                  playTick();
+                  onClose();
+                }}
+                className="text-[10px] text-white/40 hover:text-white/80 py-1.5 px-3"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleSave}
+                className="text-[10px] bg-breezy-icy text-slate-950 font-semibold rounded-lg px-3.5 py-1.5 hover:bg-breezy-lavender"
+              >
+                Enregistrer
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+}

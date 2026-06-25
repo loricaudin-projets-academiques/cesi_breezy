@@ -1,0 +1,6 @@
+{
+  "name": "Breezy",
+  "description": "A modern, premium, minimalist mobile-first social media app featuring elegant glassmorphic screens, custom profile dashboards, ephemeral Notes, and high-fidelity feed visuals.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

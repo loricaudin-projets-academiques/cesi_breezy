@@ -1,0 +1,5 @@
+export const PROFILE_BIO_MAX_LENGTH = 120;
+export const PROFILE_NAME_MAX_LENGTH = 80;
+export const PROFILE_NOTE_MAX_LENGTH = 10000;
+export const POST_TITLE_MAX_LENGTH = 100;
+export const POST_CONTENT_MAX_LENGTH = 280;
