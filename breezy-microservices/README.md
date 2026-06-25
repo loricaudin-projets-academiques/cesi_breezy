@@ -1,60 +1,77 @@
-# Breezy - Back-end
+# Breezy — Backend Microservices
 
-Breezy back-end is the logic project of Breezy with **ExpressJS + MongoDB (with Mongoose) + PostgreSQL (with Sequelize) + JWT**.
+Ce dossier contient l'ensemble de l'infrastructure backend et des bases de données de Breezy, orchestrés via Docker Compose.
 
-## Run Locally
+Le backend est découpé en microservices indépendants qui communiquent par requêtes HTTP via la Gateway Nginx.
 
-**Prerequisite:**
-*   [Docker](https://www.docker.com/) + Docker Compose
-*   [Node.js](https://nodejs.org/) (Version 23+) (local only).
+## Stack Technique Backend
+*   **API Framework** : Express.js (Node.js)
+*   **Base de données Relationnelle** : PostgreSQL (avec Sequelize ORM)
+*   **Base de données NoSQL** : MongoDB (avec Mongoose ODM)
+*   **Stockage de fichiers** : MinIO (compatible avec l'API AWS S3)
+*   **Orchestration & Gateway** : Nginx + Docker Compose
 
-```bash
-docker compose up
-```
+---
 
-The api runs at **http://localhost:80/**.
+## Architecture des Microservices
 
-## DB Admin
+Le backend est structuré en plusieurs services autonomes :
 
-### Mongo Express
-Mongo Express is used to view the MongoDB database.
-Mongo Express run at **http://localhost:8081/**
-username: admin@breezy.com
-password: root
+1.  **`auth-service`** : Gère l'authentification des comptes, le chiffrement des mots de passe (bcrypt) et la création/validation des jetons de session JWT. Il gère également l'endpoint d'administration de création d'utilisateurs (`POST /api/auth/admin/create-user`).
+2.  **`user-service`** : Gère les profils des utilisateurs (bio, avatar, note d'humeur), la liste des abonnés/abonnements et les requêtes de suspension/réactivation de comptes.
+3.  **`api-service`** : Gère la logique des posts, des tags, de l'affichage du flux d'actualité ("For You", "Following", "Friends") et de la modération des posts/mentions par le staff.
+4.  **`media-service`** : Responsable du téléchargement d'images et de fichiers médias vers notre bucket S3 hébergé sur MinIO.
+5.  **`gateway`** : Fournit un point d'accès unifié `http://localhost/` grâce à sa configuration de reverse-proxy Nginx.
 
-### pgAdmin
-pgAdmin is used to view the MongoDB database.
-pgAdmin run at **http://localhost:8082/**
-username: admin@breezy.com
-password: root
-
-if demanded:
-db_username: postgres
-db_password: postgres
-
-## Scripts
-
-| Command | Description |
-|---|---|
-| `docker compose up` | Starts all backend services |
-| `docker compose up -d` | Starts all backend services in detached |
-| `docker compose down` | Stop all backend services in detached |
-| `docker compose exec api npm run seed` | Runs seed for databases (only api_service seeds) |
-| `docker compose exec api npm run lint` | Runs lint for api_service only |
-| `docker compose exec api npm run lint:fix` | Runs lint for api_service only and try to autofix |
-
-##  Structure Interne de l'API (`api-service`)
-
-L'API principale (`api-service`) suit une architecture en couches propre et modulaire sous le dossier `src/` :
-
+Chaque microservice Node.js suit la structure interne suivante :
 ```text
-api-service/src/
-├── config/             # Configuration globale (ex: base de données)
-│   └── database.js     # Connexion à la base de données (À compléter)
-├── controllers/        # Contrôleurs gérant les requêtes/réponses HTTP
-├── models/             # Modèles de données (représentation BDD)
-├── routes/             # Déclaration et routage des points d'accès API
-├── services/           # Logique métier et règles de gestion
-├── tests/              # Tests unitaires et d'intégration
-└── index.js            # Point d'entrée principal de l'application
+[service-name]/src/
+├── config/       # Configurations (BDD, clés d'API)
+├── controllers/  # Contrôleurs recevant les requêtes et formatant les réponses
+├── databases/    # Initialisation et modèles de BDD (Postgres / Mongo)
+├── middlewares/  # Middlewares (validation JWT, gestion d'erreurs)
+├── routes/       # Routage des appels HTTP de l'API
+├── services/     # Contient les règles métiers et la logique principale
+└── index.js      # Point d'entrée de l'application Express
 ```
+
+---
+
+## Lancement du Backend
+
+### Prérequis
+*   Avoir Docker Desktop lancé.
+
+### Démarrage
+Exécute la commande suivante depuis ce répertoire :
+```bash
+docker compose up -d
+```
+Toutes les API sont ensuite accessibles au travers de la gateway sur le port `80` :
+*   L'API globale est disponible à : **`http://localhost/api/`**
+*   L'API d'authentification à : **`http://localhost/api/auth/`**
+*   L'API utilisateur à : **`http://localhost/api/users/`**
+*   L'API média à : **`http://localhost/api/media/`**
+
+---
+
+## Commandes Utiles de Maintenance
+
+| Commande | Action |
+| :--- | :--- |
+| `docker compose up -d` | Démarre toute l'infrastructure en tâche de fond. |
+| `docker compose down` | Arrête et supprime tous les conteneurs du projet. |
+| `docker compose logs -f` | Affiche les logs cumulés de tous les microservices en temps réel. |
+| `docker compose logs -f [service]` | Filtre et affiche les logs d'un service spécifique (ex : `docker compose logs -f auth`). |
+| `docker compose restart [service]` | Redémarre un conteneur donné (ex : `docker compose restart api`). |
+| `docker compose exec api npm run seed` | Exécute les scripts d'initialisation et de remplissage de données de test (seeding). |
+
+---
+
+## Dashboards d'Administration BDD & Médias
+
+| Service | Rôle | URL | Identifiants |
+| :--- | :--- | :--- | :--- |
+| **pgAdmin** | Interface pour PostgreSQL | `http://localhost:8082` | `admin@breezy.com` / `root` <br> *(Le mot de passe de connexion au serveur DB est `postgres`)* |
+| **Mongo Express** | Interface pour MongoDB | `http://localhost:8081` | `admin@breezy.com` / `root` |
+| **MinIO Console** | Interface pour le stockage S3 | `http://localhost:9001` | `breezy` / `breezy_password` |

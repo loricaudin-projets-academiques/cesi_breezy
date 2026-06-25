@@ -8,6 +8,8 @@ import {
   follow,
   patchMe,
   unfollow,
+  suspend,
+  unsuspend,
 } from "../controllers/user.controller.js";
 import { requireAuth } from "../middlewares/auth.middleware.js";
 
@@ -18,6 +20,8 @@ router.get("/me", requireAuth, fetchMe);
 router.patch("/me", requireAuth, patchMe);
 router.get("/search", requireAuth, findUsers);
 router.get("/profile/:username", requireAuth, fetchPublicProfile);
+router.post("/profile/:username/suspend", requireAuth, suspend);
+router.post("/profile/:username/unsuspend", requireAuth, unsuspend);
 router.post("/:username/follow", requireAuth, follow);
 router.delete("/:username/follow", requireAuth, unfollow);
 router.get("/:type", requireAuth, fetchRelationList);

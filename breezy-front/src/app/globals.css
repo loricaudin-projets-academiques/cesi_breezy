@@ -127,11 +127,20 @@ h6 {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7) !important;
 }
 
-.theme-light .breezy-nav-shell button {
-  color: rgba(255, 255, 255, 0.35) !important;
+.theme-light .breezy-nav-shell,
+.theme-light .breezy-nav-shell * {
+  color: rgba(255, 255, 255, 0.45) !important;
 }
 
-.theme-light .breezy-nav-shell button.text-white {
+.theme-light .breezy-nav-shell button:hover,
+.theme-light .breezy-nav-shell button:hover * {
+  color: #AEEBFF !important;
+}
+
+.theme-light .breezy-nav-shell button.text-white,
+.theme-light .breezy-nav-shell button.text-white *,
+.theme-light .breezy-nav-shell .text-white,
+.theme-light .breezy-nav-shell .text-white * {
   color: #ffffff !important;
 }
 
@@ -285,31 +294,39 @@ h6 {
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06) !important;
 }
 
-.theme-light [class*="bg-[#050505]"],
-.theme-light [class*="bg-[#050508]"],
-.theme-light [class*="bg-[#08080c]"],
-.theme-light [class*="bg-[#0d0d12]"],
-.theme-light [class*="bg-black"] {
+.theme-light [class^="bg-[#050505]"],
+.theme-light [class*=" bg-[#050505]"],
+.theme-light [class^="bg-[#050508]"],
+.theme-light [class*=" bg-[#050508]"],
+.theme-light [class^="bg-[#08080c]"],
+.theme-light [class*=" bg-[#08080c]"],
+.theme-light [class^="bg-[#0d0d12]"],
+.theme-light [class*=" bg-[#0d0d12]"],
+.theme-light [class^="bg-black"],
+.theme-light [class*=" bg-black"] {
   background-color: #ffffff !important;
 }
 
-.theme-light [class*="bg-white/"],
-.theme-light [class*="bg-white\\["] {
+.theme-light [class^="bg-white/"],
+.theme-light [class*=" bg-white/"],
+.theme-light [class^="bg-white\\["],
+.theme-light [class*=" bg-white\\["] {
   background-color: #f8fafc !important;
 }
 
-.theme-light [class*="text-white"],
+.theme-light [class^="text-white"],
+.theme-light [class*=" text-white"],
 .theme-light .text-icy,
 .theme-light .text-breezy-icy {
   color: #120034 !important;
 }
 
-.theme-light [class*="text-white/30"],
-.theme-light [class*="text-white/35"],
-.theme-light [class*="text-white/40"],
-.theme-light [class*="text-white/45"],
-.theme-light [class*="text-white/50"],
-.theme-light [class*="text-white/60"] {
+.theme-light [class^="text-white/30"], .theme-light [class*=" text-white/30"],
+.theme-light [class^="text-white/35"], .theme-light [class*=" text-white/35"],
+.theme-light [class^="text-white/40"], .theme-light [class*=" text-white/40"],
+.theme-light [class^="text-white/45"], .theme-light [class*=" text-white/45"],
+.theme-light [class^="text-white/50"], .theme-light [class*=" text-white/50"],
+.theme-light [class^="text-white/60"], .theme-light [class*=" text-white/60"] {
   color: #111827 !important;
 }
 
@@ -333,28 +350,36 @@ h6 {
 }
 
 .theme-light .text-breezy-neon,
-.theme-light [class*="text-[#AEEBFF]"] {
+.theme-light [class^="text-[#AEEBFF]"],
+.theme-light [class*=" text-[#AEEBFF]"] {
   color: #0052cc !important;
 }
 
 .theme-light .text-breezy-lavender,
 .theme-light .text-breezy-purple,
-.theme-light [class*="text-purple"],
-.theme-light [class*="text-[#C8B6FF]"],
-.theme-light [class*="text-[#E4B5FF]"] {
+.theme-light [class^="text-purple"],
+.theme-light [class*=" text-purple"],
+.theme-light [class^="text-[#C8B6FF]"],
+.theme-light [class*=" text-[#C8B6FF]"],
+.theme-light [class^="text-[#E4B5FF]"],
+.theme-light [class*=" text-[#E4B5FF]"] {
   color: #4c00b8 !important;
 }
 
-.theme-light [class*="text-rose"] {
+.theme-light [class^="text-rose"],
+.theme-light [class*=" text-rose"] {
   color: #be123c !important;
 }
 
-.theme-light [class*="text-pink"] {
+.theme-light [class^="text-pink"],
+.theme-light [class*=" text-pink"] {
   color: #db2777 !important;
 }
 
-.theme-light [class*="border-white/"],
-.theme-light [class*="border-white\\["] {
+.theme-light [class^="border-white/"],
+.theme-light [class*=" border-white/"],
+.theme-light [class^="border-white\\["],
+.theme-light [class*=" border-white\\["] {
   border-color: rgba(15, 23, 42, 0.12) !important;
 }
 
@@ -380,7 +405,8 @@ h6 {
 
 
 /* === Toast light mode === */
-.theme-light [class*="bg-slate-950"] {
+.theme-light [class^="bg-slate-950"],
+.theme-light [class*=" bg-slate-950"] {
   background-color: #ffffff !important;
 }
 

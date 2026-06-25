@@ -1,47 +1,112 @@
-# Breezy  (Projet Académique CESI)
+# Breezy — Projet Final A3 INFO (CESI)
 
-Breezy est une application distribuée en cours de développement, structurée sous la forme d'un monorepo contenant un frontend et un backend découpé en microservices (API et Authentification) orchestrés par Docker et une passerelle Nginx (API Gateway).
+Ce dépôt contient le code source de l'application Breezy, développée dans le cadre du projet de fin d'année de la promotion A3 INFO à CESI. L'objectif du projet est de concevoir et réaliser une application de réseau social s'appuyant sur une architecture distribuée en microservices et orchestrée avec Docker.
+
+## Architecture Globale du Projet
+
+Le projet est structuré sous forme de monorepo :
+
+*   **`breezy-front`** : Interface utilisateur web développée en Next.js (React 19, TypeScript, Tailwind CSS, et Motion).
+*   **`breezy-microservices`** : Répertoire contenant les microservices conteneurisés du backend :
+    *   `api-service` : Gestion du flux d'actualité, des publications (posts), des tags et des mentions.
+    *   `auth-service` : Service d'authentification autonome et sécurisé (JWT, Sequelize, PostgreSQL).
+    *   `user-service` : Gestion des profils utilisateurs, des abonnements et des relations d'amitié.
+    *   `media-service` : Gestion de l'upload et du stockage de fichiers médias via une intégration avec MinIO.
+    *   `gateway` : Passerelle Nginx (API Gateway) unifiant les points d'accès des services sur le port `80`.
 
 ---
 
-##  Architecture Globale du Projet
+## Gestion des Rôles et des Privilèges
 
-Le projet s'organise en plusieurs répertoires clés :
+Le système de privilèges comporte trois rôles distincts définis en base de données :
 
-*   breezy-front : L'application Frontend (base de projet Node.js).
-*   breezy-back : L'application Backend divisée en plusieurs services :
-    *   api-service : Service d'API principal écrit en Node.js (Express), gérant la logique métier principale.
-    *   auth-service : Service d'authentification autonome (préparé avec Express, Sequelize, PostgreSQL, bcrypt et JWT).
-    *   gateway : Configuration Nginx agissant comme reverse-proxy / API Gateway.
-*   docker-compose.yml : Fichier d'orchestration Docker pour démarrer et lier tous les services backend dans des conteneurs isolés.
+1.  **Utilisateur (`user`)** : Rôle par défaut permettant de publier du contenu, aimer (like), ajouter aux favoris, suivre des profils et échanger des messages privés.
+2.  **Modérateur (`moderator`)** : Rôle de modération. Il permet de suspendre/réactiver des comptes utilisateurs et de modérer (éditer ou supprimer) n'importe quelle publication sur la plateforme.
+    *   *Règle métier : Un modérateur ne peut pas suspendre d'autres modérateurs ni de comptes administrateurs.*
+3.  **Administrateur (`admin`)** : Possède l'intégralité des droits de modération de posts. De plus, il dispose d'un accès à un panneau d'**Administration** dédié dans le menu latéral pour créer des comptes (staff et membres) et possède les droits de suspension complets.
+4.  **Effet de la suspension** : Toute tentative de connexion ou appel à l'API effectué par un compte suspendu retourne immédiatement un code d'erreur `403 Forbidden`.
 
-##  Configuration & Lancement
+---
+
+## Lancement du Projet
 
 ### Prérequis
-*   [Docker](https://www.docker.com/) et Docker Compose installés sur votre machine.
-*   [Node.js](https://nodejs.org/) (Version 23+) pour le développement local hors conteneurs.
+*   Docker Desktop installé et actif.
+*   Node.js (version 20 ou supérieure) installé localement.
 
-### Premier démarrage
+### 1. Démarrage du Backend (Docker)
+Se positionner dans le répertoire des microservices et exécuter :
+```bash
+cd breezy-microservices
+docker compose up -d
+```
 
-Pour lancer l'environnement backend (API et Gateway Nginx) avec rechargement automatique (Hot Reload) grâce aux volumes partagés :
+### 2. Démarrage du Frontend (Local)
+Dans un terminal distinct, installer les dépendances et lancer le serveur Next.js :
+```bash
+cd breezy-front
+npm install
+npm run dev
+```
 
-1. Ouvrez un terminal à la racine du projet.
-2. Lancez la commande suivante :
-   ```bash
-   docker compose up
-   ```
+### 3. Accès à l'Application
+Une fois les serveurs actifs, ouvrir le navigateur à l'adresse suivante :
+**`http://localhost/`** (port 80 de la Gateway Nginx, qui redirige automatiquement les appels vers les services correspondants).
 
-Pour lancer l'environnement frontend avec rechargement automatique :
+---
 
-1. Ouvrez un terminal à la racine du projet.
-2. Lancez les commandes suivantes :
-   ```bash
-   npm install
-   npm run dev
-   ```
+## Commandes Utiles de Maintenance
 
-Une fois démarré :
-*   **Le site frontend écoute sur le port **`3000`** (`http://localhost:3000`).
-*   **L'API Gateway (Nginx)** écoute sur le port **`80`** (`http://localhost`).
-*   Toutes les requêtes dirigées vers `http://localhost/api/` sont redirigées vers l'**`api-service`** sur son port interne `3000`.
-*   Toutes les requêtes dirigées vers `http://localhost/auth/` sont configurées pour être redirigées vers le service d'authentification.
+### Gestion de l'Infrastructure Docker
+*Commandes à exécuter depuis le dossier `breezy-microservices/`*
+
+*   **Arrêter tous les conteneurs du projet** :
+    ```bash
+    docker compose down
+    ```
+*   **Afficher les logs cumulés en temps réel** :
+    ```bash
+    docker compose logs -f
+    ```
+*   **Forcer la reconstruction et relancer les conteneurs** :
+    ```bash
+    docker compose up -d --build
+    ```
+*   **Redémarrer un conteneur spécifique** :
+    ```bash
+    docker compose restart frontend
+    ```
+
+### Nettoyage et Compilation du Frontend
+*Commandes à exécuter depuis le dossier `breezy-front/`*
+
+*   **Supprimer le cache Next.js en cas de conflit de compilation** :
+    *   *Sous Windows (PowerShell)* : `Remove-Item -Recurse -Force .next`
+    *   *Sous macOS / Linux* : `rm -rf .next`
+*   **Valider les types TypeScript et compiler l'application** :
+    ```bash
+    npm run build
+    ```
+
+---
+
+## Interfaces d'Administration et Accès BDD
+
+Ces utilitaires d'administration sont accessibles lorsque les conteneurs Docker sont actifs :
+
+| Service | Rôle | URL | Identifiants par défaut |
+| :--- | :--- | :--- | :--- |
+| **pgAdmin** | Administration de PostgreSQL | `http://localhost:8082` | `admin@breezy.com` / `root` <br> *(Mot de passe de connexion au serveur PostgreSQL : `postgres`)* |
+| **Mongo Express** | Visualisation de MongoDB | `http://localhost:8081` | `admin@breezy.com` / `root` |
+| **MinIO Console** | Visualisation du stockage S3 | `http://localhost:9001` | `breezy` / `breezy_password` |
+
+---
+
+## Versioning Git
+*   **Vérifier le statut local** : `git status`
+*   **Créer un commit** :
+    ```bash
+    git add .
+    git commit -m "feat: description du commit"
+    ```
+*   **Pousser les modifications locales** : `git push origin fix-and-roles`

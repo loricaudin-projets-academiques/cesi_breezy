@@ -10,7 +10,7 @@ if (!JWT_SECRET) throw new Error("JWT_SECRET n'est pas défini dans les variable
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
 
-function createDefaultProfile({ name, username }) {
+function createDefaultProfile({ name, username, role = "user" }) {
   return {
     name,
     username,
@@ -24,7 +24,7 @@ function createDefaultProfile({ name, username }) {
     theme: "dark",
     ambientGlow: true,
     notificationsEnabled: true,
-    role: "user",
+    role,
   };
 }
 
@@ -41,7 +41,7 @@ function createSession(user) {
   };
 }
 
-async function register({ name, email, username, password }) {
+async function register({ name, email, username, password, role = "user" }) {
   if (!name || !email || !username || !password) {
     const error = new Error("Nom, courriel, nom d'utilisateur et mot de passe sont obligatoires.");
     error.status = 400;
@@ -75,7 +75,7 @@ async function register({ name, email, username, password }) {
   }
 
   const user = await User.create({
-    ...createDefaultProfile({ name, username }),
+    ...createDefaultProfile({ name, username, role }),
     email,
     passwordHash: await hashPassword(password),
   });
@@ -95,6 +95,12 @@ async function login({ username, password }) {
   if (!user || !(await verifyPassword(password, user.passwordHash))) {
     const error = new Error("Identifiants invalides.");
     error.status = 401;
+    throw error;
+  }
+
+  if (user.isSuspended) {
+    const error = new Error("Votre compte a été suspendu par la modération.");
+    error.status = 403;
     throw error;
   }
 

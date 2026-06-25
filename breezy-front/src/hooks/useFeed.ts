@@ -300,14 +300,14 @@ export function useFeed(
     }
   };
 
-  const loadArchivedPosts = async () => {
+  const loadArchivedPosts = useCallback(async () => {
     try {
       return await feedService.fetchArchivedPosts();
     } catch (error) {
       triggerToast(getErrorMessage(error, t('feed.error_archive_load')));
       return [];
     }
-  };
+  }, [triggerToast, t]);
 
   const handleAddPost = async (title: string, content: string, category: PostCategory, image?: string, images: string[] = [], tags: string[] = []) => {
     try {

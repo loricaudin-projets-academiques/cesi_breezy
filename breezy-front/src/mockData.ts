@@ -19,6 +19,7 @@ export const INITIAL_USER: UserProfile = {
   theme: "dark",
   ambientGlow: true,
   notificationsEnabled: true,
+  role: "user",
 };
 
 // Aucun post au démarrage — l'utilisateur crée les siens

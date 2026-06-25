@@ -1,65 +1,78 @@
-# Breezy - Front-end
+# Breezy — Frontend Client
 
-Breezy is a mobile-first social UI built with **React + Next.js + TypeScript + Tailwind CSS + Axios**.
+Ce dossier contient l'interface utilisateur web et mobile-first de Breezy, développée avec le framework Next.js.
 
-The current app keeps mock services for local development and also includes HTTP service classes for a backend or microservices setup.
+## Stack Technique & Outils
+*   **Framework** : Next.js (App Router, React 19)
+*   **Langage** : TypeScript
+*   **Styles** : Tailwind CSS
+*   **Client HTTP** : Axios (configuré dans `src/services/api.ts`)
+*   **Animations** : Motion (Framer Motion)
 
-## Run Locally
+---
 
-**Prerequisite:** Node.js 18.18+ for Next.js 15.
+## Lancement du Frontend en Mode Dev
 
+### Prérequis
+*   Node.js (version 20 ou supérieure) installé localement.
+
+### 1. Installation des dépendances
 ```bash
 npm install
-cp .env.example .env.local
+```
+
+### 2. Démarrage du serveur
+Pour démarrer Next.js localement hors Docker (port `3000`) :
+```bash
 npm run dev
 ```
+*Le serveur de développement démarrera sur `http://localhost:3000`.*
 
-The app runs at **http://localhost:3000**.
+> [!IMPORTANT]
+> En cas d'utilisation de l'infrastructure Docker complète avec la Gateway Nginx, il est recommandé d'accéder au projet via l'adresse **`http://localhost/`** (port 80) au lieu du port 3000, afin de laisser la gateway faire office de reverse-proxy pour toutes les requêtes (frontend et backend) et éviter les erreurs de CORS ou de cache.
 
-## Scripts
+---
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Starts the Next.js development server |
-| `npm run build` | Builds the Next.js app for production |
-| `npm run start` | Starts the production server |
-| `npm run lint` | Runs Next.js linting |
+## Architecture des Fichiers
 
-## Environment
-
-| Variable | Description |
-|---|---|
-| `NEXT_PUBLIC_API_URL` | Backend API base URL, for example `http://localhost:80/api` |
-
-## Architecture
-
+Voici un aperçu de l'arborescence interne du projet (`src/`) :
 ```text
 src/
-  app/              Next.js App Router routes and global layout
-  components/       Reusable UI components
-  hooks/            Client-side domain hooks
-  screens/          UI screens rendered by app routes
-  services/         Mock and HTTP data services
-    auth/
-    feed/
-    conversation/
-    storage/
-  utils/            Shared utility functions
-  types.ts          Shared domain types
-  config.ts         Runtime config defaults
-  mockData.ts       Initial local mock data
-  audio.ts          Web Audio helpers
+├── app/              # Routes Next.js, Layout global et Provider applicatif
+├── components/       # Composants graphiques réutilisables (NoteEditor, SpotifyWidget, etc.)
+├── hooks/            # Hooks personnalisés (useTranslation, useFeed, etc.)
+├── screens/          # Écrans principaux associés aux onglets de navigation
+├── services/         # Implémentations des services HTTP et Mocks
+│   ├── auth/         # Authentification (HttpAuthService)
+│   ├── feed/         # Gestion du fil d'actualité et posts (HttpFeedService)
+│   ├── conversation/ # Gestion des chats privés (HttpConversationService)
+│   └── storage/      # Fournisseur de stockage LocalStorage
+├── utils/            # Utilitaires globaux (gestion des erreurs, formats de texte)
+├── types.ts          # Déclarations des types TypeScript du domaine (UserProfile, Post, etc.)
+└── config.ts         # Configuration par défaut (base URL de l'API)
 ```
 
-Main route mapping:
+---
 
-| Route | UI screen |
-|---|---|
-| `/` | Redirects to `/feed` |
-| `/login` | `src/screens/LoginScreen.tsx` |
-| `/feed` | `src/screens/FeedScreen.tsx` |
-| `/search` | `src/screens/SearchScreen.tsx` |
-| `/messages` | `src/components/MessagesTab.tsx` |
-| `/profile` | `src/screens/ProfileScreen.tsx` |
+## Mapping des Routes & Onglets
 
-The backend switch point remains `src/services/ServiceContainer.ts`. Mock services are active by default; HTTP service implementations live next to them for backend integration.
+| Route URL | Écran ou Composant Associé | Description |
+| :--- | :--- | :--- |
+| `/` | Redirige vers `/feed` | Page d'atterrissage |
+| `/login` | `src/screens/LoginScreen.tsx` | Écrans de connexion / inscription |
+| `/feed` | `src/screens/FeedScreen.tsx` | Flux de publications principal |
+| `/search` | `src/screens/SearchScreen.tsx` | Moteur de recherche et hashtags |
+| `/messages` | `src/components/MessagesTab.tsx` | Messagerie instantanée privée |
+| `/profile` | `src/screens/ProfileScreen.tsx` | Profil personnel de l'utilisateur connecté |
+| `/profile/[username]` | `src/app/profile/[username]/page.tsx` | Profils publics des autres membres (avec actions de suivi, message et modération) |
+
+---
+
+## Scripts Disponibles dans package.json
+
+| Commande | Action |
+| :--- | :--- |
+| `npm run dev` | Démarre Next.js en mode développement. |
+| `npm run build` | Compile le projet et prépare le livrable optimisé pour la production. |
+| `npm run start` | Démarre le serveur Next.js compilé en production. |
+| `npm run lint` | Exécute l'analyseur de code (ESLint) pour remonter les alertes. |

@@ -18,6 +18,10 @@ async function getCurrentUser(authUser) {
     throw createHttpError(401, "Utilisateur introuvable.");
   }
 
+  if (user.isSuspended) {
+    throw createHttpError(403, "Votre compte a été suspendu par la modération.");
+  }
+
   return user;
 }
 
@@ -243,6 +247,50 @@ async function getRelationList({ authUser, type }) {
   return Promise.all(users.map((user) => userWithRelation(currentUser.id, user)));
 }
 
+async function suspendUserAccount({ authUser, username }) {
+  const currentUser = await getCurrentUser(authUser);
+  
+  if (currentUser.role !== "admin" && currentUser.role !== "moderator") {
+    throw createHttpError(403, "Accès refusé. Rôle insuffisant.");
+  }
+
+  const targetUsername = normalizeUsername(username);
+  const targetUser = await User.findOne({ where: { username: targetUsername } });
+
+  if (!targetUser) {
+    throw createHttpError(404, "Utilisateur introuvable.");
+  }
+
+  if (targetUser.id === currentUser.id) {
+    throw createHttpError(400, "Impossible de suspendre votre propre compte.");
+  }
+
+  if (currentUser.role === "moderator" && (targetUser.role === "admin" || targetUser.role === "moderator")) {
+    throw createHttpError(403, "Un modérateur ne peut pas suspendre un autre membre de la modération ou un administrateur.");
+  }
+
+  await targetUser.update({ isSuspended: true });
+  return userWithRelation(currentUser.id, targetUser);
+}
+
+async function unsuspendUserAccount({ authUser, username }) {
+  const currentUser = await getCurrentUser(authUser);
+  
+  if (currentUser.role !== "admin" && currentUser.role !== "moderator") {
+    throw createHttpError(403, "Accès refusé. Rôle insuffisant.");
+  }
+
+  const targetUsername = normalizeUsername(username);
+  const targetUser = await User.findOne({ where: { username: targetUsername } });
+
+  if (!targetUser) {
+    throw createHttpError(404, "Utilisateur introuvable.");
+  }
+
+  await targetUser.update({ isSuspended: false });
+  return userWithRelation(currentUser.id, targetUser);
+}
+
 export {
   followUser,
   getMe,
@@ -251,4 +299,6 @@ export {
   searchUsers,
   unfollowUser,
   updateMe,
+  suspendUserAccount,
+  unsuspendUserAccount,
 };

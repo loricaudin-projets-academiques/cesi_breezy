@@ -148,6 +148,7 @@ export const translations = {
 
     // Hamburger Panel Settings
     "settings.title": "Menu",
+    "settings.settings_label": "Paramètres",
     "settings.subtitle": "Paramètres de ton compte",
     "settings.theme_title": "Mode Sombre",
     "settings.theme_desc": "Bascule l'interface en mode sombre ou clair.",
@@ -389,6 +390,7 @@ export const translations = {
 
     // Hamburger Panel Settings
     "settings.title": "Menu",
+    "settings.settings_label": "Settings",
     "settings.subtitle": "Your account settings",
     "settings.theme_title": "Dark Mode",
     "settings.theme_desc": "Toggle between dark and light themes.",

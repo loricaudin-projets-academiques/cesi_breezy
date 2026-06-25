@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, MessageCircle, UserCheck, UserPlus } from "lucide-react";
+import { ArrowLeft, MessageCircle, ShieldAlert, UserCheck, UserPlus } from "lucide-react";
 
 import { playTick } from "../../../audio";
 import Avatar from "../../../components/Avatar";
@@ -34,6 +34,9 @@ export default function PublicProfilePage() {
   const [publicUser, setPublicUser] = useState<PublicUserProfile | null>(null);
   const [userPosts, setUserPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const isModeratorOrAdmin = profile?.user?.role === "moderator" || profile?.user?.role === "admin";
+  const canSuspend = publicUser ? (profile.user.role === "admin" || (profile.user.role === "moderator" && publicUser.role !== "admin" && publicUser.role !== "moderator")) : false;
 
   useEffect(() => {
     if (!username) return;
@@ -115,6 +118,27 @@ export default function PublicProfilePage() {
       forceNavigate(`/messages?username=${encodeURIComponent(publicUser.username)}`);
     } catch (error) {
       triggerToast(getErrorMessage(error, t('profile.error_chat')));
+    }
+  };
+
+  const handleToggleSuspension = async () => {
+    if (!publicUser) return;
+
+    playTick();
+
+    const action = publicUser.isSuspended ? "unsuspend" : "suspend";
+    try {
+      const { data } = await api.post<PublicUserProfile>(
+        `/users/profile/${encodeURIComponent(publicUser.username)}/${action}`
+      );
+      setPublicUser(data);
+      triggerToast(
+        data.isSuspended
+          ? (lang === "en" ? "Account suspended successfully!" : "Compte suspendu avec succès !")
+          : (lang === "en" ? "Account reactivated successfully!" : "Compte réactivé avec succès !")
+      );
+    } catch (error) {
+      triggerToast(getErrorMessage(error, t('action.error')));
     }
   };
 
@@ -218,6 +242,27 @@ export default function PublicProfilePage() {
           <p className="text-[9px] font-mono text-white/35 text-center">
             {t('profile.chat_locked')}
           </p>
+        )}
+        
+        {isModeratorOrAdmin && canSuspend && (
+          <button
+            onClick={handleToggleSuspension}
+            className={`w-full py-2.5 rounded-xl text-[10px] font-bold font-mono border transition flex items-center justify-center gap-1.5 cursor-pointer mt-1 ${
+              publicUser.isSuspended
+                ? "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-400"
+                : "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-400"
+            }`}
+          >
+            {publicUser.isSuspended ? (
+              <>
+                <UserCheck className="w-3.5 h-3.5" /> {lang === 'en' ? "REACTIVATE ACCOUNT" : "RÉACTIVER LE COMPTE"}
+              </>
+            ) : (
+              <>
+                <ShieldAlert className="w-3.5 h-3.5" /> {lang === 'en' ? "SUSPEND ACCOUNT" : "SUSPENDRE LE COMPTE"}
+              </>
+            )}
+          </button>
         )}
       </section>
 

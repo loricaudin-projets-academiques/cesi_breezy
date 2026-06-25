@@ -43,11 +43,15 @@ function attachAuthToken(config: InternalAxiosRequestConfig) {
 api.interceptors.request.use(attachAuthToken);
 authApi.interceptors.request.use(attachAuthToken);
 
-// Déconnexion automatique si le backend répond 401 (JWT expiré ou invalide)
+// Déconnexion automatique si le backend répond 401 (JWT expiré ou invalide) ou 403 (compte suspendu)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 && typeof window !== "undefined") {
+    const isSuspendedError = error.response?.status === 403 && 
+      (error.response?.data?.message?.toLowerCase().includes("suspendu") || 
+       error.response?.data?.message?.toLowerCase().includes("suspension"));
+
+    if ((error.response?.status === 401 || isSuspendedError) && typeof window !== "undefined") {
       window.localStorage.removeItem(API_TOKEN_STORAGE_KEY);
       window.dispatchEvent(new Event("breezy:unauthorized"));
     }

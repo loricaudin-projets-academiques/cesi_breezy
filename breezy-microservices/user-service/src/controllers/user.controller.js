@@ -6,6 +6,8 @@ import {
   searchUsers,
   unfollowUser,
   updateMe,
+  suspendUserAccount,
+  unsuspendUserAccount,
 } from "../services/user.service.js";
 
 async function fetchMe(req, res, next) {
@@ -65,6 +67,22 @@ async function fetchRelationList(req, res, next) {
   }
 }
 
+async function suspend(req, res, next) {
+  try {
+    return res.json(await suspendUserAccount({ authUser: req.user, username: req.params.username }));
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function unsuspend(req, res, next) {
+  try {
+    return res.json(await unsuspendUserAccount({ authUser: req.user, username: req.params.username }));
+  } catch (error) {
+    return next(error);
+  }
+}
+
 export {
   fetchMe,
   fetchPublicProfile,
@@ -73,4 +91,6 @@ export {
   follow,
   patchMe,
   unfollow,
+  suspend,
+  unsuspend,
 };

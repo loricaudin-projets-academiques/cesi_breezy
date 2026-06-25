@@ -9,7 +9,7 @@ import { User, Lock, Mail, Zap, ArrowRight, UserPlus, Moon, Sun, Check, Circle }
 import { playTick, playChime } from '../audio';
 import { DEFAULT_API_URL } from '../config';
 import { normalizeUsername } from '../utils/username';
-import { useTranslation } from '../hooks/useTranslation';
+import { useTranslation, TranslationKey } from '../hooks/useTranslation';
 
 interface LoginScreenProps {
   onLogin: (username: string, passkey: string, apiUrl: string) => void | Promise<void>;
@@ -53,7 +53,7 @@ export default function LoginScreen({ onLogin, onRegister, triggerToast, isLight
     setScreen(s);
   };
 
-  const passwordCriteria = [
+  const passwordCriteria: { key: TranslationKey; test: (pw: string) => boolean; fallback: string }[] = [
     { key: 'login.pass_len', test: (pw: string) => pw.length >= 8, fallback: "8 caractères min." },
     { key: 'login.pass_upper', test: (pw: string) => /[A-Z]/.test(pw), fallback: "1 majuscule" },
     { key: 'login.pass_lower', test: (pw: string) => /[a-z]/.test(pw), fallback: "1 minuscule" },
@@ -369,7 +369,7 @@ export default function LoginScreen({ onLogin, onRegister, triggerToast, isLight
                     ) : (
                       <Circle className="w-3 h-3 text-white/20 shrink-0" />
                     )}
-                    <span>{t(c.key as any) || c.fallback}</span>
+                    <span>{t(c.key) || c.fallback}</span>
                   </div>
                 );
               })}

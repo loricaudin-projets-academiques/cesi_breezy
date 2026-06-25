@@ -28,6 +28,10 @@ async function getCurrentUser(authUser) {
     throw createHttpError(401, "Utilisateur introuvable.");
   }
 
+  if (user.isSuspended) {
+    throw createHttpError(403, "Votre compte a été suspendu par la modération.");
+  }
+
   return user;
 }
 
@@ -102,8 +106,8 @@ function postToDto(post, author, interactions, currentUser) {
     images: post.media || [],
     archived: post.status === "archived",
     pinned: Boolean(post.pinned),
-    canArchive: currentUser.id === post.author_id,
-    canManage: currentUser.id === post.author_id,
+    canArchive: currentUser.id === post.author_id || currentUser.role === "moderator" || currentUser.role === "admin",
+    canManage: currentUser.id === post.author_id || currentUser.role === "moderator" || currentUser.role === "admin",
   };
 }
 
@@ -283,8 +287,15 @@ async function findOwnPost({ authUser, postId }) {
   }
 
   const post = await Post.findById(postId);
-  if (!post || post.author_id !== currentUser.id || post.status === "deleted") {
+  if (!post || post.status === "deleted") {
     throw createHttpError(404, "Post introuvable.");
+  }
+
+  const isAuthor = post.author_id === currentUser.id;
+  const isStaff = currentUser.role === "moderator" || currentUser.role === "admin";
+
+  if (!isAuthor && !isStaff) {
+    throw createHttpError(403, "Action non autorisée.");
   }
 
   return { currentUser, post };

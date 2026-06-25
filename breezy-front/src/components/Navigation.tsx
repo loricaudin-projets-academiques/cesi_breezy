@@ -24,7 +24,7 @@ interface NavigationProps {
 export default function Navigation({ activeTab, onTabChange, unreadMessages, unreadNotifications, onOpenMenu, onOpenPanel, onLogout }: NavigationProps) {
   const { t } = useTranslation();
   const menuItems = [
-    { icon: Settings, label: t('settings.title'), view: 'settings' as const },
+    { icon: Settings, label: t('settings.settings_label'), view: 'settings' as const },
     { icon: Archive, label: t('settings.archived_title'), view: 'archive' as const },
     { icon: Heart, label: 'Likes', view: 'liked' as const },
     { icon: Bookmark, label: t('settings.favorites_title'), view: 'saved' as const },

@@ -12,8 +12,11 @@ import { getAvatarUrl } from './Avatar';
 import { playTick, playChime, isSoundEnabled, setSoundEnabled } from '../audio';
 import { forceNavigate } from '../utils/navigation';
 import { useTranslation } from '../hooks/useTranslation';
+import { api } from '../services/api';
+import { getErrorMessage } from '../utils/errors';
 
 interface HamburgerPanelProps {
+  user?: UserProfile;
   isOpen: boolean;
   initialView?: PanelView;
   onClose: () => void;
@@ -33,7 +36,7 @@ interface HamburgerPanelProps {
   onLogout: () => void;
 }
 
-export type PanelView = 'menu' | 'settings' | 'liked' | 'saved' | 'archive';
+export type PanelView = 'menu' | 'settings' | 'liked' | 'saved' | 'archive' | 'admin';
 
 function Toggle({ enabled, onClick, accent = 'bg-breezy-neon' }: { enabled: boolean; onClick: () => void; accent?: string }) {
   return (
@@ -49,6 +52,7 @@ function Toggle({ enabled, onClick, accent = 'bg-breezy-neon' }: { enabled: bool
 }
 
 export default function HamburgerPanel({
+  user,
   isOpen,
   initialView = 'menu',
   onClose,
@@ -74,6 +78,43 @@ export default function HamburgerPanel({
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const isEnglish = language === 'en';
 
+  const [adminName, setAdminName] = useState('');
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminUsername, setAdminUsername] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminRole, setAdminRole] = useState<'user' | 'moderator' | 'admin'>('user');
+  const [isAdminSubmitting, setIsAdminSubmitting] = useState(false);
+
+  const handleAdminCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminName || !adminEmail || !adminUsername || !adminPassword) {
+      triggerToast(isEnglish ? 'All fields are required.' : 'Tous les champs sont obligatoires.');
+      return;
+    }
+    setIsAdminSubmitting(true);
+    playTick();
+    try {
+      await api.post('/auth/admin/create-user', {
+        name: adminName,
+        email: adminEmail,
+        username: adminUsername.startsWith('@') ? adminUsername : `@${adminUsername}`,
+        password: adminPassword,
+        role: adminRole,
+      });
+      playChime();
+      triggerToast(isEnglish ? 'Account created successfully!' : 'Compte créé avec succès !');
+      setAdminName('');
+      setAdminEmail('');
+      setAdminUsername('');
+      setAdminPassword('');
+      setAdminRole('user');
+    } catch (error) {
+      triggerToast(getErrorMessage(error, isEnglish ? 'Failed to create account.' : 'Échec de la création du compte.'));
+    } finally {
+      setIsAdminSubmitting(false);
+    }
+  };
+
   const likedPosts = posts.filter((post) => post.likedByUser);
   const savedPosts = posts.filter((post) => post.starredByUser);
   const labels = {
@@ -81,6 +122,7 @@ export default function HamburgerPanel({
     liked: isEnglish ? 'Liked posts' : 'Posts likés',
     saved: isEnglish ? 'Saved posts' : 'Posts sauvegardés',
     archive: isEnglish ? 'Archive' : 'Archive',
+    admin: isEnglish ? 'Administration' : 'Administration',
     back: isEnglish ? 'Back to menu' : 'Retour au menu',
   };
 
@@ -99,7 +141,8 @@ export default function HamburgerPanel({
     if (initialView === 'archive') {
       void onLoadArchive().then(setArchivedPosts);
     }
-  }, [initialView, isOpen, onLoadArchive]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialView, isOpen]);
 
   const handleSoundToggle = () => {
     const newVal = !soundOn;
@@ -195,6 +238,18 @@ export default function HamburgerPanel({
                         <p className="text-[13px] leading-4 text-white/45">{savedPosts.length} favoris</p>
                       </div>
                     </button>
+
+                    {user?.role === 'admin' && (
+                      <button onClick={() => transitionTo('admin')} className="w-full p-4 rounded-xl glassmorphic border border-white/5 hover:border-breezy-border-active flex items-center gap-3.5 transition group text-left">
+                        <div className="p-2 rounded-lg bg-purple-500/10 text-purple-400 group-hover:scale-105 transition">
+                          <Settings className="w-4 h-4 active-nav-glow" />
+                        </div>
+                        <div>
+                          <h4 className="text-[15px] leading-5 font-bold">{labels.admin}</h4>
+                          <p className="text-[13px] leading-4 text-white/45">{isEnglish ? 'Create staff & user accounts' : 'Créer des comptes staff & membres'}</p>
+                        </div>
+                      </button>
+                    )}
 
                     <button
                       onClick={() => {
@@ -308,6 +363,85 @@ export default function HamburgerPanel({
                       </div>
                     )}
                   />
+                )}
+
+                {activeView === 'admin' && (
+                  <motion.div key="admin" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="flex flex-col gap-4">
+                    <button onClick={() => transitionTo('menu')} className="text-[13px] leading-4 text-breezy-neon hover:underline mb-2 flex items-center gap-1 cursor-pointer select-none">
+                      &larr; {labels.back}
+                    </button>
+
+                    <form onSubmit={handleAdminCreateUser} className="flex flex-col gap-3 font-sans">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[11px] font-bold text-white/50">{isEnglish ? 'Full Name' : 'Nom complet'}</label>
+                        <input
+                          type="text"
+                          required
+                          value={adminName}
+                          onChange={(e) => setAdminName(e.target.value)}
+                          placeholder="Jean Dupont"
+                          className="bg-white/5 border border-white/10 rounded-xl p-2.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-breezy-border-active transition"
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[11px] font-bold text-white/50">{isEnglish ? 'Email Address' : 'Adresse courriel'}</label>
+                        <input
+                          type="email"
+                          required
+                          value={adminEmail}
+                          onChange={(e) => setAdminEmail(e.target.value)}
+                          placeholder="jean.dupont@exemple.com"
+                          className="bg-white/5 border border-white/10 rounded-xl p-2.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-breezy-border-active transition"
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[11px] font-bold text-white/50">{isEnglish ? 'Username' : "Nom d'utilisateur"}</label>
+                        <input
+                          type="text"
+                          required
+                          value={adminUsername}
+                          onChange={(e) => setAdminUsername(e.target.value)}
+                          placeholder="@jeandupont"
+                          className="bg-white/5 border border-white/10 rounded-xl p-2.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-breezy-border-active transition"
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[11px] font-bold text-white/50">{isEnglish ? 'Password' : 'Mot de passe'}</label>
+                        <input
+                          type="password"
+                          required
+                          value={adminPassword}
+                          onChange={(e) => setAdminPassword(e.target.value)}
+                          placeholder="••••••••"
+                          className="bg-white/5 border border-white/10 rounded-xl p-2.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-breezy-border-active transition"
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[11px] font-bold text-white/50">{isEnglish ? 'Privilege Role' : 'Rôle'}</label>
+                        <select
+                          value={adminRole}
+                          onChange={(e) => setAdminRole(e.target.value as 'user' | 'moderator' | 'admin')}
+                          className="bg-white/5 border border-white/10 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-breezy-border-active transition cursor-pointer"
+                        >
+                          <option value="user" className="bg-[#08080c] text-white">{isEnglish ? 'User' : 'Utilisateur'}</option>
+                          <option value="moderator" className="bg-[#08080c] text-white">{isEnglish ? 'Moderator' : 'Modérateur'}</option>
+                          <option value="admin" className="bg-[#08080c] text-white">{isEnglish ? 'Administrator' : 'Administrateur'}</option>
+                        </select>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={isAdminSubmitting}
+                        className="mt-2 w-full py-2.5 rounded-xl bg-breezy-neon hover:bg-breezy-neon/90 text-slate-950 font-bold text-xs transition active:scale-95 disabled:opacity-40 disabled:pointer-events-none"
+                      >
+                        {isAdminSubmitting ? (isEnglish ? 'Creating...' : 'Création en cours...') : (isEnglish ? 'Create Account' : 'Créer le compte')}
+                      </button>
+                    </form>
+                  </motion.div>
                 )}
               </AnimatePresence>
             </div>

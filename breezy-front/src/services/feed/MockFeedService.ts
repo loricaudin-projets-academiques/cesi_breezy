@@ -111,12 +111,11 @@ export class MockFeedService implements IFeedService {
       following: 0,
       friends: 0,
       note: "",
-      isPrivate: false,
       language: "fr",
       theme: "dark",
       ambientGlow: true,
       notificationsEnabled: true,
-      music: { title: "", artist: "", cover: "", isPlaying: false, progressPercent: 0 },
+      role: "user",
     };
     const post = this.createPost(author, payload.content, payload.category, payload.image, payload.images, payload.title);
     const postWithTags = { ...post, tags: payload.tags || [] };

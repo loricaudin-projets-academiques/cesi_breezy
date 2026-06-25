@@ -178,6 +178,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         />
 
         <HamburgerPanel
+          user={profile.user}
           isOpen={isHamburgerOpen}
           initialView={hamburgerInitialView}
           onClose={closePanel}

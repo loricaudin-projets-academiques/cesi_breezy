@@ -44,7 +44,7 @@ export default function SpotifyWidget({ music, onChangeMusic, triggerToast }: Sp
     let timer: NodeJS.Timeout;
     if (music.isPlaying) {
       timer = setInterval(() => {
-        setLocalProgress((prev) => {
+        setLocalProgress((prev: number) => {
           let newProgress = prev + 1.5;
           if (newProgress >= 100) {
             newProgress = 0;

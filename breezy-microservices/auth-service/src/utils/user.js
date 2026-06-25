@@ -22,6 +22,7 @@ function toPublicUser(user) {
     ambientGlow: plainUser.ambientGlow !== false,
     notificationsEnabled: plainUser.notificationsEnabled,
     role: plainUser.role,
+    isSuspended: plainUser.isSuspended,
   };
 }
 

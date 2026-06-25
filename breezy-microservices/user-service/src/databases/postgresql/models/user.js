@@ -85,6 +85,12 @@ const User = sequelize.define(
       allowNull: false,
       defaultValue: "user",
     },
+    isSuspended: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: "is_suspended",
+    },
   },
   {
     tableName: "users",

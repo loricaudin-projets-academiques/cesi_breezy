@@ -1,9 +1,10 @@
 import jwt from "jsonwebtoken";
+import User from "../databases/postgresql/models/user/user.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) throw new Error("JWT_SECRET n'est pas défini dans les variables d'environnement.");
 
-function requireAuth(req, res, next) {
+async function requireAuth(req, res, next) {
   const header = req.headers.authorization || "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : null;
 
@@ -12,10 +13,24 @@ function requireAuth(req, res, next) {
   }
 
   try {
-    req.user = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    // Check if the user is suspended
+    const user = await User.findOne({ where: { id: decoded.id } });
+    if (!user) {
+      return res.status(401).json({ message: "Utilisateur introuvable." });
+    }
+    if (user.isSuspended) {
+      return res.status(403).json({ message: "Votre compte a été suspendu par la modération." });
+    }
+
+    req.user = decoded;
     return next();
-  } catch {
-    return res.status(401).json({ message: "Token JWT invalide ou expire." });
+  } catch (error) {
+    if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token JWT invalide ou expire." });
+    }
+    return next(error);
   }
 }
 

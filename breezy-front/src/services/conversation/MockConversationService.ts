@@ -91,6 +91,10 @@ export class MockConversationService implements IConversationService {
     return `${contact.name} a reçu : "${message}"`;
   }
 
+  async markAsRead(conversationId: string): Promise<void> {
+    // No-op for mock
+  }
+
   clearData(): void {
     this.storage.remove(CONVERSATIONS_KEY);
   }

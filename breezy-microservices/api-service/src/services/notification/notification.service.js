@@ -13,6 +13,10 @@ async function getCurrentUser(authUser) {
     throw createHttpError(401, "Utilisateur introuvable.");
   }
 
+  if (user.isSuspended) {
+    throw createHttpError(403, "Votre compte a été suspendu par la modération.");
+  }
+
   return user;
 }
 

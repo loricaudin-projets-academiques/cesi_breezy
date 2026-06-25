@@ -90,6 +90,14 @@ export interface Conversation {
   messages: MessageItem[];
 }
 
+export interface MusicState {
+  title: string;
+  artist: string;
+  cover: string;
+  isPlaying: boolean;
+  progressPercent: number;
+}
+
 // Le profil complet de l'utilisateur connecté
 export interface UserProfile {
   name: string;
@@ -105,6 +113,8 @@ export interface UserProfile {
   theme: 'dark' | 'light';
   ambientGlow: boolean;
   notificationsEnabled: boolean;
+  role: 'user' | 'moderator' | 'admin';
+  isSuspended?: boolean;
 }
 
 // Une personne dans les listes abonnés / abonnements / amis

@@ -166,8 +166,8 @@ export default function NotificationsPage() {
               key={notification.id}
               onClick={() => openNotification(notification)}
               className={`notif-card w-full text-left rounded-2xl border p-3 flex gap-3 transition cursor-pointer ${notification.isRead
-                  ? "notif-read border-white/5 bg-white/[0.02] text-white/70"
-                  : "notif-unread border-rose-400/25 bg-rose-500/10 text-white"
+                ? "notif-read border-white/5 bg-white/[0.02] text-white/70"
+                : "notif-unread border-rose-400/25 bg-rose-500/10 text-white"
                 }`}
             >
               <div
