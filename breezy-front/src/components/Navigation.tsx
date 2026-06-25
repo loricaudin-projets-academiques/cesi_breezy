@@ -31,7 +31,7 @@ export default function Navigation({ activeTab, onTabChange, unreadMessages, unr
   ];
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 md:left-4 md:top-4 md:bottom-4 md:translate-x-0 md:translate-y-0 z-40 w-[min(94vw,560px)] md:w-[130px]">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 md:left-4 md:top-4 md:bottom-4 md:translate-x-0 md:translate-y-0 z-40 w-[min(94vw,560px)] md:w-[130px] lg:w-[160px]">
       <div className="breezy-nav-shell rounded-full md:rounded-3xl p-2 px-4 md:px-2 md:py-3 flex md:flex-col items-center justify-around md:justify-start md:gap-1 h-16 md:h-full md:overflow-y-auto shadow-[0_12px_36px_rgba(0,0,0,0.85)] select-none no-scrollbar">
         
         {/* Accueil */}
@@ -152,8 +152,8 @@ export default function Navigation({ activeTab, onTabChange, unreadMessages, unr
               className="w-full flex flex-col items-center justify-center gap-1 p-2 rounded-2xl text-white/55 hover:text-breezy-neon hover:bg-white/[0.04] transition"
               title={label}
             >
-              <Icon className="w-4 h-4" />
-              <span className="text-[11px] leading-4 font-bold">{label}</span>
+              <Icon className="w-4 h-4 lg:w-5 lg:h-5" />
+              <span className="text-[11px] lg:text-[12px] leading-4 font-bold">{label}</span>
             </button>
           ))}
 
@@ -162,8 +162,8 @@ export default function Navigation({ activeTab, onTabChange, unreadMessages, unr
             className="w-full flex flex-col items-center justify-center gap-1 p-2 rounded-2xl text-white/55 hover:text-breezy-neon hover:bg-white/[0.04] transition"
             title={t('settings.title')}
           >
-            <Menu className="w-4 h-4" />
-            <span className="text-[11px] leading-4 font-bold">{t('settings.title')}</span>
+            <Menu className="w-4 h-4 lg:w-5 lg:h-5" />
+            <span className="text-[11px] lg:text-[12px] leading-4 font-bold">{t('settings.title')}</span>
           </button>
 
           <button
@@ -171,8 +171,8 @@ export default function Navigation({ activeTab, onTabChange, unreadMessages, unr
             className="w-full flex flex-col items-center justify-center gap-1 p-2 rounded-2xl text-rose-300/75 hover:text-rose-300 hover:bg-rose-500/10 transition"
             title={t('settings.logout')}
           >
-            <LogOut className="w-4 h-4" />
-            <span className="text-[11px] leading-4 font-bold">{t('settings.logout')}</span>
+            <LogOut className="w-4 h-4 lg:w-5 lg:h-5" />
+            <span className="text-[11px] lg:text-[12px] leading-4 font-bold">{t('settings.logout')}</span>
           </button>
         </div>
 

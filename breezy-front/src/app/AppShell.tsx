@@ -125,7 +125,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none z-0" />
       )}
 
-      <main className="w-full h-screen md:max-w-[980px] md:w-[calc(100%-9.5rem)] md:ml-[150px] md:my-4 md:h-[calc(100vh-2rem)] md:rounded-3xl md:border md:border-white/10 bg-[#050505]/70 md:bg-[#050505]/55 flex flex-col relative overflow-hidden z-10 box-border">
+      <main className="w-full h-screen md:max-w-[980px] md:w-[calc(100%-9.5rem)] md:ml-[150px] lg:max-w-[1120px] lg:w-[calc(100%-12rem)] lg:ml-[180px] md:my-4 md:h-[calc(100vh-2rem)] md:rounded-3xl md:border md:border-white/10 bg-[#050505]/70 md:bg-[#050505]/55 flex flex-col relative overflow-hidden z-10 box-border">
         {isLoginRoute ? (
           children
         ) : (

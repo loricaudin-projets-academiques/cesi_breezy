@@ -117,7 +117,7 @@ export default function PostCard({
     <motion.div
       layout
       id={`post-${post.id}`}
-      className={`glassmorphic rounded-2xl p-4 border flex flex-col gap-3 hover:border-white/10 transition-all duration-300 relative group ${
+      className={`glassmorphic rounded-2xl p-4 lg:p-5 border flex flex-col gap-3 lg:gap-4 hover:border-white/10 transition-all duration-300 relative group ${
         isHighlighted
           ? 'border-emerald-400/50 shadow-[0_0_15px_rgba(52,211,153,0.15)] bg-emerald-500/[0.03]'
           : 'border-white/5'
@@ -134,15 +134,15 @@ export default function PostCard({
           onClick={() => forceNavigate(`/profile/${encodeURIComponent(post.authorUsername)}`)}
           className="flex items-center gap-2.5 min-w-0 text-left hover:opacity-80 transition"
         >
-          <Avatar name={post.authorName} username={post.authorUsername} url={post.avatar} className="w-9 h-9" />
+          <Avatar name={post.authorName} username={post.authorUsername} url={post.avatar} className="w-9 h-9 lg:w-11 lg:h-11" />
           <div>
-            <h4 className="text-xs font-semibold text-breezy-icy leading-none">{post.authorName}</h4>
-            <p className="text-[10px] font-mono text-white/45 mt-0.5">{post.authorUsername}</p>
+            <h4 className="text-xs lg:text-[15px] font-semibold text-breezy-icy leading-none">{post.authorName}</h4>
+            <p className="text-[10px] lg:text-[12px] font-mono text-white/55 mt-0.5 lg:mt-1">{post.authorUsername}</p>
           </div>
         </button>
         
         <div className={`flex items-center gap-1.5 ${post.pinned ? 'pr-6' : ''}`}>
-          <span className="text-[8.5px] font-mono text-white/30">{post.timestamp}</span>
+          <span className="text-[8.5px] lg:text-[12px] font-mono text-white/40">{post.timestamp}</span>
           {canManage && (
             <div className="relative">
               <button
@@ -213,13 +213,13 @@ export default function PostCard({
       </div>
 
       {post.title && (
-        <h3 className="text-[15px] md:text-[17px] leading-5 md:leading-6 font-bold text-breezy-icy break-words pl-0.5">
+        <h3 className="text-[15px] md:text-[17px] lg:text-[20px] leading-5 md:leading-6 lg:leading-7 font-bold text-breezy-icy break-words pl-0.5">
           {post.title}
         </h3>
       )}
 
       {/* Le texte du post */}
-      <p className="text-xs text-white/85 leading-relaxed tracking-tight break-words pl-0.5 font-sans">
+      <p className="text-xs text-white/90 leading-relaxed tracking-tight break-words pl-0.5 font-sans">
         {renderWithMentions(post.content)}
       </p>
 
@@ -227,7 +227,7 @@ export default function PostCard({
       {post.tags && post.tags.length > 0 && (
         <div className="flex flex-wrap gap-1 pl-0.5">
           {post.tags.map((tag) => (
-            <span key={tag} className="text-[10px] font-mono text-breezy-lavender bg-breezy-lavender/10 px-2 py-0.5 rounded-full border border-breezy-lavender/20 cursor-default select-none">
+            <span key={tag} className="text-[10px] font-mono text-breezy-lavender bg-breezy-lavender/10 px-2 lg:px-2.5 py-0.5 lg:py-1 rounded-full border border-breezy-lavender/20 cursor-default select-none">
               #{tag}
             </span>
           ))}
@@ -258,7 +258,7 @@ export default function PostCard({
             post.likedByUser ? 'text-rose-400' : 'text-white/45 hover:text-white/70'
           }`}
         >
-          <Heart className={`w-3.5 h-3.5 ${post.likedByUser ? 'fill-current' : ''}`} />
+          <Heart className={`w-3.5 h-3.5 lg:w-4 lg:h-4 ${post.likedByUser ? 'fill-current' : ''}`} />
           <span className="text-[10px]">{post.likes}</span>
         </button>
 
@@ -272,7 +272,7 @@ export default function PostCard({
             showComments ? 'text-breezy-neon font-semibold' : 'text-white/45 hover:text-white/70'
           }`}
         >
-          <MessageCircle className="w-3.5 h-3.5" />
+          <MessageCircle className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
           <span className="text-[10px]">{post.comments}</span>
         </button>
 
@@ -286,7 +286,7 @@ export default function PostCard({
           className="flex items-center gap-1.5 text-xs text-white/45 hover:text-white/70 focus:outline-none"
           title="Copier le lien"
         >
-          <Share2 className="w-3.5 h-3.5" />
+          <Share2 className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
         </button>
       </div>
 
